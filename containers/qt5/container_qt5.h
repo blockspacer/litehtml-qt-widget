@@ -1,23 +1,4 @@
-/*
- * <one line to give the library's name and an idea of what it does.>
- * Copyright (C) 2019  Pierre <pinaraf@pinaraf.info>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-#ifndef CONTAINER_QT5_H
-#define CONTAINER_QT5_H
+#pragma once
 
 #include "../../include/litehtml.h"
 #include <QWidget>
@@ -25,30 +6,71 @@
 /**
  * @todo write docs
  */
-class container_qt5 : public litehtml::document_container, public QWidget
+class container_qt5 : public QObject, public litehtml::document_container
 {
+  Q_OBJECT
+
+Q_SIGNALS:
+  void docSizeChanged(int w, int h);
+
 private:
     std::shared_ptr< litehtml::document > _doc;
 
-protected:
-    virtual void paintEvent(QPaintEvent *event) override;
-    virtual void mouseMoveEvent(QMouseEvent *event) override;
-    virtual void mousePressEvent(QMouseEvent *event) override;
-    virtual void mouseReleaseEvent(QMouseEvent *event) override;
+    QHash<QString, QByteArray> m_loaded_css;
+
+    //QHash<QString, Image> m_images;
+
+    int lastCursorX = 0;
+
+    int lastCursorY = 0;
+
+    int lastCursorClientX = 0;
+
+    int lastCursorClientY = 0;
+
+    int offsetX = 0;
+
+    int offsetY = 0;
+
+    QPoint m_Scroll{0,0};
+
+    int m_lastDocWidth = 1;
+
+    int m_lastDocHeight = 1;
+
+    QRect m_drawArea{0,0,0,0};
+
+    static int m_defaultFontSize;
 
 public:
-    /**
-     * Default constructor
-     */
-    container_qt5(QWidget *parent = nullptr);
+  /**
+   * Default constructor
+   */
+  explicit container_qt5(QObject* parent = nullptr);
 
-    /**
-     * Destructor
-     */
-    ~container_qt5();
+  /**
+   * Destructor
+   */
+  ~container_qt5();
+
+  static int getDefaultFontSize();
+
+    void setLastMouseCoords(int x, int y, int xClient, int yClient);
+
+    void setSize(int w, int h);
+
+    litehtml::element::ptr elementUnderCursor()
+    {
+      return _doc->root()->get_element_by_point(lastCursorX, lastCursorY, lastCursorClientX, lastCursorClientY);
+    }
+
+    litehtml::document::ptr getDocument()
+    {
+      return _doc;
+    }
 
     void set_document(std::shared_ptr<litehtml::document> doc);
-    
+
     /**
      * @todo write docs
      *
@@ -276,6 +298,45 @@ public:
      */
     virtual litehtml::uint_ptr create_font(const litehtml::tchar_t* faceName, int size, int weight, litehtml::font_style italic, unsigned int decoration, litehtml::font_metrics* fm) override;
 
+    virtual litehtml::tstring resolve_color(const litehtml::tstring& color) const override;
+
+    void repaint(QPainter& paiinter);
+
+    QPoint getScroll() const;
+
+    void setScroll(const QPoint &val);
+    void setScrollX(const int &val);
+    void setScrollY(const int &val);
 };
 
-#endif // CONTAINER_QT5_H
+class litehtmlWidget : public QWidget
+{
+  Q_OBJECT
+
+public:
+  /**
+   * Default constructor
+   */
+  litehtmlWidget(QWidget *parent = nullptr);
+
+  /**
+   * Destructor
+   */
+  ~litehtmlWidget();
+
+  container_qt5* getContainer() const {
+    return container;
+  }
+
+protected:
+    virtual void paintEvent(QPaintEvent *event) override;
+    virtual void mouseMoveEvent(QMouseEvent *event) override;
+    virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual void mouseReleaseEvent(QMouseEvent *event) override;
+
+  container_qt5* container;
+};
+
+
+//Q_DECLARE_METATYPE(container_qt5);
+//Q_DECLARE_METATYPE(container_qt5*);
