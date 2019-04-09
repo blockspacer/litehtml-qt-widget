@@ -28,67 +28,111 @@ ui(new Ui::MainWindow)
   std::string htmlStr = "";
   htmlStr += R"raw(
   <html>
-  <body>
-  Lorem Ipsum<input width="50px" height="50px" type="checkbox" name="nameOfChoice" value="1" style="width:50px;height:50px;background:darkgrey;">
-
-  <customtag>customtag</customtag>
+  <head>
   <link rel="stylesheet" href="://res/css/reset.css">
-  <link rel="stylesheet" href="://res/css/bootstrap.css">
   <link rel="stylesheet" href="://res/css/test1.css">
+  </head>
+  <body>
 
-  <div id='home'>dddd</div>
+<style>
+root {
+    width: 500px;
+    display: inline;
+}
+.first {
+    background-color: #ddd;
+    padding: 10px;
+    color: black;
+    margin-bottom: 5px;
+    border-bottom: 1px solid red;
+}
+.first div {
+    background-color: white;
+    border: 1px solid black;
+    height: 50px;
+    line-height: 100%;
+    text-align: center;
+    vertical-align: middle;
+}
+root.second .first div {
+    border-color: red;
+    background-color: #aaa;
+    color: white;
+}
+.first .bunt {
+    border-radius: 25px;
+    border-top: 5px solid silver;
+    border-right: 5px solid blue;
+    border-bottom: 5px solid black;
+    border-left: 5px solid red;
+}
+.first .bunt2 {
+    border-radius: 5px;
+    border-top: 5px solid red;
+    border-right: 1px solid blue;
+    border-left: 1px solid blue;
+    border-bottom: 1px solid blue;
+}
+</style>
 
-  <div style='margin:15px;font: "Droid Sans";background:#CCC;border-bottom:6px solid yellow;width:30px;height:30px'>РУСtext1</div>
-  <div style='font: "Arial Unicode MS";background:cyan;border-right:6px solid yellow;width:30px;height:30px'>РУСtext2</div>
-  <div style='font: "Cousine Regular";background:#EEE;border:3px solid lightblue;width:30px;height:30px'>РУСtext3</div>
-  <div style='font: "Font Awesome 5 Free";background:pink;border-left:16px solid grey;width:30px;height:30px'>
-  )raw";
-
-  htmlStr += "\uf15c ? ";
-  htmlStr += u8"\uf15c";
-  htmlStr += u8"\uf118";
-  htmlStr += u8"\uf118 ? \uf118";
-
-
-  htmlStr += R"raw(\uf118 ? \uf118</div>
-
-  <ul><li>Oneвапвап</li><li>Zwei\u6211\u662F\u4E2D\u6587</li><li>Trois</li></ul>
-  <bold>123SFSDFDFSDF</bold>
-  <strong>emphasized text</strong>
-  <span style='font-weight: bold;'>bold text</span>
-  <p>Line1.1 Line1.2<br />Line2</p><ul><li>One</li><li>Zwei</li><li>Trois</li></ul>
-  <table><tr><th>H1</th><th>H2</th></tr><tr><td>C1.1</td><td>C1.2</td></tr><tr><td>C2.1</td><td>C2.2</td></tr></table>
-  <img src=':/res/img/test.png' alt=''>
-  <img src=':/res/img/test2.png' alt=''>
-
-
-
-
-<ul class="pagination center">
-<li class="page-item disabled">
-    <a class="page-link" href="#" title="Back"><i class="material-icons keyboard_arrow_left">keyboard_arrow_left</i></a>
-</li>
-<li class="page-item">
-  <a class="page-link" href="#">1</a>
-</li>
-<li class="page-item active">
-    <a class="page-link" href="#">2 <span class="sr-only">(current)</span></a>
-</li>
-<li class="page-item">
-  <a class="page-link" href="#">3</a>
-</li>
-<li class="page-item">
-    <a class="page-link" href="#" title="Next"><i class="material-icons keyboard_arrow_right">keyboard_arrow_right</i></a>
-</li>
-</ul>
-
-<br>
-dsasdasad
-<div class="pager center">
-    <a class="page-link disabled" href="#" title="Back"><i class="material-icons keyboard_arrow_left">keyboard_arrow_left</i><span>Previous Article</span></a>
-    <a class="page-link" href="#" title="Next"><span>ghjhjh Article</span><i class="material-icons keyboard_arrow_right">keyboard_arrow_right</i></a>
-</div>
-
+<root>
+  <div class="first">
+    <div style="">1px width / 1px radius</div>
+  </div>
+  <div class="first">
+    <div style="border-width: 5px">5px width / 0px radius</div>
+  </div>
+  <div class="first">
+    <div style="border-radius: 1px;">1px width / 1px radius</div>
+  </div>
+  <div class="first">
+    <div style="border-width: 5px; border-radius: 5px;">5px width / 5px radius</div>
+  </div>
+  <div class="first">
+    <div style="border-radius: 5px;">1px width / 5px radius</div>
+  </div>
+  <div class="first">
+    <div style="border-width: 5px; border-radius: 15px;">5px width / 15px radius</div>
+  </div>
+  <div class="first">
+    <div style="border-width: 5px; border-left-width: 15px; border-right-width: 15px; border-radius: 15px;">5px 15px width / 15px radius</div>
+  </div>
+  <div class="first">
+    <div style="border-width: 5px; border-left-width: 15px; border-right-width: 15px; border-radius: 25px;">5px 15px width / 25px radius</div>
+  </div>
+  <div class="first">
+    <div class="bunt">Bunt</div>
+  </div>
+</root>
+<root class="second">
+  <div class="first">
+    <div style="">1px width / 1px radius</div>
+  </div>
+  <div class="first">
+    <div style="border-width: 5px">5px width / 0px radius</div>
+  </div>
+  <div class="first">
+    <div style="border-radius: 1px;">1px width / 1px radius</div>
+  </div>
+  <div class="first">
+    <div style="border-width: 5px; border-radius: 5px;">5px width / 5px radius</div>
+  </div>
+  <div class="first">
+    <div style="border-radius: 5px;">1px width / 5px radius</div>
+  </div>
+  <div class="first">
+    <div style="border-width: 5px; border-radius: 15px;">5px width / 15px radius</div>
+  </div>
+  <div class="first">
+    <div style="border-width: 5px; border-left-width: 15px; border-right-width: 15px; border-radius: 15px;">5px 15px width / 15px radius</div>
+  </div>
+  <div class="first">
+    <div style="border-width: 5px; border-left-width: 15px; border-right-width: 15px; border-radius: 25px;">5px 15px width / 25px radius</div>
+  </div>
+  <div class="first">
+    <div class="bunt2">Bunt 2</div>
+  </div>
+</root>
 
   </body>
   </html>)raw";
@@ -108,6 +152,9 @@ dsasdasad
   m_litehtmlWidget->show();
 
   ui->scrollAreaVerticalLayout->addWidget(m_litehtmlWidget);
+
+  m_litehtmlWidget->repaint();
+
   //c->setGeometry(0, 0, 500, 1200);
 
   /*//ui->scrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);

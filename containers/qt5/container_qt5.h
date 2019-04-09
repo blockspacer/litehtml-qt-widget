@@ -13,8 +13,10 @@ class container_qt5 : public QObject, public litehtml::document_container
 Q_SIGNALS:
   void docSizeChanged(int w, int h);
 
-private:
+public:
     std::shared_ptr< litehtml::document > _doc;
+
+private:
 
     QHash<QString, QByteArray> m_loaded_css;
 
@@ -38,15 +40,17 @@ private:
 
     int m_lastDocHeight = 1;
 
-    QRect m_drawArea{0,0,0,0};
+    //QRect m_drawArea{100,100,100,100};
 
     static int m_defaultFontSize;
+
+    QWidget*	m_owner;
 
 public:
   /**
    * Default constructor
    */
-  explicit container_qt5(QObject* parent = nullptr);
+  explicit container_qt5(QWidget* parent = nullptr);
 
   /**
    * Destructor
@@ -55,9 +59,13 @@ public:
 
   static int getDefaultFontSize();
 
+    //void setDrawArea(const QRect& area);
+
+    //QRect getDrawArea() const;
+
     void setLastMouseCoords(int x, int y, int xClient, int yClient);
 
-    void setSize(int w, int h);
+    //void setSize(int w, int h);
 
     litehtml::element::ptr elementUnderCursor()
     {
@@ -333,6 +341,8 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent *event) override;
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void mouseReleaseEvent(QMouseEvent *event) override;
+    virtual void resizeEvent(QResizeEvent *event) override;
+    virtual void wheelEvent(QWheelEvent* event) override;
 
   container_qt5* container;
 };
