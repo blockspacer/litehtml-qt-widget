@@ -1418,12 +1418,14 @@ void container_qt5::draw_background(litehtml::uint_ptr hdc, const litehtml::back
       //qDebug() << "iter == m_images.end()" << __FUNCTION__;
       // drw placeholder
       painter->fillRect(clipRect, dummyColor );
+      painter->restore();
       return;
     }
 
     QImage* img = getImage( bg.image.c_str(), bg.baseurl.c_str() );
     if (!img) {
       painter->fillRect(clipRect, dummyColor );
+      painter->restore();
       return;
     }
 
