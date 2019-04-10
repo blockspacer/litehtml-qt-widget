@@ -456,6 +456,9 @@ const double piDouble = M_PI;
 const float piFloat = static_cast<float>(M_PI);
 #endif
 
+typedef int ExceptionCode;
+const int INDEX_SIZE_ERR = 0;
+
 static void
 addArc(QPainter* painter, QPainterPath& path, const FloatPoint& p, float r, float sar, float ear, bool anticlockwise)
 {
@@ -578,6 +581,24 @@ static void addArcTo(QPainter* painter, QPainterPath& path, const FloatPoint& p1
     addArc(painter, path, p, radius, sa, ea, anticlockwise);
 }
 
+static void arc(QPainter* painter, QPainterPath& path, float x, float y, float r, float sa, float ea, bool anticlockwise/*, ExceptionCode& ec*/)
+{
+    //ec = 0;
+    if (!std::isfinite(x) | !std::isfinite(y) | !std::isfinite(r) | !std::isfinite(sa) | !std::isfinite(ea))
+        return;
+
+    if (r < 0) {
+        //ec = INDEX_SIZE_ERR;
+        return;
+    }
+
+    if (sa == ea)
+        return;
+
+    /*if (!state().m_invertibleCTM)
+        return;*/
+    addArc(painter, path, FloatPoint(x, y), r, sa, ea, anticlockwise);
+}
 
 static void add_path_arc(QPainter* painter, QPainterPath& path, double x, double y, double rx, double ry, double a1, double a2, bool neg)
 {
@@ -787,36 +808,50 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
             double start_angle	= end_angle - M_PI / 2.0  / ((double) bdr_top / (double) bdr_right + 1);
 
             {
-              painter->save();
+              //painter->save();
               auto rx = r_top - bdr_right;
               auto ry = r_top - bdr_right + (bdr_right - bdr_top);
               auto p = FloatPoint(draw_pos.right() - r_top,
         draw_pos.top() + r_top);
-              path.translate(p.x(), p.y());
-              painter->scale(1, ry / rx);
-              path.translate(-p.x(), -p.y());
-              addArc(painter, path,
-                p,
-                rx,
-                end_angle,
-                start_angle, true);
-              painter->restore();
+              if(true)//if(rx > 0 && ry > 0)
+              {
+                painter->save();
+                path.translate(p.x(), p.y());
+                //painter->scale(1, ry / rx);
+                path.translate(-p.x(), -p.y());
+                arc(painter, path,
+                  p.x(), p.y(),
+                  rx,
+                  end_angle,
+                  start_angle, true);
+                painter->restore();
+              } else {
+                path.moveTo(p.x(), p.y());
+              }
+              //painter->restore();
             }
             {
-              painter->save();
+              //painter->save();
               auto rx = r_top;
               auto ry = r_top;
               auto p = FloatPoint(draw_pos.right() - r_top,
         draw_pos.top() + r_top);
-              path.translate(p.x(), p.y());
-              painter->scale(1, ry / rx);
-              path.translate(-p.x(), -p.y());
-              addArc(painter, path,
-                p,
-                rx,
-                start_angle,
-                end_angle, false);
-              painter->restore();
+              if(true)//if(rx > 0 && ry > 0)
+              {
+                painter->save();
+                path.translate(p.x(), p.y());
+                //painter->scale(1, ry / rx);
+                path.translate(-p.x(), -p.y());
+                arc(painter, path,
+                  p.x(), p.y(),
+                  rx,
+                  start_angle,
+                  end_angle, false);
+                painter->restore();
+              } else {
+                path.moveTo(p.x(), p.y());
+              }
+              //painter->restore();
             }
           } else
           {
@@ -834,36 +869,50 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
             double end_angle	= start_angle + M_PI / 2.0  / ((double) bdr_bottom / (double) bdr_right + 1);
 
             {
-              painter->save();
+              //painter->save();
               auto rx = r_bottom;
               auto ry = r_bottom;
               auto p = FloatPoint(draw_pos.right() - r_bottom,
         draw_pos.bottom() - r_bottom);
-              path.translate(p.x(), p.y());
-              painter->scale(1, ry / rx);
-              path.translate(-p.x(), -p.y());
-              addArc(painter, path,
-                p,
-                rx,
-                start_angle,
-                end_angle, false);
-              painter->restore();
+              if(true)//if(rx > 0 && ry > 0)
+              {
+                painter->save();
+                path.translate(p.x(), p.y());
+                //painter->scale(1, ry / rx);
+                path.translate(-p.x(), -p.y());
+                arc(painter, path,
+                  p.x(), p.y(),
+                  rx,
+                  start_angle,
+                  end_angle, false);
+                painter->restore();
+              } else {
+                path.moveTo(p.x(), p.y());
+              }
+              //painter->restore();
             }
             {
-              painter->save();
+              //painter->save();
               auto rx = r_bottom - bdr_right;
               auto ry = r_bottom - bdr_right + (bdr_right - bdr_bottom);
               auto p = FloatPoint(draw_pos.right() - r_bottom,
         draw_pos.bottom() - r_bottom);
-              path.translate(p.x(), p.y());
-              painter->scale(1, ry / rx);
-              path.translate(-p.x(), -p.y());
-              addArc(painter, path,
-                p,
-                rx,
-                end_angle,
-                start_angle, true);
-              painter->restore();
+              if(true)//if(rx > 0 && ry > 0)
+              {
+                painter->save();
+                path.translate(p.x(), p.y());
+                //painter->scale(1, ry / rx);
+                path.translate(-p.x(), -p.y());
+                arc(painter, path,
+                  p.x(), p.y(),
+                  rx,
+                  end_angle,
+                  start_angle, true);
+                painter->restore();
+              } else {
+                path.moveTo(p.x(), p.y());
+              }
+              //painter->restore();
             }
           } else
           {
@@ -889,36 +938,50 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
             double start_angle	= M_PI / 2.0;
             double end_angle	= start_angle + M_PI / 2.0  / ((double) bdr_left / (double) bdr_bottom + 1);
             {
-              painter->save();
+              //painter->save();
               auto rx = r_left - bdr_bottom + (bdr_bottom - bdr_left);
               auto ry = r_left - bdr_bottom;
               auto p = FloatPoint(draw_pos.left() + r_left,
                   draw_pos.bottom() - r_left);
-              path.translate(p.x(), p.y());
-              painter->scale(1, ry / rx);
-              path.translate(-p.x(), -p.y());
-              addArc(painter, path,
-                p,
-                rx,
-                start_angle,
-                end_angle, false);
-              painter->restore();
+              if(true)//if(rx > 0 && ry > 0)
+              {
+                painter->save();
+                path.translate(p.x(), p.y());
+                //painter->scale(1, ry / rx);
+                path.translate(-p.x(), -p.y());
+                arc(painter, path,
+                  p.x(), p.y(),
+                  rx,
+                  start_angle,
+                  end_angle, false);
+                painter->restore();
+              } else {
+                path.moveTo(p.x(), p.y());
+              }
+              //painter->restore();
             }
             {
-              painter->save();
+              //painter->save();
               auto rx = r_left;
               auto ry = r_left;
               auto p = FloatPoint(draw_pos.left() + r_left,
                   draw_pos.bottom() - r_left);
-              path.translate(p.x(), p.y());
-              painter->scale(1, ry / rx);
-              path.translate(-p.x(), -p.y());
-              addArc(painter, path,
-                p,
-                rx,
-                end_angle,
-                start_angle, true);
-              painter->restore();
+              if(true)//if(rx > 0 && ry > 0)
+              {
+                painter->save();
+                path.translate(p.x(), p.y());
+                //painter->scale(1, ry / rx);
+                path.translate(-p.x(), -p.y());
+                arc(painter, path,
+                  p.x(), p.y(),
+                  rx,
+                  end_angle,
+                  start_angle, true);
+                painter->restore();
+              } else {
+                path.moveTo(p.x(), p.y());
+              }
+              //painter->restore();
             }
 
           } else
@@ -936,36 +999,50 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
             double end_angle	= M_PI / 2.0;
             double start_angle	= end_angle - M_PI / 2.0  / ((double) bdr_right / (double) bdr_bottom + 1);
             {
-              painter->save();
+              //painter->save();
               auto rx = r_right;
               auto ry = r_right;
               auto p = FloatPoint(draw_pos.right() - r_right,
                   draw_pos.bottom() - r_right);
-              path.translate(p.x(), p.y());
-              painter->scale(1, ry / rx);
-              path.translate(-p.x(), -p.y());
-              addArc(painter, path,
-                p,
-                rx,
-                end_angle,
-                start_angle, true);
-              painter->restore();
+              if(true)//if(rx > 0 && ry > 0)
+              {
+                painter->save();
+                path.translate(p.x(), p.y());
+                //painter->scale(1, ry / rx);
+                path.translate(-p.x(), -p.y());
+                arc(painter, path,
+                  p.x(), p.y(),
+                  rx,
+                  end_angle,
+                  start_angle, true);
+                painter->restore();
+              } else {
+                path.moveTo(p.x(), p.y());
+              }
+              //painter->restore();
             }
             {
-              painter->save();
+              //painter->save();
               auto rx = r_right - bdr_bottom + (bdr_bottom - bdr_right);
               auto ry = r_right - bdr_bottom;
               auto p = FloatPoint(draw_pos.right() - r_right,
                   draw_pos.bottom() - r_right);
-              path.translate(p.x(), p.y());
-              painter->scale(1, ry / rx);
-              path.translate(-p.x(), -p.y());
-              addArc(painter, path,
-                p,
-                rx,
-                start_angle,
-                end_angle, false);
-              painter->restore();
+              if(true)//if(rx > 0 && ry > 0)
+              {
+                painter->save();
+                path.translate(p.x(), p.y());
+                //painter->scale(1, ry / rx);
+                path.translate(-p.x(), -p.y());
+                arc(painter, path,
+                  p.x(), p.y(),
+                  rx,
+                  start_angle,
+                  end_angle, false);
+                painter->restore();
+              } else {
+                path.moveTo(p.x(), p.y());
+              }
+              //painter->restore();
             }
 
           } else
@@ -995,36 +1072,50 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
             double start_angle	= end_angle - M_PI / 2.0  / ((double) bdr_left / (double) bdr_top + 1);
 
             {
-              painter->save();
+              //painter->save();
               auto rx = r_left;
               auto ry = r_left;
               auto p = FloatPoint(draw_pos.left() + r_left,
                 draw_pos.top() + r_left);
-              path.translate(p.x(), p.y());
-              painter->scale(1, ry / rx);
-              path.translate(-p.x(), -p.y());
-              addArc(painter, path,
-                p,
-                rx,
-                end_angle,
-                start_angle, true);
-              painter->restore();
+              if(true)//if(rx > 0 && ry > 0)
+              {
+                painter->save();
+                path.translate(p.x(), p.y());
+                //painter->scale(1, ry / rx);
+                path.translate(-p.x(), -p.y());
+                arc(painter, path,
+                  p.x(), p.y(),
+                  rx,
+                  end_angle,
+                  start_angle, true);
+                painter->restore();
+              } else {
+                path.moveTo(p.x(), p.y());
+              }
+              //painter->restore();
             }
             {
-              painter->save();
+              //painter->save();
               auto rx = r_left - bdr_top + (bdr_top - bdr_left);
               auto ry = r_left - bdr_top;
               auto p = FloatPoint(draw_pos.left() + r_left,
                 draw_pos.top() + r_left);
-              path.translate(p.x(), p.y());
-              painter->scale(1, ry / rx);
-              path.translate(-p.x(), -p.y());
-              addArc(painter, path,
-                p,
-                rx,
-                start_angle,
-                end_angle, false);
-              painter->restore();
+              if(true)//if(rx > 0 && ry > 0)
+              {
+                painter->save();
+                path.translate(p.x(), p.y());
+                //painter->scale(1, ry / rx);
+                path.translate(-p.x(), -p.y());
+                arc(painter, path,
+                  p.x(), p.y(),
+                  rx,
+                  start_angle,
+                  end_angle, false);
+                painter->restore();
+              } else {
+                path.moveTo(p.x(), p.y());
+              }
+              //painter->restore();
             }
 
 
@@ -1048,36 +1139,50 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
             double end_angle	= start_angle + M_PI / 2.0  / ((double) bdr_right / (double) bdr_top + 1);
 
             {
-              painter->save();
+              //painter->save();
               auto rx = r_right - bdr_top + (bdr_top - bdr_right);
               auto ry = r_right - bdr_top;
               auto p = FloatPoint(draw_pos.right() - r_right,
                 draw_pos.top() + r_right);
-              path.translate(p.x(), p.y());
-              painter->scale(1, ry / rx);
-              path.translate(-p.x(), -p.y());
-              addArc(painter, path,
-                p,
-                rx,
-                start_angle,
-                end_angle, false);
-              painter->restore();
+              if(true)//if(rx > 0 && ry > 0)
+              {
+                painter->save();
+                path.translate(p.x(), p.y());
+                //painter->scale(1, ry / rx);
+                path.translate(-p.x(), -p.y());
+                arc(painter, path,
+                  p.x(), p.y(),
+                  rx,
+                  start_angle,
+                  end_angle, false);
+                painter->restore();
+              } else {
+                path.moveTo(p.x(), p.y());
+              }
+              //painter->restore();
             }
             {
-              painter->save();
+              //painter->save();
               auto rx = r_right;
               auto ry = r_right;
               auto p = FloatPoint(draw_pos.right() - r_right,
                 draw_pos.top() + r_right);
-              path.translate(p.x(), p.y());
-              painter->scale(1, ry / rx);
-              path.translate(-p.x(), -p.y());
-              addArc(painter, path,
-                p,
-                rx,
-                end_angle,
-                start_angle, true);
-              painter->restore();
+              if(true)//if(rx > 0 && ry > 0)
+              {
+                painter->save();
+                path.translate(p.x(), p.y());
+                //painter->scale(1, ry / rx);
+                path.translate(-p.x(), -p.y());
+                arc(painter, path,
+                  p.x(), p.y(),
+                  rx,
+                  end_angle,
+                  start_angle, true);
+                painter->restore();
+              } else {
+                path.moveTo(p.x(), p.y());
+              }
+              //painter->restore();
             }
           } else
           {
@@ -1112,36 +1217,50 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
             double end_angle	= start_angle + M_PI / 2.0  / ((double) bdr_top / (double) bdr_left + 1);
 
             {
-              painter->save();
+              //painter->save();
               auto rx = r_top - bdr_left;
               auto ry = r_top - bdr_left + (bdr_left - bdr_top);
               auto p = FloatPoint(draw_pos.left() + r_top,
                   draw_pos.top() + r_top);
-              path.translate(p.x(), p.y());
-              painter->scale(1, ry / rx);
-              path.translate(-p.x(), -p.y());
-              addArc(painter, path,
-                p,
-                rx,
-                start_angle,
-                end_angle, false);
-              painter->restore();
+              if(true)//if(rx > 0 && ry > 0)
+              {
+                painter->save();
+                path.translate(p.x(), p.y());
+                //painter->scale(1, ry / rx);
+                path.translate(-p.x(), -p.y());
+                arc(painter, path,
+                  p.x(), p.y(),
+                  rx,
+                  start_angle,
+                  end_angle, false);
+                painter->restore();
+              } else {
+                path.moveTo(p.x(), p.y());
+              }
+              //painter->restore();
             }
             {
-              painter->save();
+              //painter->save();
               auto rx = r_top;
               auto ry = r_top;
               auto p = FloatPoint(draw_pos.left() + r_top,
         draw_pos.top() + r_top);
-              path.translate(p.x(), p.y());
-              painter->scale(1, ry / rx);
-              path.translate(-p.x(), -p.y());
-              addArc(painter, path,
-                p,
-                rx,
-                end_angle,
-                start_angle, true);
-              painter->restore();
+              if(true)//if(rx > 0 && ry > 0)
+              {
+                painter->save();
+                path.translate(p.x(), p.y());
+                //painter->scale(1, ry / rx);
+                path.translate(-p.x(), -p.y());
+                arc(painter, path,
+                  p.x(), p.y(),
+                  rx,
+                  end_angle,
+                  start_angle, true);
+                painter->restore();
+              } else {
+                path.moveTo(p.x(), p.y());
+              }
+              //painter->restore();
             }
           } else
           {
@@ -1159,36 +1278,50 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
             double start_angle	= end_angle - M_PI / 2.0  / ((double) bdr_bottom / (double) bdr_left + 1);
 
             {
-              painter->save();
+              //painter->save();
               auto rx = r_bottom;
               auto ry = r_bottom;
               auto p = FloatPoint(draw_pos.left() + r_bottom,
                   draw_pos.bottom() - r_bottom);
-              path.translate(p.x(), p.y());
-              painter->scale(1, ry / rx);
-              path.translate(-p.x(), -p.y());
-              addArc(painter, path,
-                p,
-                rx,
-                end_angle,
-                start_angle, true);
-              painter->restore();
+              if(true)//if(rx > 0 && ry > 0)
+              {
+                painter->save();
+                path.translate(p.x(), p.y());
+                //painter->scale(1, ry / rx);
+                path.translate(-p.x(), -p.y());
+                arc(painter, path,
+                  p.x(), p.y(),
+                  rx,
+                  end_angle,
+                  start_angle, true);
+                painter->restore();
+              } else {
+                path.moveTo(p.x(), p.y());
+              }
+              //painter->restore();
             }
             {
-              painter->save();
+              //painter->save();
               auto rx = r_bottom - bdr_left;
               auto ry = r_bottom - bdr_left + (bdr_left - bdr_bottom);
               auto p = FloatPoint(draw_pos.left() + r_bottom,
                   draw_pos.bottom() - r_bottom);
-              path.translate(p.x(), p.y());
-              painter->scale(1, ry / rx);
-              path.translate(-p.x(), -p.y());
-              addArc(painter, path,
-                p,
-                rx,
-                start_angle,
-                end_angle, false);
-              painter->restore();
+              if(true)//if(rx > 0 && ry > 0)
+              {
+                painter->save();
+                path.translate(p.x(), p.y());
+                //painter->scale(1, ry / rx);
+                path.translate(-p.x(), -p.y());
+                arc(painter, path,
+                  p.x(), p.y(),
+                  rx,
+                  start_angle,
+                  end_angle, false);
+                painter->restore();
+              } else {
+                path.moveTo(p.x(), p.y());
+              }
+              //painter->restore();
             }
           } else
           {
