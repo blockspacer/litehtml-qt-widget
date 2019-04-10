@@ -27,12 +27,14 @@ CONFIG += c++11
 SOURCES += \
     src/main.cpp \
     src/mainwindow.cpp \
-    src/fontcache.cpp
+    src/fontcache.cpp \
+    pathqt.cpp
 
 HEADERS += \
         include/litehtml.h \
     src/mainwindow.h \
-    src/fontcache.h
+    src/fontcache.h \
+    pathqt.h
 
 INCLUDEPATH     += $$PWD
 INCLUDEPATH     += $$PWD/src

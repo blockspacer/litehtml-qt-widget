@@ -35,7 +35,7 @@ ui(new Ui::MainWindow)
   <body>
 
 <style>
-root {
+#root {
     width: 500px;
     display: inline;
 }
@@ -54,7 +54,7 @@ root {
     text-align: center;
     vertical-align: middle;
 }
-root.second .first div {
+#root.second .first div {
     border-color: red;
     background-color: #aaa;
     color: white;
@@ -75,7 +75,7 @@ root.second .first div {
 }
 </style>
 
-<root>
+<div id="root">
   <div class="first">
     <div style="">1px width / 1px radius</div>
   </div>
@@ -103,8 +103,8 @@ root.second .first div {
   <div class="first">
     <div class="bunt">Bunt</div>
   </div>
-</root>
-<root class="second">
+</div>
+<div id="root" class="second">
   <div class="first">
     <div style="">1px width / 1px radius</div>
   </div>
@@ -132,7 +132,7 @@ root.second .first div {
   <div class="first">
     <div class="bunt2">Bunt 2</div>
   </div>
-</root>
+</div>
 
   </body>
   </html>)raw";

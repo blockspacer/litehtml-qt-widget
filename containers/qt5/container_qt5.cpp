@@ -8,11 +8,11 @@
 #include <QDesktopServices>
 
 #include "fontcache.h"
+#include "pathqt.h"
 #include <cmath>
 
 // https://github.com/Nanquitas/3DS_eBook_Reader/blob/51f1fedc2565de36253104a01f4689db00c35991/source/Litehtml3DSContainer.cpp#L18
 #define PPI 132.1
-
 
 static litehtml::position::vector	m_clips;
 
@@ -444,219 +444,14 @@ void container_qt5::set_caption(const litehtml::tchar_t* caption)
     //qDebug() << __FUNCTION__;
 }
 
-#define DEGREES(t) ((t) * 180.0 / M_PI)
-
-#define FloatPoint QPointF
-
-#ifndef M_PI
-const double piDouble = 3.14159265358979323846;
-const float piFloat = 3.14159265358979323846f;
-#else
-const double piDouble = M_PI;
-const float piFloat = static_cast<float>(M_PI);
-#endif
-
-typedef int ExceptionCode;
-const int INDEX_SIZE_ERR = 0;
-
-static void
-addArc(QPainter* painter, QPainterPath& path, const FloatPoint& p, float r, float sar, float ear, bool anticlockwise)
-{
-    qreal xc = p.x();
-    qreal yc = p.y();
-    qreal radius = r;
-
-
-    //### HACK
-    // In Qt we don't switch the coordinate system for degrees
-    // and still use the 0,0 as bottom left for degrees so we need
-    // to switch
-    sar = -sar;
-    ear = -ear;
-    anticlockwise = !anticlockwise;
-    //end hack
-
-    float sa = DEGREES(sar);
-    float ea = DEGREES(ear);
-
-    double span = 0;
-
-    double xs = xc - radius;
-    double ys = yc - radius;
-    double width  = radius*2;
-    double height = radius*2;
-
-    if ((!anticlockwise && (ea - sa >= 360)) || (anticlockwise && (sa - ea >= 360)))
-        // If the anticlockwise argument is false and endAngle-startAngle is equal to or greater than 2*PI, or, if the
-        // anticlockwise argument is true and startAngle-endAngle is equal to or greater than 2*PI, then the arc is the whole
-        // circumference of this circle.
-        span = 360;
-    else {
-        if (!anticlockwise && (ea < sa))
-            span += 360;
-        else if (anticlockwise && (sa < ea))
-            span -= 360;
-
-        // this is also due to switched coordinate system
-        // we would end up with a 0 span instead of 360
-        if (!(qFuzzyCompare(span + (ea - sa) + 1, 1.0)
-            && qFuzzyCompare(qAbs(span), 360.0))) {
-            // mod 360
-            span += (ea - sa) - (static_cast<int>((ea - sa) / 360)) * 360;
-        }
-    }
-
-    // If the path is empty, move to where the arc will start to avoid painting a line from (0,0)
-    // NOTE: QPainterPath::isEmpty() won't work here since it ignores a lone MoveToElement
-    if (!path.elementCount())
-        path.arcMoveTo(xs, ys, width, height, sa);
-    else if (!radius) {
-        path.lineTo(xc, yc);
-        return;
-    }
-
-    path.arcTo(xs, ys, width, height, sa, span);
-}
-
-// see
-// https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/platform/graphics/qt/PathQt.cpp#L201
-// https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/platform/graphics/cairo/PathCairo.cpp#L146
-static void addArcTo(QPainter* painter, QPainterPath& path, const FloatPoint& p1, const FloatPoint& p2, float radius)
-{
-    FloatPoint p0(path.currentPosition());
-
-    FloatPoint p1p0((p0.x() - p1.x()), (p0.y() - p1.y()));
-    FloatPoint p1p2((p2.x() - p1.x()), (p2.y() - p1.y()));
-    float p1p0_length = sqrtf(p1p0.x() * p1p0.x() + p1p0.y() * p1p0.y());
-    float p1p2_length = sqrtf(p1p2.x() * p1p2.x() + p1p2.y() * p1p2.y());
-
-    double cos_phi = (p1p0.x() * p1p2.x() + p1p0.y() * p1p2.y()) / (p1p0_length * p1p2_length);
-
-    // The points p0, p1, and p2 are on the same straight line (HTML5, 4.8.11.1.8)
-    // We could have used areCollinear() here, but since we're reusing
-    // the variables computed above later on we keep this logic.
-    if (qFuzzyCompare(qAbs(cos_phi), 1.0)) {
-        path.lineTo(p1);
-        return;
-    }
-
-    float tangent = radius / tan(acos(cos_phi) / 2);
-    float factor_p1p0 = tangent / p1p0_length;
-    FloatPoint t_p1p0((p1.x() + factor_p1p0 * p1p0.x()), (p1.y() + factor_p1p0 * p1p0.y()));
-
-    FloatPoint orth_p1p0(p1p0.y(), -p1p0.x());
-    float orth_p1p0_length = sqrt(orth_p1p0.x() * orth_p1p0.x() + orth_p1p0.y() * orth_p1p0.y());
-    float factor_ra = radius / orth_p1p0_length;
-
-    // angle between orth_p1p0 and p1p2 to get the right vector orthographic to p1p0
-    double cos_alpha = (orth_p1p0.x() * p1p2.x() + orth_p1p0.y() * p1p2.y()) / (orth_p1p0_length * p1p2_length);
-    if (cos_alpha < 0.f)
-        orth_p1p0 = FloatPoint(-orth_p1p0.x(), -orth_p1p0.y());
-
-    FloatPoint p((t_p1p0.x() + factor_ra * orth_p1p0.x()), (t_p1p0.y() + factor_ra * orth_p1p0.y()));
-
-    // calculate angles for addArc
-    orth_p1p0 = FloatPoint(-orth_p1p0.x(), -orth_p1p0.y());
-    float sa = acos(orth_p1p0.x() / orth_p1p0_length);
-    if (orth_p1p0.y() < 0.f)
-        sa = 2 * piDouble - sa;
-
-    // anticlockwise logic
-    bool anticlockwise = false;
-
-    float factor_p1p2 = tangent / p1p2_length;
-    FloatPoint t_p1p2((p1.x() + factor_p1p2 * p1p2.x()), (p1.y() + factor_p1p2 * p1p2.y()));
-    FloatPoint orth_p1p2((t_p1p2.x() - p.x()), (t_p1p2.y() - p.y()));
-    float orth_p1p2_length = sqrtf(orth_p1p2.x() * orth_p1p2.x() + orth_p1p2.y() * orth_p1p2.y());
-    float ea = acos(orth_p1p2.x() / orth_p1p2_length);
-    if (orth_p1p2.y() < 0)
-        ea = 2 * piDouble - ea;
-    if ((sa > ea) && ((sa - ea) < piDouble))
-        anticlockwise = true;
-    if ((sa < ea) && ((ea - sa) > piDouble))
-        anticlockwise = true;
-
-    path.lineTo(t_p1p0);
-
-    addArc(painter, path, p, radius, sa, ea, anticlockwise);
-}
-
-static void arc(QPainter* painter, QPainterPath& path, float x, float y, float r, float sa, float ea, bool anticlockwise/*, ExceptionCode& ec*/)
-{
-    //ec = 0;
-    if (!std::isfinite(x) | !std::isfinite(y) | !std::isfinite(r) | !std::isfinite(sa) | !std::isfinite(ea))
-        return;
-
-    if (r < 0) {
-        //ec = INDEX_SIZE_ERR;
-        return;
-    }
-
-    if (sa == ea)
-        return;
-
-    /*if (!state().m_invertibleCTM)
-        return;*/
-    addArc(painter, path, FloatPoint(x, y), r, sa, ea, anticlockwise);
-}
-
-static void add_path_arc(QPainter* painter, QPainterPath& path, double x, double y, double rx, double ry, double a1, double a2, bool neg)
-{
-            /*QRectF r2(
-            draw_pos.left() + r_left,
-              draw_pos.bottom() - r_left,
-              r_left,
-              r_left);
-            QPainterPath path;
-            path.arcTo(r1,start_angle,end_angle);
-            path.arcTo(r2,end_angle,start_angle);
-            // and finally fill it
-            painter->fillPath(path, QBrush(getColor(borders.bottom.color)));*/
-
-
-  if(rx > 0 && ry > 0)
-  {
-
-    path.translate(x, y);
-    //path.scale(1, ry / rx);
-    path.translate(-x, -y);
-
-    /*cairo_save(cr);
-
-    cairo_translate(cr, x, y);
-    cairo_scale(cr, 1, ry / rx);
-    cairo_translate(cr, -x, -y);*/
-
-    if(neg)
-    {
-      //cairo_arc_negative(cr, x, y, rx, a1, a2);
-            QRectF r1(
-            x, y, rx, ry
-            );
-      path.arcTo(r1,a1, a2);
-    } else
-    {
-            QRectF r1(
-            x, y, rx, ry
-            );
-      path.arcTo(r1,a1, a2);
-      //cairo_arc(cr, x, y, rx, a1, a2);
-    }
-
-    //cairo_restore(cr);
-  } else
-  {
-    path.moveTo(x, y);
-    //cairo_move_to(cr, x, y);
-  }
-}
-
 void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders& borders, const litehtml::position& draw_pos, bool root)
 {
     //qDebug() << __FUNCTION__ << " for root = " << root;
     QPainter *painter = (QPainter *) hdc;
 
     painter->save();
+
+    painter->setRenderHint(QPainter::Antialiasing);
 
     apply_clip( painter );
 
@@ -666,110 +461,6 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
         //painter->setPen(Qt::NoPen);
         //painter->fillRect(area, QBrush(getColor(borders.top.color)) );
     } else {
-#ifdef nope
-        if (borders.top.style != litehtml::border_style_none) {
-            setPenForBorder(painter, borders.top);
-            painter->drawLine(area.topLeft(), area.topRight());
-        }
-        if (borders.bottom.style != litehtml::border_style_none) {
-            setPenForBorder(painter, borders.bottom);
-            painter->drawLine(area.bottomLeft(), area.bottomRight());
-
-            //QPainterPath path;
-            //path.addRoundedRect(QRectF(10, 10, 100, 50), 10, 10);
-        }
-        if (borders.left.style != litehtml::border_style_none) {
-            setPenForBorder(painter, borders.left);
-            painter->drawLine(area.topLeft(), area.bottomLeft());
-        }
-        if (borders.right.style != litehtml::border_style_none) {
-            setPenForBorder(painter, borders.right);
-            painter->drawLine(area.topRight(), area.bottomRight());
-        }
-
-
-        /*int bdr_top		= 0;
-        int bdr_bottom	= 0;
-        int bdr_left	= 0;
-        int bdr_right	= 0;
-
-        if(borders.top.width != 0 && borders.top.style > litehtml::border_style_hidden)
-        {
-          bdr_top = (int) borders.top.width;
-        }
-        if(borders.bottom.width != 0 && borders.bottom.style > litehtml::border_style_hidden)
-        {
-          bdr_bottom = (int) borders.bottom.width;
-        }
-        if(borders.left.width != 0 && borders.left.style > litehtml::border_style_hidden)
-        {
-          bdr_left = (int) borders.left.width;
-        }
-        if(borders.right.width != 0 && borders.right.style > litehtml::border_style_hidden)
-        {
-          bdr_right = (int) borders.right.width;
-        }
-
-        if (bdr_bottom)
-        {
-          QPoint aFrom(offsetX + draw_pos.left(), offsetY + draw_pos.bottom());
-          QPoint bTo(offsetX + draw_pos.right(), offsetY + draw_pos.bottom());
-          QColor color(borders.bottom.color.red, borders.bottom.color.green, borders.bottom.color.blue, borders.bottom.color.alpha);
-          setPenForBorder(painter, borders.bottom);
-          for (int x = 0; x < bdr_bottom; x++)
-          {
-            //win->DrawList->AddLine(aFrom, bTo, color);
-            painter->drawLine(aFrom, bTo);
-            aFrom.setY(aFrom.y()+1);
-            bTo.setY(bTo.y()+1);
-          }
-        }
-
-        if (bdr_top)
-        {
-          QPoint aFrom(offsetX + draw_pos.left(), offsetY + draw_pos.top());
-          QPoint bTo(offsetX + draw_pos.right(), offsetY + draw_pos.top());
-          QColor color(borders.top.color.red, borders.top.color.green, borders.top.color.blue, borders.top.color.alpha);
-          setPenForBorder(painter, borders.top);
-          for (int x = 0; x < bdr_top; x++)
-          {
-            //win->DrawList->AddLine(aFrom, bTo, color);
-            painter->drawLine(aFrom, bTo);
-            aFrom.setY(aFrom.y()+1);
-            bTo.setY(bTo.y()+1);
-          }
-        }
-
-        if (bdr_right)
-        {
-          QPoint aFrom(offsetX + draw_pos.right(), offsetY + draw_pos.top());
-          QPoint bTo(offsetX + draw_pos.right(), offsetY + draw_pos.bottom());
-          QColor color(borders.right.color.red, borders.right.color.green, borders.right.color.blue, borders.right.color.alpha);
-          setPenForBorder(painter, borders.right);
-          for (int x = 0; x < bdr_right; x++)
-          {
-            //win->DrawList->AddLine(aFrom, bTo, color);
-            painter->drawLine(aFrom, bTo);
-            aFrom.setX(aFrom.x()-1);
-            bTo.setX(bTo.x()-1);
-          }
-        }
-
-        if (bdr_left)
-        {
-          QPoint aFrom(offsetX + draw_pos.left(), offsetY + draw_pos.top());
-          QPoint bTo(offsetX + draw_pos.left(), offsetY + draw_pos.bottom());
-          QColor color(borders.left.color.red, borders.left.color.green, borders.left.color.blue, borders.left.color.alpha);
-          setPenForBorder(painter, borders.left);
-          for (int x = 0; x < bdr_left; x++)
-          {
-            //win->DrawList->AddLine(aFrom, bTo, color);
-            painter->drawLine(aFrom, bTo);
-            aFrom.setX(aFrom.x()+1);
-            bTo.setX(bTo.x()+1);
-          }
-        }*/
-#else
 
         int bdr_top		= 0;
         int bdr_bottom	= 0;
@@ -793,10 +484,33 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
           bdr_right = (int) borders.right.width;
         }
 
+        /*std::array<QPoint, 2> upperLeft_Radius = {
+          QPoint{}
+          , QPoint{}
+        };
+
+        std::array<QPoint, 2> upperRight_Radius = {
+          QPoint{}
+          , QPoint{}
+        };
+
+        std::array<QPoint, 2> lowerRight_Radius = {
+          QPoint{}
+          , QPoint{}
+        };
+
+        std::array<QPoint, 2> lowerLeft_Radius = {
+          QPoint{}
+          , QPoint{}
+        };*/
+
+        //QPainterPath path;
+
         // draw right border
         if(bdr_right)
         {
-          QPainterPath path;
+          //QPainterPath qtpath;
+          Path path;
           //set_color(cr, borders.right.color);
 
           double r_top	= borders.radius.top_right_x;
@@ -813,20 +527,20 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               auto ry = r_top - bdr_right + (bdr_right - bdr_top);
               auto p = FloatPoint(draw_pos.right() - r_top,
         draw_pos.top() + r_top);
-              if(true)//if(rx > 0 && ry > 0)
+              if(rx > 0 && ry > 0)
               {
                 painter->save();
-                path.translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
-                path.translate(-p.x(), -p.y());
-                arc(painter, path,
-                  p.x(), p.y(),
+                path.platformPath().translate(p.x(), p.y());
+                painter->scale(1, ry / rx);
+                path.platformPath().translate(-p.x(), -p.y());
+                path.addArc(
+                  p,
                   rx,
                   end_angle,
                   start_angle, true);
                 painter->restore();
               } else {
-                path.moveTo(p.x(), p.y());
+                path.platformPath().moveTo(p.x(), p.y());
               }
               //painter->restore();
             }
@@ -836,27 +550,27 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               auto ry = r_top;
               auto p = FloatPoint(draw_pos.right() - r_top,
         draw_pos.top() + r_top);
-              if(true)//if(rx > 0 && ry > 0)
+              if(rx > 0 && ry > 0)
               {
                 painter->save();
-                path.translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
-                path.translate(-p.x(), -p.y());
-                arc(painter, path,
-                  p.x(), p.y(),
+                path.platformPath().translate(p.x(), p.y());
+                painter->scale(1, ry / rx);
+                path.platformPath().translate(-p.x(), -p.y());
+                path.addArc(
+                  p,
                   rx,
                   start_angle,
                   end_angle, false);
                 painter->restore();
               } else {
-                path.moveTo(p.x(), p.y());
+                path.platformPath().moveTo(p.x(), p.y());
               }
               //painter->restore();
             }
           } else
           {
-            path.moveTo(draw_pos.right() - bdr_right, draw_pos.top() + bdr_top);
-            path.lineTo(draw_pos.right(), draw_pos.top());
+            path.platformPath().moveTo(draw_pos.right() - bdr_right, draw_pos.top() + bdr_top);
+            path.platformPath().lineTo(draw_pos.right(), draw_pos.top());
           }
 
           if(r_bottom)
@@ -874,20 +588,20 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               auto ry = r_bottom;
               auto p = FloatPoint(draw_pos.right() - r_bottom,
         draw_pos.bottom() - r_bottom);
-              if(true)//if(rx > 0 && ry > 0)
+              if(rx > 0 && ry > 0)
               {
                 painter->save();
-                path.translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
-                path.translate(-p.x(), -p.y());
-                arc(painter, path,
-                  p.x(), p.y(),
+                path.platformPath().translate(p.x(), p.y());
+                painter->scale(1, ry / rx);
+                path.platformPath().translate(-p.x(), -p.y());
+                path.addArc(
+                  p,
                   rx,
                   start_angle,
                   end_angle, false);
                 painter->restore();
               } else {
-                path.moveTo(p.x(), p.y());
+                path.platformPath().moveTo(p.x(), p.y());
               }
               //painter->restore();
             }
@@ -897,37 +611,38 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               auto ry = r_bottom - bdr_right + (bdr_right - bdr_bottom);
               auto p = FloatPoint(draw_pos.right() - r_bottom,
         draw_pos.bottom() - r_bottom);
-              if(true)//if(rx > 0 && ry > 0)
+              if(rx > 0 && ry > 0)
               {
                 painter->save();
-                path.translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
-                path.translate(-p.x(), -p.y());
-                arc(painter, path,
-                  p.x(), p.y(),
+                path.platformPath().translate(p.x(), p.y());
+                painter->scale(1, ry / rx);
+                path.platformPath().translate(-p.x(), -p.y());
+                path.addArc(
+                  p,
                   rx,
                   end_angle,
                   start_angle, true);
                 painter->restore();
               } else {
-                path.moveTo(p.x(), p.y());
+                path.platformPath().moveTo(p.x(), p.y());
               }
               //painter->restore();
             }
           } else
           {
-            path.lineTo(draw_pos.right(),	draw_pos.bottom());
-            path.lineTo(draw_pos.right() - bdr_right,	draw_pos.bottom() - bdr_bottom);
+            path.platformPath().lineTo(draw_pos.right(),	draw_pos.bottom());
+            path.platformPath().lineTo(draw_pos.right() - bdr_right,	draw_pos.bottom() - bdr_bottom);
           }
           //cairo_fill(cr);
-          painter->fillPath(path, QBrush(getColor(borders.right.color)));
+          path.closeSubpath();
+          painter->fillPath(path.platformPath(), QBrush(getColor(borders.right.color)));
         }
-
 
         // draw bottom border
         if(bdr_bottom)
         {
-          QPainterPath path;
+          Path path;
+          //QPainterPath path;
           //set_color(cr, borders.bottom.color);
 
           double r_left	= borders.radius.bottom_left_x;
@@ -946,17 +661,17 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               if(true)//if(rx > 0 && ry > 0)
               {
                 painter->save();
-                path.translate(p.x(), p.y());
+                path.platformPath().translate(p.x(), p.y());
                 //painter->scale(1, ry / rx);
-                path.translate(-p.x(), -p.y());
-                arc(painter, path,
-                  p.x(), p.y(),
+                path.platformPath().translate(-p.x(), -p.y());
+                path.addArc(
+                  p,
                   rx,
                   start_angle,
                   end_angle, false);
                 painter->restore();
               } else {
-                path.moveTo(p.x(), p.y());
+                path.platformPath().moveTo(p.x(), p.y());
               }
               //painter->restore();
             }
@@ -969,17 +684,17 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               if(true)//if(rx > 0 && ry > 0)
               {
                 painter->save();
-                path.translate(p.x(), p.y());
+                path.platformPath().translate(p.x(), p.y());
                 //painter->scale(1, ry / rx);
-                path.translate(-p.x(), -p.y());
-                arc(painter, path,
-                  p.x(), p.y(),
+                path.platformPath().translate(-p.x(), -p.y());
+                path.addArc(
+                  p,
                   rx,
                   end_angle,
                   start_angle, true);
                 painter->restore();
               } else {
-                path.moveTo(p.x(), p.y());
+                path.platformPath().moveTo(p.x(), p.y());
               }
               //painter->restore();
             }
@@ -988,8 +703,8 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
           {
             //cairo_move_to(cr, draw_pos.left(), draw_pos.bottom());
             //cairo_line_to(cr, draw_pos.left() + bdr_left, draw_pos.bottom() - bdr_bottom);
-            path.moveTo(draw_pos.left(), draw_pos.bottom());
-            path.lineTo(draw_pos.left() + bdr_left, draw_pos.bottom() - bdr_bottom);
+            path.platformPath().moveTo(draw_pos.left(), draw_pos.bottom());
+            path.platformPath().lineTo(draw_pos.left() + bdr_left, draw_pos.bottom() - bdr_bottom);
           }
 
           if(r_right)
@@ -1007,17 +722,17 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               if(true)//if(rx > 0 && ry > 0)
               {
                 painter->save();
-                path.translate(p.x(), p.y());
+                path.platformPath().translate(p.x(), p.y());
                 //painter->scale(1, ry / rx);
-                path.translate(-p.x(), -p.y());
-                arc(painter, path,
-                  p.x(), p.y(),
+                path.platformPath().translate(-p.x(), -p.y());
+                path.addArc(
+                  p,
                   rx,
                   end_angle,
                   start_angle, true);
                 painter->restore();
               } else {
-                path.moveTo(p.x(), p.y());
+                path.platformPath().moveTo(p.x(), p.y());
               }
               //painter->restore();
             }
@@ -1030,17 +745,17 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               if(true)//if(rx > 0 && ry > 0)
               {
                 painter->save();
-                path.translate(p.x(), p.y());
+                path.platformPath().translate(p.x(), p.y());
                 //painter->scale(1, ry / rx);
-                path.translate(-p.x(), -p.y());
-                arc(painter, path,
-                  p.x(), p.y(),
+                path.platformPath().translate(-p.x(), -p.y());
+                path.addArc(
+                  p,
                   rx,
                   start_angle,
                   end_angle, false);
                 painter->restore();
               } else {
-                path.moveTo(p.x(), p.y());
+                path.platformPath().moveTo(p.x(), p.y());
               }
               //painter->restore();
             }
@@ -1049,18 +764,20 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
           {
             //cairo_line_to(cr, draw_pos.right() - bdr_right,	draw_pos.bottom() - bdr_bottom);
             //cairo_line_to(cr, draw_pos.right(),	draw_pos.bottom());
-            path.lineTo( draw_pos.right() - bdr_right,	draw_pos.bottom() - bdr_bottom);
-            path.lineTo( draw_pos.right(),	draw_pos.bottom());
+            path.platformPath().lineTo( draw_pos.right() - bdr_right,	draw_pos.bottom() - bdr_bottom);
+            path.platformPath().lineTo( draw_pos.right(),	draw_pos.bottom());
           }
 
           //cairo_fill(cr);
-          painter->fillPath(path, QBrush(getColor(borders.bottom.color)));
+          path.closeSubpath();
+          painter->fillPath(path.platformPath(),QBrush(getColor(borders.bottom.color)));
         }
 
         // draw top border
         if(bdr_top)
         {
-          QPainterPath path;
+          Path path;
+          //QPainterPath path;
           //set_color(cr, borders.top.color);
 
           double r_left	= borders.radius.top_left_x;
@@ -1080,17 +797,17 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               if(true)//if(rx > 0 && ry > 0)
               {
                 painter->save();
-                path.translate(p.x(), p.y());
+                path.platformPath().translate(p.x(), p.y());
                 //painter->scale(1, ry / rx);
-                path.translate(-p.x(), -p.y());
-                arc(painter, path,
-                  p.x(), p.y(),
+                path.platformPath().translate(-p.x(), -p.y());
+                path.addArc(
+                  p,
                   rx,
                   end_angle,
                   start_angle, true);
                 painter->restore();
               } else {
-                path.moveTo(p.x(), p.y());
+                path.platformPath().moveTo(p.x(), p.y());
               }
               //painter->restore();
             }
@@ -1103,17 +820,17 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               if(true)//if(rx > 0 && ry > 0)
               {
                 painter->save();
-                path.translate(p.x(), p.y());
+                path.platformPath().translate(p.x(), p.y());
                 //painter->scale(1, ry / rx);
-                path.translate(-p.x(), -p.y());
-                arc(painter, path,
-                  p.x(), p.y(),
+                path.platformPath().translate(-p.x(), -p.y());
+                path.addArc(
+                  p,
                   rx,
                   start_angle,
                   end_angle, false);
                 painter->restore();
               } else {
-                path.moveTo(p.x(), p.y());
+                path.platformPath().moveTo(p.x(), p.y());
               }
               //painter->restore();
             }
@@ -1127,8 +844,8 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
             //painter->drawLine(
             //  QPoint(draw_pos.left(), draw_pos.top()),
             //  QPoint(draw_pos.left() + bdr_left, draw_pos.top() + bdr_top));
-            path.moveTo(draw_pos.left(), draw_pos.top());
-            path.lineTo(draw_pos.left() + bdr_left, draw_pos.top() + bdr_top);
+            path.platformPath().moveTo(draw_pos.left(), draw_pos.top());
+            path.platformPath().lineTo(draw_pos.left() + bdr_left, draw_pos.top() + bdr_top);
           }
 
           if(r_right)
@@ -1147,17 +864,17 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               if(true)//if(rx > 0 && ry > 0)
               {
                 painter->save();
-                path.translate(p.x(), p.y());
+                path.platformPath().translate(p.x(), p.y());
                 //painter->scale(1, ry / rx);
-                path.translate(-p.x(), -p.y());
-                arc(painter, path,
-                  p.x(), p.y(),
+                path.platformPath().translate(-p.x(), -p.y());
+                path.addArc(
+                  p,
                   rx,
                   start_angle,
                   end_angle, false);
                 painter->restore();
               } else {
-                path.moveTo(p.x(), p.y());
+                path.platformPath().moveTo(p.x(), p.y());
               }
               //painter->restore();
             }
@@ -1170,17 +887,17 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               if(true)//if(rx > 0 && ry > 0)
               {
                 painter->save();
-                path.translate(p.x(), p.y());
+                path.platformPath().translate(p.x(), p.y());
                 //painter->scale(1, ry / rx);
-                path.translate(-p.x(), -p.y());
-                arc(painter, path,
-                  p.x(), p.y(),
+                path.platformPath().translate(-p.x(), -p.y());
+                path.addArc(
+                  p,
                   rx,
                   end_angle,
                   start_angle, true);
                 painter->restore();
               } else {
-                path.moveTo(p.x(), p.y());
+                path.platformPath().moveTo(p.x(), p.y());
               }
               //painter->restore();
             }
@@ -1192,12 +909,13 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
             //painter->drawLine(
             //  QPoint(draw_pos.right() - bdr_right,	draw_pos.top() + bdr_top),
             //  QPoint(draw_pos.right(),	draw_pos.top()));
-            ////path.moveTo(draw_pos.left(), draw_pos.top());
-            path.lineTo(draw_pos.right() - bdr_right,	draw_pos.top() + bdr_top);
-            path.lineTo(draw_pos.right(),	draw_pos.top());
+            ////path.platformPath().moveTo(draw_pos.left(), draw_pos.top());
+            path.platformPath().lineTo(draw_pos.right() - bdr_right,	draw_pos.top() + bdr_top);
+            path.platformPath().lineTo(draw_pos.right(),	draw_pos.top());
           }
 
-          painter->fillPath(path, QBrush(getColor(borders.top.color)));
+          path.closeSubpath();
+          painter->fillPath(path.platformPath(),QBrush(getColor(borders.top.color)));
 
           //cairo_fill(cr);
         }
@@ -1205,7 +923,8 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
         // draw left border
         if(bdr_left)
         {
-          QPainterPath path;
+          Path path;
+          //QPainterPath path;
           //set_color(cr, borders.left.color);
 
           double r_top	= borders.radius.top_left_x;
@@ -1225,17 +944,17 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               if(true)//if(rx > 0 && ry > 0)
               {
                 painter->save();
-                path.translate(p.x(), p.y());
+                path.platformPath().translate(p.x(), p.y());
                 //painter->scale(1, ry / rx);
-                path.translate(-p.x(), -p.y());
-                arc(painter, path,
-                  p.x(), p.y(),
+                path.platformPath().translate(-p.x(), -p.y());
+                path.addArc(
+                  p,
                   rx,
                   start_angle,
                   end_angle, false);
                 painter->restore();
               } else {
-                path.moveTo(p.x(), p.y());
+                path.platformPath().moveTo(p.x(), p.y());
               }
               //painter->restore();
             }
@@ -1248,17 +967,17 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               if(true)//if(rx > 0 && ry > 0)
               {
                 painter->save();
-                path.translate(p.x(), p.y());
+                path.platformPath().translate(p.x(), p.y());
                 //painter->scale(1, ry / rx);
-                path.translate(-p.x(), -p.y());
-                arc(painter, path,
-                  p.x(), p.y(),
+                path.platformPath().translate(-p.x(), -p.y());
+                path.addArc(
+                  p,
                   rx,
                   end_angle,
                   start_angle, true);
                 painter->restore();
               } else {
-                path.moveTo(p.x(), p.y());
+                path.platformPath().moveTo(p.x(), p.y());
               }
               //painter->restore();
             }
@@ -1266,8 +985,8 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
           {
             //cairo_move_to(cr, draw_pos.left() + bdr_left, draw_pos.top() + bdr_top);
             //cairo_line_to(cr, draw_pos.left(), draw_pos.top());
-            path.moveTo(draw_pos.left() + bdr_left, draw_pos.top() + bdr_top);
-            path.lineTo(draw_pos.left(), draw_pos.top());
+            path.platformPath().moveTo(draw_pos.left() + bdr_left, draw_pos.top() + bdr_top);
+            path.platformPath().lineTo(draw_pos.left(), draw_pos.top());
           }
 
           if(r_bottom)
@@ -1286,17 +1005,17 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               if(true)//if(rx > 0 && ry > 0)
               {
                 painter->save();
-                path.translate(p.x(), p.y());
+                path.platformPath().translate(p.x(), p.y());
                 //painter->scale(1, ry / rx);
-                path.translate(-p.x(), -p.y());
-                arc(painter, path,
-                  p.x(), p.y(),
+                path.platformPath().translate(-p.x(), -p.y());
+                path.addArc(
+                  p,
                   rx,
                   end_angle,
                   start_angle, true);
                 painter->restore();
               } else {
-                path.moveTo(p.x(), p.y());
+                path.platformPath().moveTo(p.x(), p.y());
               }
               //painter->restore();
             }
@@ -1309,17 +1028,17 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               if(true)//if(rx > 0 && ry > 0)
               {
                 painter->save();
-                path.translate(p.x(), p.y());
+                path.platformPath().translate(p.x(), p.y());
                 //painter->scale(1, ry / rx);
-                path.translate(-p.x(), -p.y());
-                arc(painter, path,
-                  p.x(), p.y(),
+                path.platformPath().translate(-p.x(), -p.y());
+                path.addArc(
+                  p,
                   rx,
                   start_angle,
                   end_angle, false);
                 painter->restore();
               } else {
-                path.moveTo(p.x(), p.y());
+                path.platformPath().moveTo(p.x(), p.y());
               }
               //painter->restore();
             }
@@ -1327,16 +1046,16 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
           {
             //cairo_line_to(cr, draw_pos.left(),	draw_pos.bottom());
             //cairo_line_to(cr, draw_pos.left() + bdr_left,	draw_pos.bottom() - bdr_bottom);
-            path.lineTo(draw_pos.left(),	draw_pos.bottom());
-            path.lineTo(draw_pos.left() + bdr_left,	draw_pos.bottom() - bdr_bottom);
+            path.platformPath().lineTo(draw_pos.left(),	draw_pos.bottom());
+            path.platformPath().lineTo(draw_pos.left() + bdr_left,	draw_pos.bottom() - bdr_bottom);
           }
 
           //cairo_fill(cr);
-          painter->fillPath(path, QBrush(getColor(borders.left.color)));
+          path.closeSubpath();
+          painter->fillPath(path.platformPath(),QBrush(getColor(borders.left.color)));
         }
         //cairo_restore(cr);
 
-#endif
     }
 
     painter->restore();
