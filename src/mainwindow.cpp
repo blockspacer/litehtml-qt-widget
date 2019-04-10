@@ -76,6 +76,18 @@ ui(new Ui::MainWindow)
 
 <div id="root">
   <div class="first">
+    <div style="border-image: url(:/res/img/test.png) 30 round round; border-width: 3px;">border-image</div>
+  </div>
+  <div class="first">
+    <div style="border-image: linear-gradient(to left, #61c69d 0%, #2d72bc 100%); border-image-slice: 1; border-width: 3px;">border-image: linear-gradient(to left, #61c69d 0%, #2d72bc 100%); border-image-slice: 1; border-width: 3px;</div>
+  </div>
+  <div class="first">
+    <div style="border: 5px solid gold;border-style: inset;padding: 5px;">border-style: inset; padding: 5px;</div>
+  </div>
+  <div class="first">
+    <div style="border: 5px solid gold;border-style: outset;padding: 5px;">border-style: outset; padding: 5px;</div>
+  </div>
+  <div class="first">
     <div style="border-style: dashed;padding: 5px;">border-style: dashed; padding: 5px;</div>
   </div>
   <div class="first">
@@ -83,6 +95,15 @@ ui(new Ui::MainWindow)
   </div>
   <div class="first">
     <div style="border: 5px solid gold; border-style: double;padding: 5px;">border: 5px solid gold;border-style: double; padding: 5px;</div>
+  </div>
+  <div class="first">
+    <div style="border: 15px solid rgba(255,0,0,0.0);">border: 15px solid rgba(255,0,0,0.0);</div>
+  </div>
+  <div class="first">
+    <div style="border: 15px solid rgba(255,0,0,0.1);">border: 15px solid rgba(255,0,0,0.1);</div>
+  </div>
+  <div class="first">
+    <div style="border: 15px solid rgba(255,0,0,1.0);">border: 15px solid rgba(255,0,0,1.0);</div>
   </div>
   <div class="first">
     <div style="border: 5px solid pink; border-left-width: 15px;">border: 5px solid pink; border-left-width: 15px;</div>

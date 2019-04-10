@@ -1474,7 +1474,7 @@ void GraphicsContext::strokeRect(const FloatRect& rect, float width)
     QPen nPen = p->pen();
     nPen.setCapStyle(toQtLineCap(lc));
     p->setPen(nPen);
-}
+}*/
 
 void GraphicsContext::setLineDash(const DashArray& dashes, float dashOffset)
 {
@@ -1498,7 +1498,7 @@ void GraphicsContext::setLineDash(const DashArray& dashes, float dashOffset)
     p->setPen(pen);
 }
 
-void GraphicsContext::setLineJoin(LineJoin lj)
+/*void GraphicsContext::setLineJoin(LineJoin lj)
 {
     if (paintingDisabled())
         return;

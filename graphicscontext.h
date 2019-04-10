@@ -313,9 +313,9 @@ public:
         void drawFocusRing(const QVector<IntRect>&, int width, int offset, const Color&);
         void drawFocusRing(const QVector<Path>&, int width, int offset, const Color&);
 
-        /*void setLineCap(LineCap);
+        /*void setLineCap(LineCap);*/
         void setLineDash(const DashArray&, float dashOffset);
-        void setLineJoin(LineJoin);*/
+        //void setLineJoin(LineJoin);
 
         void setMiterLimit(float);
 

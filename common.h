@@ -48,6 +48,11 @@
 // not change this order!
 enum EBorderStyle { BNONE, BHIDDEN, INSET, GROOVE, RIDGE, OUTSET, DOTTED, DASHED, SOLID, DOUBLE };
 
+///////
+
+// https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/platform/graphics/DashArray.h
+typedef QVector<float> DashArray;
+
 /////////
 
 #define ASSERT(string) Q_ASSERT(string)

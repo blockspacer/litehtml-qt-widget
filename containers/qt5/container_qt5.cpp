@@ -474,173 +474,6 @@ static bool borderWillArcInnerEdge(const IntSize& firstRadius, const IntSize& se
             && (!secondRadius.height() || secondRadius.height() >= middleBorderWidth);
 }
 
-static void drawBoxSideFromPath(GraphicsContext* graphicsContext, IntRect borderRect, Path borderPath,
-                                    float thickness, float drawThickness,
-                                    BoxSide s,
-                                    //const RenderStyle* style,
-                                    ColorSpace colorSpace,
-                                    Color c, EBorderStyle borderStyle)
-{
-    if (thickness <= 0)
-        return;
-
-    if (borderStyle == DOUBLE && thickness < 3)
-        borderStyle = SOLID;
-
-    switch (borderStyle) {
-    case BNONE:
-    case BHIDDEN:
-        return;
-    case DOTTED:
-    /*case DASHED: {
-        graphicsContext->setStrokeColor(c, colorSpace);
-
-        // The stroke is doubled here because the provided path is the
-        // outside edge of the border so half the stroke is clipped off.
-        // The extra multiplier is so that the clipping mask can antialias
-        // the edges to prevent jaggies.
-        graphicsContext->setStrokeThickness(drawThickness * 2 * 1.1f);
-        graphicsContext->setStrokeStyle(borderStyle == DASHED ? DashedStroke : DottedStroke);
-
-        // If the number of dashes that fit in the path is odd and non-integral then we
-        // will have an awkwardly-sized dash at the end of the path. To try to avoid that
-        // here, we simply make the whitespace dashes ever so slightly bigger.
-        // FIXME: This could be even better if we tried to manipulate the dash offset
-        // and possibly the whiteSpaceWidth to get the corners dash-symmetrical.
-        float patWidth = thickness * ((borderStyle == DASHED) ? 3.0f : 1.0f);
-        float whiteSpaceWidth = patWidth;
-        float numberOfDashes = borderPath.length() / patWidth;
-        bool evenNumberOfFullDashes = !((int)numberOfDashes % 2);
-        bool integralNumberOfDashes = !(numberOfDashes - (int)numberOfDashes);
-        if (!evenNumberOfFullDashes && !integralNumberOfDashes) {
-            float numberOfWhitespaceDashes = numberOfDashes / 2;
-            whiteSpaceWidth += (patWidth  / numberOfWhitespaceDashes);
-        }
-
-        DashArray lineDash;
-        lineDash.append(patWidth);
-        lineDash.append(whiteSpaceWidth);
-        graphicsContext->setLineDash(lineDash, patWidth);
-        graphicsContext->addPath(borderPath);
-        graphicsContext->strokePath();
-        return;
-    }
-    case DOUBLE: {
-        int outerBorderTopWidth = borderTopWidth() / 3;
-        int outerBorderRightWidth = borderRightWidth() / 3;
-        int outerBorderBottomWidth = borderBottomWidth() / 3;
-        int outerBorderLeftWidth = borderLeftWidth() / 3;
-
-        int innerBorderTopWidth = borderTopWidth() * 2 / 3;
-        int innerBorderRightWidth = borderRightWidth() * 2 / 3;
-        int innerBorderBottomWidth = borderBottomWidth() * 2 / 3;
-        int innerBorderLeftWidth = borderLeftWidth() * 2 / 3;
-
-        // We need certain integer rounding results
-        if (borderTopWidth() % 3 == 2)
-            outerBorderTopWidth += 1;
-        if (borderRightWidth() % 3 == 2)
-            outerBorderRightWidth += 1;
-        if (borderBottomWidth() % 3 == 2)
-            outerBorderBottomWidth += 1;
-        if (borderLeftWidth() % 3 == 2)
-            outerBorderLeftWidth += 1;
-
-        if (borderTopWidth() % 3 == 1)
-            innerBorderTopWidth += 1;
-        if (borderRightWidth() % 3 == 1)
-            innerBorderRightWidth += 1;
-        if (borderBottomWidth() % 3 == 1)
-            innerBorderBottomWidth += 1;
-        if (borderLeftWidth() % 3 == 1)
-            innerBorderLeftWidth += 1;
-
-        // Get the inner border rects for both the outer border line and the inner border line
-        IntRect outerBorderInnerRect = borderInnerRect(borderRect, outerBorderTopWidth, outerBorderBottomWidth,
-            outerBorderLeftWidth, outerBorderRightWidth);
-        IntRect innerBorderInnerRect = borderInnerRect(borderRect, innerBorderTopWidth, innerBorderBottomWidth,
-            innerBorderLeftWidth, innerBorderRightWidth);
-
-        // Get the inner radii for the outer border line
-        IntSize outerBorderTopLeftInnerRadius, outerBorderTopRightInnerRadius, outerBorderBottomLeftInnerRadius,
-            outerBorderBottomRightInnerRadius;
-        getInnerBorderRadiiForRectWithBorderWidths(outerBorderInnerRect, outerBorderTopWidth, outerBorderBottomWidth,
-            outerBorderLeftWidth, outerBorderRightWidth, outerBorderTopLeftInnerRadius, outerBorderTopRightInnerRadius,
-            outerBorderBottomLeftInnerRadius, outerBorderBottomRightInnerRadius);
-
-        // Get the inner radii for the inner border line
-        IntSize innerBorderTopLeftInnerRadius, innerBorderTopRightInnerRadius, innerBorderBottomLeftInnerRadius,
-            innerBorderBottomRightInnerRadius;
-        getInnerBorderRadiiForRectWithBorderWidths(innerBorderInnerRect, innerBorderTopWidth, innerBorderBottomWidth,
-            innerBorderLeftWidth, innerBorderRightWidth, innerBorderTopLeftInnerRadius, innerBorderTopRightInnerRadius,
-            innerBorderBottomLeftInnerRadius, innerBorderBottomRightInnerRadius);
-
-        // Draw inner border line
-        graphicsContext->save();
-        graphicsContext->addRoundedRectClip(innerBorderInnerRect, innerBorderTopLeftInnerRadius,
-            innerBorderTopRightInnerRadius, innerBorderBottomLeftInnerRadius, innerBorderBottomRightInnerRadius);
-        drawBoxSideFromPath(graphicsContext, borderRect, borderPath, thickness, drawThickness, s, style, c, SOLID);
-        graphicsContext->restore();
-
-        // Draw outer border line
-        graphicsContext->save();
-        graphicsContext->clipOutRoundedRect(outerBorderInnerRect, outerBorderTopLeftInnerRadius,
-            outerBorderTopRightInnerRadius, outerBorderBottomLeftInnerRadius, outerBorderBottomRightInnerRadius);
-        drawBoxSideFromPath(graphicsContext, borderRect, borderPath, thickness, drawThickness, s, style, c, SOLID);
-        graphicsContext->restore();
-
-        return;
-    }
-    case RIDGE:
-    case GROOVE:
-    {
-        EBorderStyle s1;
-        EBorderStyle s2;
-        if (borderStyle == GROOVE) {
-            s1 = INSET;
-            s2 = OUTSET;
-        } else {
-            s1 = OUTSET;
-            s2 = INSET;
-        }
-
-        IntRect halfBorderRect = borderInnerRect(borderRect, borderLeftWidth() / 2, borderBottomWidth() / 2,
-            borderLeftWidth() / 2, borderRightWidth() / 2);
-
-        IntSize topLeftHalfRadius, topRightHalfRadius, bottomLeftHalfRadius, bottomRightHalfRadius;
-        getInnerBorderRadiiForRectWithBorderWidths(halfBorderRect, borderLeftWidth() / 2,
-            borderBottomWidth() / 2, borderLeftWidth() / 2, borderRightWidth() / 2,
-            topLeftHalfRadius, topRightHalfRadius, bottomLeftHalfRadius, bottomRightHalfRadius);
-
-        // Paint full border
-        drawBoxSideFromPath(graphicsContext, borderRect, borderPath, thickness, drawThickness, s, style, c, s1);
-
-        // Paint inner only
-        graphicsContext->save();
-        graphicsContext->addRoundedRectClip(halfBorderRect, topLeftHalfRadius, topRightHalfRadius,
-            bottomLeftHalfRadius, bottomRightHalfRadius);
-        drawBoxSideFromPath(graphicsContext, borderRect, borderPath, thickness, drawThickness, s, style, c, s2);
-        graphicsContext->restore();
-
-        return;
-    }
-    case INSET:
-        if (s == BSTop || s == BSLeft)
-            c = c.dark();
-        break;
-    case OUTSET:
-        if (s == BSBottom || s == BSRight)
-            c = c.dark();
-        break;*/
-    default:
-        break;
-    }
-
-    graphicsContext->setStrokeStyle(NoStroke);
-    graphicsContext->setFillColor(c, colorSpace);
-    graphicsContext->drawRect(borderRect);
-}
-
 static void drawLineForBoxSide(ColorSpace colorSpace, GraphicsContext* graphicsContext, int x1, int y1, int x2, int y2,
                                       BoxSide s, Color c, EBorderStyle style,
                                       int adjbw1, int adjbw2)
@@ -913,167 +746,7 @@ static void clipBorderSidePolygon(GraphicsContext* graphicsContext, const IntRec
     graphicsContext->clipConvexPolygon(4, secondQuad, !secondEdgeMatches);
 }
 
-static void paintBorder(
-  ColorSpace colorSpace,
-  const Color& topColor,  const Color& bottomColor,
-  const Color& leftColor, const Color& rightColor,
-  EBorderStyle topStyle,
-  EBorderStyle bottomStyle,
-  EBorderStyle leftStyle,
-  EBorderStyle rightStyle,
-  IntSize topLeftRadius, IntSize topRightRadius, IntSize bottomLeftRadius, IntSize bottomRightRadius,
-  IntRect innerBorderRect,
-  IntSize innerTopLeftRadius, IntSize innerTopRightRadius, IntSize innerBottomLeftRadius, IntSize innerBottomRightRadius,
-  const litehtml::borders& borders,
-  bool topTransparent, bool bottomTransparent, bool rightTransparent, bool leftTransparent,
-  bool renderTop, bool renderLeft, bool renderRight, bool renderBottom,
-  bool hasBorderRadius,
-  GraphicsContext* graphicsContext,
-  int tx, int ty, int w, int h,
-  bool begin = true, bool end = true)
-{
-    /*if (paintNinePieceImage(graphicsContext, tx, ty, w, h, style, borderImage()))
-        return;*/
 
-    if (graphicsContext->paintingDisabled())
-        return;
-
-    bool renderRadii = false;
-    Path roundedPath;
-    IntSize topLeft, topRight, bottomLeft, bottomRight;
-    IntRect borderRect(tx, ty, w, h);
-
-    if (hasBorderRadius) {
-        //IntSize topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius;
-        //getBorderRadiiForRect(borderRect, topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius);
-
-        //IntRect innerBorderRect = borderInnerRect(borderRect, borderTopWidth(), borderBottomWidth(),
-        /*    borderLeftWidth(), borderRightWidth());
-
-        IntSize innerTopLeftRadius, innerTopRightRadius, innerBottomLeftRadius, innerBottomRightRadius;
-        getInnerBorderRadiiForRectWithBorderWidths(innerBorderRect, borderTopWidth(), borderBottomWidth(),
-            borderLeftWidth(), borderRightWidth(), innerTopLeftRadius, innerTopRightRadius,
-            innerBottomLeftRadius, innerBottomRightRadius);*/
-
-        if (begin) {
-            topLeft = topLeftRadius;
-            bottomLeft = bottomLeftRadius;
-        }
-        if (end) {
-            topRight = topRightRadius;
-            bottomRight = bottomRightRadius;
-        }
-
-        renderRadii = true;
-
-        // Clip to the inner and outer radii rects.
-        graphicsContext->save();
-        graphicsContext->addRoundedRectClip(borderRect, topLeft, topRight, bottomLeft, bottomRight);
-        graphicsContext->clipOutRoundedRect(innerBorderRect, innerTopLeftRadius, innerTopRightRadius, innerBottomLeftRadius, innerBottomRightRadius);
-
-        roundedPath.addRoundedRect(borderRect, topLeft, topRight, bottomLeft, bottomRight);
-        graphicsContext->addPath(roundedPath);
-    }
-
-    bool upperLeftBorderStylesMatch = renderLeft && (topStyle == leftStyle) && (topColor == leftColor);
-    bool upperRightBorderStylesMatch = renderRight && (topStyle == rightStyle) && (topColor == rightColor) && (topStyle != OUTSET) && (topStyle != RIDGE) && (topStyle != INSET) && (topStyle != GROOVE);
-    bool lowerLeftBorderStylesMatch = renderLeft && (bottomStyle == leftStyle) && (bottomColor == leftColor) && (bottomStyle != OUTSET) && (bottomStyle != RIDGE) && (bottomStyle != INSET) && (bottomStyle != GROOVE);
-    bool lowerRightBorderStylesMatch = renderRight && (bottomStyle == rightStyle) && (bottomColor == rightColor);
-
-    if (renderTop) {
-        int x = tx;
-        int x2 = tx + w;
-
-        if (renderRadii && borderWillArcInnerEdge(topLeft, topRight, borders.left.width, borders.right.width, borders.top.width)) {
-            graphicsContext->save();
-            clipBorderSidePolygon(graphicsContext, borderRect, topLeft, topRight, bottomLeft, bottomRight, BSTop, upperLeftBorderStylesMatch, upperRightBorderStylesMatch, borders.left.width, borders.right.width, borders.top.width, borders.bottom.width);
-            float thickness = max(max(borders.top.width, borders.left.width), borders.right.width);
-            drawBoxSideFromPath(graphicsContext, borderRect, roundedPath, borders.top.width, thickness, BSTop, colorSpace, topColor, topStyle);
-            graphicsContext->restore();
-        } else {
-            bool ignoreLeft = (topColor == leftColor && topTransparent == leftTransparent && topStyle >= OUTSET
-                && (leftStyle == DOTTED || leftStyle == DASHED || leftStyle == SOLID || leftStyle == OUTSET));
-            bool ignoreRight = (topColor == rightColor && topTransparent == rightTransparent && topStyle >= OUTSET
-                && (rightStyle == DOTTED || rightStyle == DASHED || rightStyle == SOLID || rightStyle == INSET));
-
-            drawLineForBoxSide(colorSpace, graphicsContext, x, ty, x2, ty + borders.top.width, BSTop, topColor, topStyle,
-                    ignoreLeft ? 0 : borders.left.width, ignoreRight ? 0 : borders.right.width);
-        }
-    }
-
-    if (renderBottom) {
-        int x = tx;
-        int x2 = tx + w;
-
-        if (renderRadii && borderWillArcInnerEdge(bottomLeft, bottomRight, borders.left.width, borders.right.width, borders.bottom.width)) {
-            graphicsContext->save();
-            clipBorderSidePolygon(graphicsContext, borderRect, topLeft, topRight, bottomLeft, bottomRight, BSBottom, lowerLeftBorderStylesMatch, lowerRightBorderStylesMatch, borders.left.width, borders.right.width, borders.top.width, borders.bottom.width);
-            float thickness = max(max(borders.bottom.width, borders.left.width), borders.right.width);
-            drawBoxSideFromPath(graphicsContext, borderRect, roundedPath, borders.bottom.width, thickness, BSBottom, colorSpace, bottomColor, bottomStyle);
-            graphicsContext->restore();
-        } else {
-            bool ignoreLeft = (bottomColor == leftColor && bottomTransparent == leftTransparent && bottomStyle >= OUTSET
-                && (leftStyle == DOTTED || leftStyle == DASHED || leftStyle == SOLID || leftStyle == OUTSET));
-
-            bool ignoreRight = (bottomColor == rightColor && bottomTransparent == rightTransparent && bottomStyle >= OUTSET
-                && (rightStyle == DOTTED || rightStyle == DASHED || rightStyle == SOLID || rightStyle == INSET));
-
-            drawLineForBoxSide(colorSpace, graphicsContext, x, ty + h - borders.bottom.width, x2, ty + h, BSBottom, bottomColor,
-                        bottomStyle, ignoreLeft ? 0 : borders.left.width,
-                        ignoreRight ? 0 : borders.right.width);
-        }
-    }
-
-    if (renderLeft) {
-        int y = ty;
-        int y2 = ty + h;
-
-        if (renderRadii && borderWillArcInnerEdge(bottomLeft, topLeft, borders.bottom.width, borders.top.width, borders.left.width)) {
-            graphicsContext->save();
-            clipBorderSidePolygon(graphicsContext, borderRect, topLeft, topRight, bottomLeft, bottomRight, BSLeft, upperLeftBorderStylesMatch, lowerLeftBorderStylesMatch, borders.left.width, borders.right.width, borders.top.width, borders.bottom.width);
-            float thickness = max(max(borders.left.width, borders.top.width), borders.bottom.width);
-            drawBoxSideFromPath(graphicsContext, borderRect, roundedPath, borders.left.width, thickness, BSLeft, colorSpace, leftColor, leftStyle);
-            graphicsContext->restore();
-        } else {
-            bool ignoreTop = (topColor == leftColor && topTransparent == leftTransparent && leftStyle >= OUTSET
-                && (topStyle == DOTTED || topStyle == DASHED || topStyle == SOLID || topStyle == OUTSET));
-
-            bool ignoreBottom = (bottomColor == leftColor && bottomTransparent == leftTransparent && leftStyle >= OUTSET
-                && (bottomStyle == DOTTED || bottomStyle == DASHED || bottomStyle == SOLID || bottomStyle == INSET));
-
-            drawLineForBoxSide(colorSpace, graphicsContext, tx, y, tx + borders.left.width, y2, BSLeft, leftColor,
-                        leftStyle, ignoreTop ? 0 : borders.top.width, ignoreBottom ? 0 : borders.bottom.width);
-        }
-    }
-
-    if (renderRight) {
-        if (renderRadii && borderWillArcInnerEdge(bottomRight, topRight, borders.bottom.width, borders.top.width, borders.right.width)) {
-            graphicsContext->save();
-            clipBorderSidePolygon(graphicsContext, borderRect, topLeft, topRight, bottomLeft, bottomRight, BSRight, upperRightBorderStylesMatch, lowerRightBorderStylesMatch, borders.left.width, borders.right.width, borders.top.width, borders.bottom.width);
-            float thickness = max(max(borders.right.width, borders.top.width), borders.bottom.width);
-            drawBoxSideFromPath(graphicsContext, borderRect, roundedPath, borders.right.width, thickness, BSRight, colorSpace, rightColor, rightStyle);
-            graphicsContext->restore();
-        } else {
-            bool ignoreTop = ((topColor == rightColor) && (topTransparent == rightTransparent)
-                && (rightStyle >= DOTTED || rightStyle == INSET)
-                && (topStyle == DOTTED || topStyle == DASHED || topStyle == SOLID || topStyle == OUTSET));
-
-            bool ignoreBottom = ((bottomColor == rightColor) && (bottomTransparent == rightTransparent)
-                && (rightStyle >= DOTTED || rightStyle == INSET)
-                && (bottomStyle == DOTTED || bottomStyle == DASHED || bottomStyle == SOLID || bottomStyle == INSET));
-
-            int y = ty;
-            int y2 = ty + h;
-
-            drawLineForBoxSide(colorSpace, graphicsContext, tx + w - borders.right.width, y, tx + w, y2, BSRight, rightColor,
-                rightStyle, ignoreTop ? 0 : borders.top.width,
-                ignoreBottom ? 0 : borders.bottom.width);
-        }
-    }
-
-    if (renderRadii)
-        graphicsContext->restore();
-}
 
 static void constrainCornerRadiiForRect(const IntRect& r, IntSize& topLeft, IntSize& topRight, IntSize& bottomLeft, IntSize& bottomRight)
 {
@@ -1144,8 +817,8 @@ static void getBorderRadiiForRect(
 }
 
 static void getInnerBorderRadiiForRectWithBorderWidths(const IntRect& innerRect,
-//unsigned short topWidth, unsigned short bottomWidth, unsigned short leftWidth, unsigned short rightWidth,
 const litehtml::borders& borders,
+unsigned short topWidth, unsigned short bottomWidth, unsigned short leftWidth, unsigned short rightWidth,
 IntSize& innerTopLeft, IntSize& innerTopRight, IntSize& innerBottomLeft, IntSize& innerBottomRight)
 //const
 {
@@ -1174,112 +847,191 @@ IntSize& innerTopLeft, IntSize& innerTopRight, IntSize& innerBottomLeft, IntSize
     innerBottomLeft = IntSize(borders.radius.bottom_left_x, borders.radius.bottom_left_y);
     innerBottomRight = IntSize(borders.radius.bottom_right_x, borders.radius.bottom_right_y);
 
+    innerTopLeft.setWidth(max(0, innerTopLeft.width() - leftWidth));
+    innerTopLeft.setHeight(max(0, innerTopLeft.height() - topWidth));
 
-    innerTopLeft.setWidth(max(0, innerTopLeft.width() - borders.left.width));
-    innerTopLeft.setHeight(max(0, innerTopLeft.height() - borders.top.width));
+    innerTopRight.setWidth(max(0, innerTopRight.width() - rightWidth));
+    innerTopRight.setHeight(max(0, innerTopRight.height() - topWidth));
 
-    innerTopRight.setWidth(max(0, innerTopRight.width() - borders.right.width));
-    innerTopRight.setHeight(max(0, innerTopRight.height() - borders.top.width));
+    innerBottomLeft.setWidth(max(0, innerBottomLeft.width() - leftWidth));
+    innerBottomLeft.setHeight(max(0, innerBottomLeft.height() - bottomWidth));
 
-    innerBottomLeft.setWidth(max(0, innerBottomLeft.width() - borders.left.width));
-    innerBottomLeft.setHeight(max(0, innerBottomLeft.height() - borders.bottom.width));
-
-    innerBottomRight.setWidth(max(0, innerBottomRight.width() - borders.right.width));
-    innerBottomRight.setHeight(max(0, innerBottomRight.height() - borders.bottom.width));
+    innerBottomRight.setWidth(max(0, innerBottomRight.width() - rightWidth));
+    innerBottomRight.setHeight(max(0, innerBottomRight.height() - bottomWidth));
 
     constrainCornerRadiiForRect(innerRect, innerTopLeft, innerTopRight, innerBottomLeft, innerBottomRight);
 }
 
-// https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/RenderBoxModelObject.cpp#L1002
-void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders& borders, const litehtml::position& draw_pos, bool root)
+static void drawBoxSideFromPath(GraphicsContext* graphicsContext, IntRect borderRect, Path borderPath,
+                                    float thickness, float drawThickness,
+                                    BoxSide s,
+                                    const litehtml::borders& borders,
+                                    //const RenderStyle* style,
+                                    ColorSpace colorSpace,
+                                    Color c, EBorderStyle borderStyle)
 {
-    //qDebug() << __FUNCTION__ << " for root = " << root;
-    //QPainter *painter = (QPainter *) hdc;
-    GraphicsContext* graphicsContext = (GraphicsContext*) hdc;
-    if(!graphicsContext) {
-      return;
-    }
-    QPainter *painter = (QPainter *) graphicsContext->platformContext();
-    if(!painter) {
-      return;
-    }
+    if (thickness <= 0)
+        return;
 
-    int bdr_top		= 0;
-    int bdr_bottom	= 0;
-    int bdr_left	= 0;
-    int bdr_right	= 0;
+    if (borderStyle == DOUBLE && thickness < 3)
+        borderStyle = SOLID;
 
-    if(borders.top.width != 0 && borders.top.style > litehtml::border_style_hidden)
+    switch (borderStyle) {
+    case BNONE:
+    case BHIDDEN:
+        return;
+    case DOTTED:
+    case DASHED: {
+        graphicsContext->setStrokeColor(c, colorSpace);
+
+        // The stroke is doubled here because the provided path is the
+        // outside edge of the border so half the stroke is clipped off.
+        // The extra multiplier is so that the clipping mask can antialias
+        // the edges to prevent jaggies.
+        graphicsContext->setStrokeThickness(drawThickness * 2 * 1.1f);
+        graphicsContext->setStrokeStyle(borderStyle == DASHED ? DashedStroke : DottedStroke);
+
+        // If the number of dashes that fit in the path is odd and non-integral then we
+        // will have an awkwardly-sized dash at the end of the path. To try to avoid that
+        // here, we simply make the whitespace dashes ever so slightly bigger.
+        // FIXME: This could be even better if we tried to manipulate the dash offset
+        // and possibly the whiteSpaceWidth to get the corners dash-symmetrical.
+        float patWidth = thickness * ((borderStyle == DASHED) ? 3.0f : 1.0f);
+        float whiteSpaceWidth = patWidth;
+        float numberOfDashes = borderPath.length() / patWidth;
+        bool evenNumberOfFullDashes = !((int)numberOfDashes % 2);
+        bool integralNumberOfDashes = !(numberOfDashes - (int)numberOfDashes);
+        if (!evenNumberOfFullDashes && !integralNumberOfDashes) {
+            float numberOfWhitespaceDashes = numberOfDashes / 2;
+            whiteSpaceWidth += (patWidth  / numberOfWhitespaceDashes);
+        }
+
+        DashArray lineDash;
+        lineDash.append(patWidth);
+        lineDash.append(whiteSpaceWidth);
+        graphicsContext->setLineDash(lineDash, patWidth);
+        graphicsContext->addPath(borderPath);
+        graphicsContext->strokePath();
+        return;
+    }
+    case DOUBLE: {
+        int outerBorderTopWidth = borders.top.width / 3;
+        int outerBorderRightWidth = borders.right.width / 3;
+        int outerBorderBottomWidth = borders.bottom.width / 3;
+        int outerBorderLeftWidth = borders.left.width / 3;
+
+        int innerBorderTopWidth = borders.top.width * 2 / 3;
+        int innerBorderRightWidth = borders.right.width * 2 / 3;
+        int innerBorderBottomWidth = borders.bottom.width * 2 / 3;
+        int innerBorderLeftWidth = borders.left.width * 2 / 3;
+
+        // We need certain integer rounding results
+        if (borders.top.width % 3 == 2)
+            outerBorderTopWidth += 1;
+        if (borders.right.width % 3 == 2)
+            outerBorderRightWidth += 1;
+        if (borders.bottom.width % 3 == 2)
+            outerBorderBottomWidth += 1;
+        if (borders.left.width % 3 == 2)
+            outerBorderLeftWidth += 1;
+
+        if (borders.top.width % 3 == 1)
+            innerBorderTopWidth += 1;
+        if (borders.right.width % 3 == 1)
+            innerBorderRightWidth += 1;
+        if (borders.bottom.width % 3 == 1)
+            innerBorderBottomWidth += 1;
+        if (borders.left.width % 3 == 1)
+            innerBorderLeftWidth += 1;
+
+        // Get the inner border rects for both the outer border line and the inner border line
+        IntRect outerBorderInnerRect = borderInnerRect(borderRect, outerBorderTopWidth, outerBorderBottomWidth,
+            outerBorderLeftWidth, outerBorderRightWidth);
+        IntRect innerBorderInnerRect = borderInnerRect(borderRect, innerBorderTopWidth, innerBorderBottomWidth,
+            innerBorderLeftWidth, innerBorderRightWidth);
+
+        // Get the inner radii for the outer border line
+        IntSize outerBorderTopLeftInnerRadius, outerBorderTopRightInnerRadius, outerBorderBottomLeftInnerRadius,
+            outerBorderBottomRightInnerRadius;
+        getInnerBorderRadiiForRectWithBorderWidths(outerBorderInnerRect, borders,
+            outerBorderTopWidth, outerBorderBottomWidth,
+            outerBorderLeftWidth, outerBorderRightWidth, outerBorderTopLeftInnerRadius, outerBorderTopRightInnerRadius,
+            outerBorderBottomLeftInnerRadius, outerBorderBottomRightInnerRadius);
+
+        // Get the inner radii for the inner border line
+        IntSize innerBorderTopLeftInnerRadius, innerBorderTopRightInnerRadius, innerBorderBottomLeftInnerRadius,
+            innerBorderBottomRightInnerRadius;
+        getInnerBorderRadiiForRectWithBorderWidths(innerBorderInnerRect, borders,
+            innerBorderTopWidth, innerBorderBottomWidth,
+            innerBorderLeftWidth, innerBorderRightWidth, innerBorderTopLeftInnerRadius, innerBorderTopRightInnerRadius,
+            innerBorderBottomLeftInnerRadius, innerBorderBottomRightInnerRadius);
+
+        // Draw inner border line
+        graphicsContext->save();
+        graphicsContext->addRoundedRectClip(innerBorderInnerRect, innerBorderTopLeftInnerRadius,
+            innerBorderTopRightInnerRadius, innerBorderBottomLeftInnerRadius, innerBorderBottomRightInnerRadius);
+        drawBoxSideFromPath(graphicsContext, borderRect, borderPath, thickness, drawThickness, s, borders, colorSpace, c, SOLID);
+        graphicsContext->restore();
+
+        // Draw outer border line
+        graphicsContext->save();
+        graphicsContext->clipOutRoundedRect(outerBorderInnerRect, outerBorderTopLeftInnerRadius,
+            outerBorderTopRightInnerRadius, outerBorderBottomLeftInnerRadius, outerBorderBottomRightInnerRadius);
+        drawBoxSideFromPath(graphicsContext, borderRect, borderPath, thickness, drawThickness, s, borders, colorSpace, c, SOLID);
+        graphicsContext->restore();
+
+        return;
+    }
+    case RIDGE:
+    case GROOVE:
     {
-      bdr_top = (int) borders.top.width;
+        EBorderStyle s1;
+        EBorderStyle s2;
+        if (borderStyle == GROOVE) {
+            s1 = INSET;
+            s2 = OUTSET;
+        } else {
+            s1 = OUTSET;
+            s2 = INSET;
+        }
+
+        IntRect halfBorderRect = borderInnerRect(borderRect, borders.left.width / 2, borders.bottom.width / 2,
+            borders.left.width / 2, borders.right.width / 2);
+
+        IntSize topLeftHalfRadius, topRightHalfRadius, bottomLeftHalfRadius, bottomRightHalfRadius;
+        getInnerBorderRadiiForRectWithBorderWidths(halfBorderRect, borders,
+            borders.left.width / 2, borders.bottom.width / 2, borders.left.width / 2, borders.right.width / 2,
+            topLeftHalfRadius, topRightHalfRadius, bottomLeftHalfRadius, bottomRightHalfRadius);
+
+        // Paint full border
+        drawBoxSideFromPath(graphicsContext, borderRect, borderPath, thickness, drawThickness, s, borders, colorSpace, c, s1);
+
+        // Paint inner only
+        graphicsContext->save();
+        graphicsContext->addRoundedRectClip(halfBorderRect, topLeftHalfRadius, topRightHalfRadius,
+            bottomLeftHalfRadius, bottomRightHalfRadius);
+        drawBoxSideFromPath(graphicsContext, borderRect, borderPath, thickness, drawThickness, s, borders, colorSpace, c, s2);
+        graphicsContext->restore();
+
+        return;
     }
-    if(borders.bottom.width != 0 && borders.bottom.style > litehtml::border_style_hidden)
-    {
-      bdr_bottom = (int) borders.bottom.width;
+    case INSET:
+        if (s == BSTop || s == BSLeft)
+            c = c.dark();
+        break;
+    case OUTSET:
+        if (s == BSBottom || s == BSRight)
+            c = c.dark();
+        break;
+    default:
+        break;
     }
-    if(borders.left.width != 0 && borders.left.style > litehtml::border_style_hidden)
-    {
-      bdr_left = (int) borders.left.width;
-    }
-    if(borders.right.width != 0 && borders.right.style > litehtml::border_style_hidden)
-    {
-      bdr_right = (int) borders.right.width;
-    }
 
-    bool topTransparent = false;//borderTopIsTransparent();
-    bool bottomTransparent = false;//borderBottomIsTransparent();
-    bool rightTransparent = false;//borderRightIsTransparent();
-    bool leftTransparent = false;//borderLeftIsTransparent();
+    graphicsContext->setStrokeStyle(NoStroke);
+    graphicsContext->setFillColor(c, colorSpace);
+    graphicsContext->drawRect(borderRect);
+}
 
-    bool renderTop = true;//topStyle > BHIDDEN && !topTransparent;
-    bool renderLeft = true;//leftStyle > BHIDDEN && begin && !leftTransparent;
-    bool renderRight = true;//rightStyle > BHIDDEN && end && !rightTransparent;
-    bool renderBottom = true;//bottomStyle > BHIDDEN && !bottomTransparent;
-
-    const Color& topColor = toColor(borders.top.color);//visitedDependentColor(CSSPropertyBorderTopColor);
-    const Color& bottomColor = toColor(borders.bottom.color);//visitedDependentColor(CSSPropertyBorderBottomColor);
-    const Color& leftColor = toColor(borders.left.color);//visitedDependentColor(CSSPropertyBorderLeftColor);
-    const Color& rightColor = toColor(borders.right.color);//visitedDependentColor(CSSPropertyBorderRightColor);
-
-    bool renderRadii = false;
-    Path roundedPath;
-    IntSize topLeft, topRight, bottomLeft, bottomRight;
-    topLeft = IntSize(borders.radius.top_left_x, borders.radius.top_left_y);
-    topRight = IntSize(borders.radius.top_right_x, borders.radius.top_right_y);
-    bottomLeft = IntSize(borders.radius.bottom_left_x, borders.radius.bottom_left_y);
-    bottomRight = IntSize(borders.radius.bottom_right_x, borders.radius.bottom_right_y);
-
-    QRect  borderArea = getRect(draw_pos);
-
-    IntRect borderRect(borderArea.x(), borderArea.y(), borderArea.width(), borderArea.height());
-
-    IntSize topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius;
-    getBorderRadiiForRect(borderRect, borders, topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius);
-
-    IntRect innerBorderRect = borderInnerRect(borderRect, borders.top.width, borders.bottom.width,
-              borders.left.width, borders.right.width);
-
-    IntSize innerTopLeftRadius, innerTopRightRadius, innerBottomLeftRadius, innerBottomRightRadius;
-
-    /*
-     * static void getInnerBorderRadiiForRectWithBorderWidths(const IntRect& innerRect,
-//unsigned short topWidth, unsigned short bottomWidth, unsigned short leftWidth, unsigned short rightWidth,
-const litehtml::borders& borders,
-IntSize& innerTopLeft, IntSize& innerTopRight, IntSize& innerBottomLeft, IntSize& innerBottomRight) const
-{    */
-    getInnerBorderRadiiForRectWithBorderWidths(innerBorderRect, borders, innerTopLeftRadius, innerTopRightRadius,
-            innerBottomLeftRadius, innerBottomRightRadius);
-
-    bool hasBorderRadius = true;
-
-    if (root) {
-        // we are in <html>, so no borders here
-        //painter->setPen(Qt::NoPen);
-        //painter->fillRect(area, QBrush(getColor(borders.top.color)) );
-    } else {
-      graphicsContext->save();
-
-/*
 static void paintBorder(
   ColorSpace colorSpace,
   const Color& topColor,  const Color& bottomColor,
@@ -1298,13 +1050,227 @@ static void paintBorder(
   GraphicsContext* graphicsContext,
   int tx, int ty, int w, int h,
   bool begin = true, bool end = true)
-*/
-      paintBorder(sRGBColorSpace,
+{
+    /*if (paintNinePieceImage(graphicsContext, tx, ty, w, h, style, borderImage()))
+        return;*/
+
+    if (graphicsContext->paintingDisabled())
+        return;
+
+    bool renderRadii = false;
+    Path roundedPath;
+    IntSize topLeft, topRight, bottomLeft, bottomRight;
+    IntRect borderRect(tx, ty, w, h);
+
+    if (hasBorderRadius) {
+        if (begin) {
+            topLeft = topLeftRadius;
+            bottomLeft = bottomLeftRadius;
+        }
+        if (end) {
+            topRight = topRightRadius;
+            bottomRight = bottomRightRadius;
+        }
+
+        renderRadii = true;
+
+        // Clip to the inner and outer radii rects.
+        graphicsContext->save();
+        graphicsContext->addRoundedRectClip(borderRect, topLeft, topRight, bottomLeft, bottomRight);
+        graphicsContext->clipOutRoundedRect(innerBorderRect, innerTopLeftRadius, innerTopRightRadius, innerBottomLeftRadius, innerBottomRightRadius);
+
+        roundedPath.addRoundedRect(borderRect, topLeft, topRight, bottomLeft, bottomRight);
+        graphicsContext->addPath(roundedPath);
+    }
+
+    bool upperLeftBorderStylesMatch = renderLeft && (topStyle == leftStyle) && (topColor == leftColor);
+    bool upperRightBorderStylesMatch = renderRight && (topStyle == rightStyle) && (topColor == rightColor) && (topStyle != OUTSET) && (topStyle != RIDGE) && (topStyle != INSET) && (topStyle != GROOVE);
+    bool lowerLeftBorderStylesMatch = renderLeft && (bottomStyle == leftStyle) && (bottomColor == leftColor) && (bottomStyle != OUTSET) && (bottomStyle != RIDGE) && (bottomStyle != INSET) && (bottomStyle != GROOVE);
+    bool lowerRightBorderStylesMatch = renderRight && (bottomStyle == rightStyle) && (bottomColor == rightColor);
+
+    if (renderTop) {
+        int x = tx;
+        int x2 = tx + w;
+
+        if (renderRadii && borderWillArcInnerEdge(topLeft, topRight, borders.left.width, borders.right.width, borders.top.width)) {
+            graphicsContext->save();
+            clipBorderSidePolygon(graphicsContext, borderRect, topLeft, topRight, bottomLeft, bottomRight, BSTop, upperLeftBorderStylesMatch, upperRightBorderStylesMatch, borders.left.width, borders.right.width, borders.top.width, borders.bottom.width);
+            float thickness = max(max(borders.top.width, borders.left.width), borders.right.width);
+            drawBoxSideFromPath(graphicsContext, borderRect, roundedPath, borders.top.width, thickness, BSTop, borders, colorSpace, topColor, topStyle);
+            graphicsContext->restore();
+        } else {
+            bool ignoreLeft = (topColor == leftColor && topTransparent == leftTransparent && topStyle >= OUTSET
+                && (leftStyle == DOTTED || leftStyle == DASHED || leftStyle == SOLID || leftStyle == OUTSET));
+            bool ignoreRight = (topColor == rightColor && topTransparent == rightTransparent && topStyle >= OUTSET
+                && (rightStyle == DOTTED || rightStyle == DASHED || rightStyle == SOLID || rightStyle == INSET));
+
+            drawLineForBoxSide(colorSpace, graphicsContext, x, ty, x2, ty + borders.top.width, BSTop, topColor, topStyle,
+                    ignoreLeft ? 0 : borders.left.width, ignoreRight ? 0 : borders.right.width);
+        }
+    }
+
+    if (renderBottom) {
+        int x = tx;
+        int x2 = tx + w;
+
+        if (renderRadii && borderWillArcInnerEdge(bottomLeft, bottomRight, borders.left.width, borders.right.width, borders.bottom.width)) {
+            graphicsContext->save();
+            clipBorderSidePolygon(graphicsContext, borderRect, topLeft, topRight, bottomLeft, bottomRight, BSBottom, lowerLeftBorderStylesMatch, lowerRightBorderStylesMatch, borders.left.width, borders.right.width, borders.top.width, borders.bottom.width);
+            float thickness = max(max(borders.bottom.width, borders.left.width), borders.right.width);
+            drawBoxSideFromPath(graphicsContext, borderRect, roundedPath, borders.bottom.width, thickness, BSBottom, borders, colorSpace, bottomColor, bottomStyle);
+            graphicsContext->restore();
+        } else {
+            bool ignoreLeft = (bottomColor == leftColor && bottomTransparent == leftTransparent && bottomStyle >= OUTSET
+                && (leftStyle == DOTTED || leftStyle == DASHED || leftStyle == SOLID || leftStyle == OUTSET));
+
+            bool ignoreRight = (bottomColor == rightColor && bottomTransparent == rightTransparent && bottomStyle >= OUTSET
+                && (rightStyle == DOTTED || rightStyle == DASHED || rightStyle == SOLID || rightStyle == INSET));
+
+            drawLineForBoxSide(colorSpace, graphicsContext, x, ty + h - borders.bottom.width, x2, ty + h, BSBottom, bottomColor,
+                        bottomStyle, ignoreLeft ? 0 : borders.left.width,
+                        ignoreRight ? 0 : borders.right.width);
+        }
+    }
+
+    if (renderLeft) {
+        int y = ty;
+        int y2 = ty + h;
+
+        if (renderRadii && borderWillArcInnerEdge(bottomLeft, topLeft, borders.bottom.width, borders.top.width, borders.left.width)) {
+            graphicsContext->save();
+            clipBorderSidePolygon(graphicsContext, borderRect, topLeft, topRight, bottomLeft, bottomRight, BSLeft, upperLeftBorderStylesMatch, lowerLeftBorderStylesMatch, borders.left.width, borders.right.width, borders.top.width, borders.bottom.width);
+            float thickness = max(max(borders.left.width, borders.top.width), borders.bottom.width);
+            drawBoxSideFromPath(graphicsContext, borderRect, roundedPath, borders.left.width, thickness, BSLeft, borders, colorSpace, leftColor, leftStyle);
+            graphicsContext->restore();
+        } else {
+            bool ignoreTop = (topColor == leftColor && topTransparent == leftTransparent && leftStyle >= OUTSET
+                && (topStyle == DOTTED || topStyle == DASHED || topStyle == SOLID || topStyle == OUTSET));
+
+            bool ignoreBottom = (bottomColor == leftColor && bottomTransparent == leftTransparent && leftStyle >= OUTSET
+                && (bottomStyle == DOTTED || bottomStyle == DASHED || bottomStyle == SOLID || bottomStyle == INSET));
+
+            drawLineForBoxSide(colorSpace, graphicsContext, tx, y, tx + borders.left.width, y2, BSLeft, leftColor,
+                        leftStyle, ignoreTop ? 0 : borders.top.width, ignoreBottom ? 0 : borders.bottom.width);
+        }
+    }
+
+    if (renderRight) {
+        if (renderRadii && borderWillArcInnerEdge(bottomRight, topRight, borders.bottom.width, borders.top.width, borders.right.width)) {
+            graphicsContext->save();
+            clipBorderSidePolygon(graphicsContext, borderRect, topLeft, topRight, bottomLeft, bottomRight, BSRight, upperRightBorderStylesMatch, lowerRightBorderStylesMatch, borders.left.width, borders.right.width, borders.top.width, borders.bottom.width);
+            float thickness = max(max(borders.right.width, borders.top.width), borders.bottom.width);
+            drawBoxSideFromPath(graphicsContext, borderRect, roundedPath, borders.right.width, thickness, BSRight, borders, colorSpace, rightColor, rightStyle);
+            graphicsContext->restore();
+        } else {
+            bool ignoreTop = ((topColor == rightColor) && (topTransparent == rightTransparent)
+                && (rightStyle >= DOTTED || rightStyle == INSET)
+                && (topStyle == DOTTED || topStyle == DASHED || topStyle == SOLID || topStyle == OUTSET));
+
+            bool ignoreBottom = ((bottomColor == rightColor) && (bottomTransparent == rightTransparent)
+                && (rightStyle >= DOTTED || rightStyle == INSET)
+                && (bottomStyle == DOTTED || bottomStyle == DASHED || bottomStyle == SOLID || bottomStyle == INSET));
+
+            int y = ty;
+            int y2 = ty + h;
+
+            drawLineForBoxSide(colorSpace, graphicsContext, tx + w - borders.right.width, y, tx + w, y2, BSRight, rightColor,
+                rightStyle, ignoreTop ? 0 : borders.top.width,
+                ignoreBottom ? 0 : borders.bottom.width);
+        }
+    }
+
+    if (renderRadii)
+        graphicsContext->restore();
+}
+
+EBorderStyle toEBorderStyle(const litehtml::border& border) {
+  switch (border.style) {
+    case litehtml::border_style::border_style_none:
+      return EBorderStyle::BNONE;
+    case litehtml::border_style::border_style_inset:
+      return EBorderStyle::INSET;
+    case litehtml::border_style::border_style_ridge:
+      return EBorderStyle::RIDGE;
+    case litehtml::border_style::border_style_solid:
+      return EBorderStyle::SOLID;
+    case litehtml::border_style::border_style_dashed:
+      return EBorderStyle::DASHED;
+    case litehtml::border_style::border_style_dotted:
+      return EBorderStyle::DOTTED;
+    case litehtml::border_style::border_style_double:
+      return EBorderStyle::DOUBLE;
+    case litehtml::border_style::border_style_groove:
+      return EBorderStyle::GROOVE;
+    case litehtml::border_style::border_style_hidden:
+      return EBorderStyle::BHIDDEN;
+    case litehtml::border_style::border_style_outset:
+      return EBorderStyle::OUTSET;
+  }
+}
+
+// https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/RenderBoxModelObject.cpp#L1002
+void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders& borders, const litehtml::position& draw_pos, bool root)
+{
+    if (root) {
+      // we are in <html>, so no borders here
+      return;
+    }
+
+    GraphicsContext* graphicsContext = (GraphicsContext*) hdc;
+    if(!graphicsContext) {
+      return;
+    }
+    QPainter *painter = (QPainter *) graphicsContext->platformContext();
+    if(!painter) {
+      return;
+    }
+
+    bool topTransparent = borders.top.color.alpha > 0;
+    bool bottomTransparent = borders.bottom.color.alpha > 0;
+    bool rightTransparent = borders.right.color.alpha > 0;
+    bool leftTransparent = borders.left.color.alpha > 0;
+
+    bool renderTop = borders.top.style > litehtml::border_style_hidden;
+    bool renderLeft = borders.left.style > litehtml::border_style_hidden;
+    bool renderRight = borders.right.style > litehtml::border_style_hidden;
+    bool renderBottom = borders.bottom.style > litehtml::border_style_hidden;
+
+    const Color& topColor = toColor(borders.top.color);
+    const Color& bottomColor = toColor(borders.bottom.color);
+    const Color& leftColor = toColor(borders.left.color);
+    const Color& rightColor = toColor(borders.right.color);
+
+    QRect  borderArea = getRect(draw_pos);
+
+    IntRect borderRect(borderArea.x(), borderArea.y(), borderArea.width(), borderArea.height());
+
+    IntSize topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius;
+    getBorderRadiiForRect(borderRect, borders, topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius);
+
+    IntRect innerBorderRect = borderInnerRect(borderRect, borders.top.width, borders.bottom.width,
+              borders.left.width, borders.right.width);
+
+    IntSize innerTopLeftRadius, innerTopRightRadius, innerBottomLeftRadius, innerBottomRightRadius;
+
+    getInnerBorderRadiiForRectWithBorderWidths(innerBorderRect, borders,
+      borders.top.width, borders.bottom.width, borders.left.width, borders.right.width,
+      innerTopLeftRadius, innerTopRightRadius,
+              innerBottomLeftRadius, innerBottomRightRadius);
+
+    bool hasBorderRadius = true;
+
+    graphicsContext->save();
+
+    painter->setRenderHint(QPainter::Antialiasing);
+
+    apply_clip( painter );
+
+    paintBorder(sRGBColorSpace,
       topColor, bottomColor, leftColor, rightColor,
-      EBorderStyle::SOLID,
-      EBorderStyle::SOLID,
-      EBorderStyle::SOLID,
-      EBorderStyle::SOLID,
+      toEBorderStyle(borders.top),
+      toEBorderStyle(borders.bottom),
+      toEBorderStyle(borders.left),
+      toEBorderStyle(borders.right),
       topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius, // <<<
       innerBorderRect,
       innerTopLeftRadius, innerTopRightRadius, innerBottomLeftRadius, innerBottomRightRadius,
@@ -1313,659 +1279,10 @@ static void paintBorder(
       renderTop, renderLeft, renderRight, renderBottom,
       hasBorderRadius,
       graphicsContext,
-      draw_pos.x, draw_pos.y, draw_pos.width, draw_pos.height
-      );
+      draw_pos.x, draw_pos.y, draw_pos.width, draw_pos.height, true, true
+    );
 
-
-      //graphicsContext->setFillColor(Color(0,0,0,0), sRGBColorSpace);
-      //graphicsContext->setStrokeColor(topColor, sRGBColorSpace);
-      //graphicsContext->setFillRule(RULE_EVENODD);
-      //graphicsContext->setStrokeThickness(11.0);
-      //graphicsContext->drawRect(borderArea);
-
-      //graphicsContext->setFillColor(topColor, sRGBColorSpace);
-
-      //graphicsContext->drawRect(borderRect);
-      /*graphicsContext->setStrokeThickness(1.0);
-      graphicsContext->setFillColor(topColor, DeviceColorSpace);
-      graphicsContext->fillRect(borderRect);*/
-
-      /*IntRect innerBorderRect = borderInnerRect(borderRect, borders.top.width, borders.bottom.width,
-              borders.left.width, borders.right.width);
-
-      graphicsContext->addRoundedRectClip(innerBorderRect, topLeft, topRight, bottomLeft, bottomRight);
-      graphicsContext->clipOutRoundedRect(innerBorderRect, topLeft, topRight, bottomLeft, bottomRight);
-
-      roundedPath.addRoundedRect(borderRect, topLeft, topRight, bottomLeft, bottomRight);
-      //roundedPath.closeSubpath();
-      //painter->fillPath(roundedPath.platformPath(), QBrush(QColor(10,0,0,10)));
-      graphicsContext->addPath(roundedPath);
-
-      //graphicsContext->setFillRule(RULE_EVENODD);
-      //graphicsContext->setFillColor(fillColor, s->colorSpace());
-      //graphicsContext->setShadow(shadowOffset, shadowBlur, shadowColor, s->colorSpace());
-      //graphicsContext->fillPath();
-      graphicsContext->strokePath();*/
-
-      //graphicsContext->drawPath();
-      graphicsContext->restore();
-    }
-
-    return;
-
-
-    ////////////
-
-    painter->save();
-
-    painter->setRenderHint(QPainter::Antialiasing);
-
-    apply_clip( painter );
-
-    QRect area = getRect(draw_pos);
-    if (root) {
-        // we are in <html>, so no borders here
-        //painter->setPen(Qt::NoPen);
-        //painter->fillRect(area, QBrush(getColor(borders.top.color)) );
-    } else {
-
-        int bdr_top		= 0;
-        int bdr_bottom	= 0;
-        int bdr_left	= 0;
-        int bdr_right	= 0;
-
-        if(borders.top.width != 0 && borders.top.style > litehtml::border_style_hidden)
-        {
-          bdr_top = (int) borders.top.width;
-        }
-        if(borders.bottom.width != 0 && borders.bottom.style > litehtml::border_style_hidden)
-        {
-          bdr_bottom = (int) borders.bottom.width;
-        }
-        if(borders.left.width != 0 && borders.left.style > litehtml::border_style_hidden)
-        {
-          bdr_left = (int) borders.left.width;
-        }
-        if(borders.right.width != 0 && borders.right.style > litehtml::border_style_hidden)
-        {
-          bdr_right = (int) borders.right.width;
-        }
-
-        /*std::array<QPoint, 2> upperLeft_Radius = {
-          QPoint{}
-          , QPoint{}
-        };
-
-        std::array<QPoint, 2> upperRight_Radius = {
-          QPoint{}
-          , QPoint{}
-        };
-
-        std::array<QPoint, 2> lowerRight_Radius = {
-          QPoint{}
-          , QPoint{}
-        };
-
-        std::array<QPoint, 2> lowerLeft_Radius = {
-          QPoint{}
-          , QPoint{}
-        };*/
-
-        //QPainterPath path;
-
-        // draw right border
-        if(bdr_right)
-        {
-          //QPainterPath qtpath;
-          Path path;
-          //set_color(cr, borders.right.color);
-
-          double r_top	= borders.radius.top_right_x;
-          double r_bottom	= borders.radius.bottom_right_x;
-
-          if(r_top)
-          {
-            double end_angle	= 2 * M_PI;
-            double start_angle	= end_angle - M_PI / 2.0  / ((double) bdr_top / (double) bdr_right + 1);
-
-            {
-              //painter->save();
-              auto rx = r_top - bdr_right;
-              auto ry = r_top - bdr_right + (bdr_right - bdr_top);
-              auto p = FloatPoint(draw_pos.right() - r_top,
-        draw_pos.top() + r_top);
-              if(rx > 0 && ry > 0)
-              {
-                painter->save();
-                path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
-                path.platformPath().translate(-p.x(), -p.y());
-                path.addArc(
-                  p,
-                  rx,
-                  end_angle,
-                  start_angle, true);
-                painter->restore();
-              } else {
-                //path.moveTo(p);
-              }
-              //painter->restore();
-            }
-            {
-              //painter->save();
-              auto rx = r_top;
-              auto ry = r_top;
-              auto p = FloatPoint(draw_pos.right() - r_top,
-        draw_pos.top() + r_top);
-              if(rx > 0 && ry > 0)
-              {
-                painter->save();
-                path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
-                path.platformPath().translate(-p.x(), -p.y());
-                path.addArc(
-                  p,
-                  rx,
-                  start_angle,
-                  end_angle, false);
-                painter->restore();
-              } else {
-                //path.moveTo(p);
-              }
-              //painter->restore();
-            }
-          } else
-          {
-            path.moveTo(QPointF(draw_pos.right() - bdr_right, draw_pos.top() + bdr_top));
-            path.addLineTo(QPointF(draw_pos.right(), draw_pos.top()));
-          }
-
-          if(r_bottom)
-          {
-            //cairo_line_to(cr, draw_pos.right(),	draw_pos.bottom() - r_bottom);
-            //setPenForBorder(painter, borders.bottom);
-            //painter->drawLine(area.bottomLeft(), area.bottomRight());
-
-            double start_angle	= 0;
-            double end_angle	= start_angle + M_PI / 2.0  / ((double) bdr_bottom / (double) bdr_right + 1);
-
-            {
-              //painter->save();
-              auto rx = r_bottom;
-              auto ry = r_bottom;
-              auto p = FloatPoint(draw_pos.right() - r_bottom,
-        draw_pos.bottom() - r_bottom);
-              if(rx > 0 && ry > 0)
-              {
-                painter->save();
-                path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
-                path.platformPath().translate(-p.x(), -p.y());
-                path.addArc(
-                  p,
-                  rx,
-                  start_angle,
-                  end_angle, false);
-                painter->restore();
-              } else {
-                //path.moveTo(p);
-              }
-              //painter->restore();
-            }
-            {
-              //painter->save();
-              auto rx = r_bottom - bdr_right;
-              auto ry = r_bottom - bdr_right + (bdr_right - bdr_bottom);
-              auto p = FloatPoint(draw_pos.right() - r_bottom,
-        draw_pos.bottom() - r_bottom);
-              if(rx > 0 && ry > 0)
-              {
-                painter->save();
-                path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
-                path.platformPath().translate(-p.x(), -p.y());
-                path.addArc(
-                  p,
-                  rx,
-                  end_angle,
-                  start_angle, true);
-                painter->restore();
-              } else {
-                //path.moveTo(p);
-              }
-              //painter->restore();
-            }
-          } else
-          {
-            path.addLineTo(QPointF(draw_pos.right(),	draw_pos.bottom()));
-            path.addLineTo(QPointF(draw_pos.right() - bdr_right,	draw_pos.bottom() - bdr_bottom));
-          }
-          //cairo_fill(cr);
-          path.closeSubpath();
-          painter->fillPath(path.platformPath(), QBrush(getColor(borders.right.color)));
-        }
-
-        // draw bottom border
-        if(bdr_bottom)
-        {
-          Path path;
-          //QPainterPath path;
-          //set_color(cr, borders.bottom.color);
-
-          double r_left	= borders.radius.bottom_left_x;
-          double r_right	= borders.radius.bottom_right_x;
-
-          if(r_left)
-          {
-            double start_angle	= M_PI / 2.0;
-            double end_angle	= start_angle + M_PI / 2.0  / ((double) bdr_left / (double) bdr_bottom + 1);
-            {
-              //painter->save();
-              auto rx = r_left - bdr_bottom + (bdr_bottom - bdr_left);
-              auto ry = r_left - bdr_bottom;
-              auto p = FloatPoint(draw_pos.left() + r_left,
-                  draw_pos.bottom() - r_left);
-              if(rx > 0 && ry > 0)
-              {
-                painter->save();
-                path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
-                path.platformPath().translate(-p.x(), -p.y());
-                path.addArc(
-                  p,
-                  rx,
-                  start_angle,
-                  end_angle, false);
-                painter->restore();
-              } else {
-                //path.moveTo(p);
-              }
-              //painter->restore();
-            }
-            {
-              //painter->save();
-              auto rx = r_left;
-              auto ry = r_left;
-              auto p = FloatPoint(draw_pos.left() + r_left,
-                  draw_pos.bottom() - r_left);
-              if(rx > 0 && ry > 0)
-              {
-                painter->save();
-                path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
-                path.platformPath().translate(-p.x(), -p.y());
-                path.addArc(
-                  p,
-                  rx,
-                  end_angle,
-                  start_angle, true);
-                painter->restore();
-              } else {
-                //path.moveTo(p);
-              }
-              //painter->restore();
-            }
-
-          } else
-          {
-            //cairo_move_to(cr, draw_pos.left(), draw_pos.bottom());
-            //cairo_line_to(cr, draw_pos.left() + bdr_left, draw_pos.bottom() - bdr_bottom);
-            path.moveTo(QPointF(draw_pos.left(), draw_pos.bottom()));
-            path.addLineTo(QPointF(draw_pos.left() + bdr_left, draw_pos.bottom() - bdr_bottom));
-          }
-
-          if(r_right)
-          {
-            //cairo_line_to(cr, draw_pos.right() - r_right,	draw_pos.bottom());
-
-            double end_angle	= M_PI / 2.0;
-            double start_angle	= end_angle - M_PI / 2.0  / ((double) bdr_right / (double) bdr_bottom + 1);
-            {
-              //painter->save();
-              auto rx = r_right;
-              auto ry = r_right;
-              auto p = FloatPoint(draw_pos.right() - r_right,
-                  draw_pos.bottom() - r_right);
-              if(rx > 0 && ry > 0)
-              {
-                painter->save();
-                path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
-                path.platformPath().translate(-p.x(), -p.y());
-                path.addArc(
-                  p,
-                  rx,
-                  end_angle,
-                  start_angle, true);
-                painter->restore();
-              } else {
-                //path.moveTo(p);
-              }
-              //painter->restore();
-            }
-            {
-              //painter->save();
-              auto rx = r_right - bdr_bottom + (bdr_bottom - bdr_right);
-              auto ry = r_right - bdr_bottom;
-              auto p = FloatPoint(draw_pos.right() - r_right,
-                  draw_pos.bottom() - r_right);
-              if(rx > 0 && ry > 0)
-              {
-                painter->save();
-                path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
-                path.platformPath().translate(-p.x(), -p.y());
-                path.addArc(
-                  p,
-                  rx,
-                  start_angle,
-                  end_angle, false);
-                painter->restore();
-              } else {
-                //path.moveTo(p);
-              }
-              //painter->restore();
-            }
-
-          } else
-          {
-            //cairo_line_to(cr, draw_pos.right() - bdr_right,	draw_pos.bottom() - bdr_bottom);
-            //cairo_line_to(cr, draw_pos.right(),	draw_pos.bottom());
-            path.addLineTo( QPointF(draw_pos.right() - bdr_right,	draw_pos.bottom() - bdr_bottom) );
-            path.addLineTo( QPointF(draw_pos.right(),	draw_pos.bottom()) );
-          }
-
-          //cairo_fill(cr);
-          path.closeSubpath();
-          painter->fillPath(path.platformPath(),QBrush(getColor(borders.bottom.color)));
-        }
-
-        // draw top border
-        if(bdr_top)
-        {
-          Path path;
-          //QPainterPath path;
-          //set_color(cr, borders.top.color);
-
-          double r_left	= borders.radius.top_left_x;
-          double r_right	= borders.radius.top_right_x;
-
-          if(r_left)
-          {
-            double end_angle	= M_PI * 3.0 / 2.0;
-            double start_angle	= end_angle - M_PI / 2.0  / ((double) bdr_left / (double) bdr_top + 1);
-
-            {
-              //painter->save();
-              auto rx = r_left;
-              auto ry = r_left;
-              auto p = FloatPoint(draw_pos.left() + r_left,
-                draw_pos.top() + r_left);
-              if(rx > 0 && ry > 0)
-              {
-                painter->save();
-                path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
-                path.platformPath().translate(-p.x(), -p.y());
-                path.addArc(
-                  p,
-                  rx,
-                  end_angle,
-                  start_angle, true);
-                painter->restore();
-              } else {
-                //path.moveTo(p);
-              }
-              //painter->restore();
-            }
-            {
-              //painter->save();
-              auto rx = r_left - bdr_top + (bdr_top - bdr_left);
-              auto ry = r_left - bdr_top;
-              auto p = FloatPoint(draw_pos.left() + r_left,
-                draw_pos.top() + r_left);
-              if(rx > 0 && ry > 0)
-              {
-                painter->save();
-                path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
-                path.platformPath().translate(-p.x(), -p.y());
-                path.addArc(
-                  p,
-                  rx,
-                  start_angle,
-                  end_angle, false);
-                painter->restore();
-              } else {
-                //path.moveTo(p);
-              }
-              //painter->restore();
-            }
-
-
-          } else
-          {
-            //cairo_move_to(cr, draw_pos.left(), draw_pos.top());
-            //cairo_line_to(cr, draw_pos.left() + bdr_left, draw_pos.top() + bdr_top);
-            //setPenForBorder(painter, borders.top);
-            //painter->drawLine(
-            //  QPoint(draw_pos.left(), draw_pos.top()),
-            //  QPoint(draw_pos.left() + bdr_left, draw_pos.top() + bdr_top));
-            path.moveTo(QPointF(draw_pos.left(), draw_pos.top()));
-            path.addLineTo(QPointF(draw_pos.left() + bdr_left, draw_pos.top() + bdr_top));
-          }
-
-          if(r_right)
-          {
-            //cairo_line_to(cr, draw_pos.right() - r_right,	draw_pos.top() + bdr_top);
-
-            double start_angle	= M_PI * 3.0 / 2.0;
-            double end_angle	= start_angle + M_PI / 2.0  / ((double) bdr_right / (double) bdr_top + 1);
-
-            {
-              //painter->save();
-              auto rx = r_right - bdr_top + (bdr_top - bdr_right);
-              auto ry = r_right - bdr_top;
-              auto p = FloatPoint(draw_pos.right() - r_right,
-                draw_pos.top() + r_right);
-              if(rx > 0 && ry > 0)
-              {
-                painter->save();
-                path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
-                path.platformPath().translate(-p.x(), -p.y());
-                path.addArc(
-                  p,
-                  rx,
-                  start_angle,
-                  end_angle, false);
-                painter->restore();
-              } else {
-                //path.moveTo(p);
-              }
-              //painter->restore();
-            }
-            {
-              //painter->save();
-              auto rx = r_right;
-              auto ry = r_right;
-              auto p = FloatPoint(draw_pos.right() - r_right,
-                draw_pos.top() + r_right);
-              if(rx > 0 && ry > 0)
-              {
-                painter->save();
-                path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
-                path.platformPath().translate(-p.x(), -p.y());
-                path.addArc(
-                  p,
-                  rx,
-                  end_angle,
-                  start_angle, true);
-                painter->restore();
-              } else {
-                //path.moveTo(p);
-              }
-              //painter->restore();
-            }
-          } else
-          {
-            //cairo_line_to(cr, draw_pos.right() - bdr_right,	draw_pos.top() + bdr_top);
-            //cairo_line_to(cr, draw_pos.right(),	draw_pos.top());
-            //setPenForBorder(painter, borders.top);
-            //painter->drawLine(
-            //  QPoint(draw_pos.right() - bdr_right,	draw_pos.top() + bdr_top),
-            //  QPoint(draw_pos.right(),	draw_pos.top()));
-            ////path.moveTo(draw_pos.left(), draw_pos.top());
-            path.addLineTo(QPointF(draw_pos.right() - bdr_right,	draw_pos.top() + bdr_top));
-            path.addLineTo(QPointF(draw_pos.right(),	draw_pos.top()));
-          }
-
-          path.closeSubpath();
-          painter->fillPath(path.platformPath(),QBrush(getColor(borders.top.color)));
-
-          //cairo_fill(cr);
-        }
-
-        // draw left border
-        if(bdr_left)
-        {
-          Path path;
-          //QPainterPath path;
-          //set_color(cr, borders.left.color);
-
-          double r_top	= borders.radius.top_left_x;
-          double r_bottom	= borders.radius.bottom_left_x;
-
-          if(r_top)
-          {
-            double start_angle	= M_PI;
-            double end_angle	= start_angle + M_PI / 2.0  / ((double) bdr_top / (double) bdr_left + 1);
-
-            {
-              //painter->save();
-              auto rx = r_top - bdr_left;
-              auto ry = r_top - bdr_left + (bdr_left - bdr_top);
-              auto p = FloatPoint(draw_pos.left() + r_top,
-                  draw_pos.top() + r_top);
-              if(rx > 0 && ry > 0)
-              {
-                painter->save();
-                path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
-                path.platformPath().translate(-p.x(), -p.y());
-                path.addArc(
-                  p,
-                  rx,
-                  start_angle,
-                  end_angle, false);
-                painter->restore();
-              } else {
-                //path.moveTo(p);
-              }
-              //painter->restore();
-            }
-            {
-              //painter->save();
-              auto rx = r_top;
-              auto ry = r_top;
-              auto p = FloatPoint(draw_pos.left() + r_top,
-        draw_pos.top() + r_top);
-              if(rx > 0 && ry > 0)
-              {
-                painter->save();
-                path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
-                path.platformPath().translate(-p.x(), -p.y());
-                path.addArc(
-                  p,
-                  rx,
-                  end_angle,
-                  start_angle, true);
-                painter->restore();
-              } else {
-                //path.moveTo(p);
-              }
-              //painter->restore();
-            }
-          } else
-          {
-            //cairo_move_to(cr, draw_pos.left() + bdr_left, draw_pos.top() + bdr_top);
-            //cairo_line_to(cr, draw_pos.left(), draw_pos.top());
-            path.moveTo(QPointF(draw_pos.left() + bdr_left, draw_pos.top() + bdr_top));
-            path.addLineTo(QPointF(draw_pos.left(), draw_pos.top()));
-          }
-
-          if(r_bottom)
-          {
-            //cairo_line_to(cr, draw_pos.left(),	draw_pos.bottom() - r_bottom);
-
-            double end_angle	= M_PI;
-            double start_angle	= end_angle - M_PI / 2.0  / ((double) bdr_bottom / (double) bdr_left + 1);
-
-            {
-              //painter->save();
-              auto rx = r_bottom;
-              auto ry = r_bottom;
-              auto p = FloatPoint(draw_pos.left() + r_bottom,
-                  draw_pos.bottom() - r_bottom);
-              if(rx > 0 && ry > 0)
-              {
-                painter->save();
-                path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
-                path.platformPath().translate(-p.x(), -p.y());
-                path.addArc(
-                  p,
-                  rx,
-                  end_angle,
-                  start_angle, true);
-                painter->restore();
-              } else {
-                //path.moveTo(p);
-              }
-              //painter->restore();
-            }
-            {
-              //painter->save();
-              auto rx = r_bottom - bdr_left;
-              auto ry = r_bottom - bdr_left + (bdr_left - bdr_bottom);
-              auto p = FloatPoint(draw_pos.left() + r_bottom,
-                  draw_pos.bottom() - r_bottom);
-              if(rx > 0 && ry > 0)
-              {
-                painter->save();
-                path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
-                path.platformPath().translate(-p.x(), -p.y());
-                path.addArc(
-                  p,
-                  rx,
-                  start_angle,
-                  end_angle, false);
-                painter->restore();
-              } else {
-                //path.moveTo(p);
-              }
-              //painter->restore();
-            }
-          } else
-          {
-            //cairo_line_to(cr, draw_pos.left(),	draw_pos.bottom());
-            //cairo_line_to(cr, draw_pos.left() + bdr_left,	draw_pos.bottom() - bdr_bottom);
-            path.addLineTo(QPointF(draw_pos.left(),	draw_pos.bottom()));
-            path.addLineTo(QPointF(draw_pos.left() + bdr_left,	draw_pos.bottom() - bdr_bottom));
-          }
-
-          //cairo_fill(cr);
-          path.closeSubpath();
-          painter->fillPath(path.platformPath(),QBrush(getColor(borders.left.color)));
-        }
-        //cairo_restore(cr);
-
-    }
-
-    painter->restore();
+    graphicsContext->restore();
 }
 
 void container_qt5::draw_background(litehtml::uint_ptr hdc, const litehtml::background_paint& bg)
