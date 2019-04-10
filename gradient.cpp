@@ -6,6 +6,8 @@
 #include "common.h"
 //#include "Gradient.h"
 
+#include "graphicscontext.h"
+
 #include "color.h"
 #include "floatrect.h"
 //#include <wtf/UnusedParam.h>
