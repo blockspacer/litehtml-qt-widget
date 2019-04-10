@@ -540,7 +540,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   start_angle, true);
                 painter->restore();
               } else {
-                path.platformPath().moveTo(p.x(), p.y());
+                path.moveTo(p);
               }
               //painter->restore();
             }
@@ -563,14 +563,14 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   end_angle, false);
                 painter->restore();
               } else {
-                path.platformPath().moveTo(p.x(), p.y());
+                path.moveTo(p);
               }
               //painter->restore();
             }
           } else
           {
-            path.platformPath().moveTo(draw_pos.right() - bdr_right, draw_pos.top() + bdr_top);
-            path.platformPath().lineTo(draw_pos.right(), draw_pos.top());
+            path.moveTo(QPointF(draw_pos.right() - bdr_right, draw_pos.top() + bdr_top));
+            path.addLineTo(QPointF(draw_pos.right(), draw_pos.top()));
           }
 
           if(r_bottom)
@@ -601,7 +601,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   end_angle, false);
                 painter->restore();
               } else {
-                path.platformPath().moveTo(p.x(), p.y());
+                path.moveTo(p);
               }
               //painter->restore();
             }
@@ -624,14 +624,14 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   start_angle, true);
                 painter->restore();
               } else {
-                path.platformPath().moveTo(p.x(), p.y());
+                path.moveTo(p);
               }
               //painter->restore();
             }
           } else
           {
-            path.platformPath().lineTo(draw_pos.right(),	draw_pos.bottom());
-            path.platformPath().lineTo(draw_pos.right() - bdr_right,	draw_pos.bottom() - bdr_bottom);
+            path.addLineTo(QPointF(draw_pos.right(),	draw_pos.bottom()));
+            path.addLineTo(QPointF(draw_pos.right() - bdr_right,	draw_pos.bottom() - bdr_bottom));
           }
           //cairo_fill(cr);
           path.closeSubpath();
@@ -671,7 +671,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   end_angle, false);
                 painter->restore();
               } else {
-                path.platformPath().moveTo(p.x(), p.y());
+                path.moveTo(p);
               }
               //painter->restore();
             }
@@ -694,7 +694,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   start_angle, true);
                 painter->restore();
               } else {
-                path.platformPath().moveTo(p.x(), p.y());
+                path.moveTo(p);
               }
               //painter->restore();
             }
@@ -703,8 +703,8 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
           {
             //cairo_move_to(cr, draw_pos.left(), draw_pos.bottom());
             //cairo_line_to(cr, draw_pos.left() + bdr_left, draw_pos.bottom() - bdr_bottom);
-            path.platformPath().moveTo(draw_pos.left(), draw_pos.bottom());
-            path.platformPath().lineTo(draw_pos.left() + bdr_left, draw_pos.bottom() - bdr_bottom);
+            path.moveTo(QPointF(draw_pos.left(), draw_pos.bottom()));
+            path.addLineTo(QPointF(draw_pos.left() + bdr_left, draw_pos.bottom() - bdr_bottom));
           }
 
           if(r_right)
@@ -732,7 +732,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   start_angle, true);
                 painter->restore();
               } else {
-                path.platformPath().moveTo(p.x(), p.y());
+                path.moveTo(p);
               }
               //painter->restore();
             }
@@ -755,7 +755,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   end_angle, false);
                 painter->restore();
               } else {
-                path.platformPath().moveTo(p.x(), p.y());
+                path.moveTo(p);
               }
               //painter->restore();
             }
@@ -764,8 +764,8 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
           {
             //cairo_line_to(cr, draw_pos.right() - bdr_right,	draw_pos.bottom() - bdr_bottom);
             //cairo_line_to(cr, draw_pos.right(),	draw_pos.bottom());
-            path.platformPath().lineTo( draw_pos.right() - bdr_right,	draw_pos.bottom() - bdr_bottom);
-            path.platformPath().lineTo( draw_pos.right(),	draw_pos.bottom());
+            path.addLineTo( QPointF(draw_pos.right() - bdr_right,	draw_pos.bottom() - bdr_bottom) );
+            path.addLineTo( QPointF(draw_pos.right(),	draw_pos.bottom()) );
           }
 
           //cairo_fill(cr);
@@ -807,7 +807,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   start_angle, true);
                 painter->restore();
               } else {
-                path.platformPath().moveTo(p.x(), p.y());
+                path.moveTo(p);
               }
               //painter->restore();
             }
@@ -830,7 +830,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   end_angle, false);
                 painter->restore();
               } else {
-                path.platformPath().moveTo(p.x(), p.y());
+                path.moveTo(p);
               }
               //painter->restore();
             }
@@ -844,8 +844,8 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
             //painter->drawLine(
             //  QPoint(draw_pos.left(), draw_pos.top()),
             //  QPoint(draw_pos.left() + bdr_left, draw_pos.top() + bdr_top));
-            path.platformPath().moveTo(draw_pos.left(), draw_pos.top());
-            path.platformPath().lineTo(draw_pos.left() + bdr_left, draw_pos.top() + bdr_top);
+            path.moveTo(QPointF(draw_pos.left(), draw_pos.top()));
+            path.addLineTo(QPointF(draw_pos.left() + bdr_left, draw_pos.top() + bdr_top));
           }
 
           if(r_right)
@@ -874,7 +874,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   end_angle, false);
                 painter->restore();
               } else {
-                path.platformPath().moveTo(p.x(), p.y());
+                path.moveTo(p);
               }
               //painter->restore();
             }
@@ -897,7 +897,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   start_angle, true);
                 painter->restore();
               } else {
-                path.platformPath().moveTo(p.x(), p.y());
+                path.moveTo(p);
               }
               //painter->restore();
             }
@@ -909,9 +909,9 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
             //painter->drawLine(
             //  QPoint(draw_pos.right() - bdr_right,	draw_pos.top() + bdr_top),
             //  QPoint(draw_pos.right(),	draw_pos.top()));
-            ////path.platformPath().moveTo(draw_pos.left(), draw_pos.top());
-            path.platformPath().lineTo(draw_pos.right() - bdr_right,	draw_pos.top() + bdr_top);
-            path.platformPath().lineTo(draw_pos.right(),	draw_pos.top());
+            ////path.moveTo(draw_pos.left(), draw_pos.top());
+            path.addLineTo(QPointF(draw_pos.right() - bdr_right,	draw_pos.top() + bdr_top));
+            path.addLineTo(QPointF(draw_pos.right(),	draw_pos.top()));
           }
 
           path.closeSubpath();
@@ -954,7 +954,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   end_angle, false);
                 painter->restore();
               } else {
-                path.platformPath().moveTo(p.x(), p.y());
+                path.moveTo(p);
               }
               //painter->restore();
             }
@@ -977,7 +977,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   start_angle, true);
                 painter->restore();
               } else {
-                path.platformPath().moveTo(p.x(), p.y());
+                path.moveTo(p);
               }
               //painter->restore();
             }
@@ -985,8 +985,8 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
           {
             //cairo_move_to(cr, draw_pos.left() + bdr_left, draw_pos.top() + bdr_top);
             //cairo_line_to(cr, draw_pos.left(), draw_pos.top());
-            path.platformPath().moveTo(draw_pos.left() + bdr_left, draw_pos.top() + bdr_top);
-            path.platformPath().lineTo(draw_pos.left(), draw_pos.top());
+            path.moveTo(QPointF(draw_pos.left() + bdr_left, draw_pos.top() + bdr_top));
+            path.addLineTo(QPointF(draw_pos.left(), draw_pos.top()));
           }
 
           if(r_bottom)
@@ -1015,7 +1015,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   start_angle, true);
                 painter->restore();
               } else {
-                path.platformPath().moveTo(p.x(), p.y());
+                path.moveTo(p);
               }
               //painter->restore();
             }
@@ -1038,7 +1038,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   end_angle, false);
                 painter->restore();
               } else {
-                path.platformPath().moveTo(p.x(), p.y());
+                path.moveTo(p);
               }
               //painter->restore();
             }
@@ -1046,8 +1046,8 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
           {
             //cairo_line_to(cr, draw_pos.left(),	draw_pos.bottom());
             //cairo_line_to(cr, draw_pos.left() + bdr_left,	draw_pos.bottom() - bdr_bottom);
-            path.platformPath().lineTo(draw_pos.left(),	draw_pos.bottom());
-            path.platformPath().lineTo(draw_pos.left() + bdr_left,	draw_pos.bottom() - bdr_bottom);
+            path.addLineTo(QPointF(draw_pos.left(),	draw_pos.bottom()));
+            path.addLineTo(QPointF(draw_pos.left() + bdr_left,	draw_pos.bottom() - bdr_bottom));
           }
 
           //cairo_fill(cr);
