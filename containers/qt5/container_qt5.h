@@ -308,7 +308,7 @@ public:
 
     virtual litehtml::tstring resolve_color(const litehtml::tstring& color) const override;
 
-    void repaint(QPainter& paiinter);
+    void repaint(QPainter& painter);
 
     QPoint getScroll() const;
 

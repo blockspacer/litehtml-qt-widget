@@ -7,6 +7,8 @@
 #include <QMouseEvent>
 #include <QDesktopServices>
 
+#include "graphicscontext.h"
+
 #include "fontcache.h"
 #include "pathqt.h"
 #include <cmath>
@@ -175,7 +177,13 @@ void container_qt5::repaint(QPainter& painter)
     clipPos.x 		= rc.x();
     clipPos.y 		= rc.y();
 
-    _doc->draw(static_cast<litehtml::uint_ptr>(&painter), getScroll().x(), getScroll().y(), &clipPos);
+    //GraphicsContext* graphicsContext = new GraphicsContext(&painter);
+
+    // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebKit2/WebProcess/WebPage/qt/ChunkedUpdateDrawingAreaQt.cpp#L44
+    GraphicsContext graphicsContext(&painter);
+
+    Q_ASSERT(graphicsContext.platformContext() != nullptr);
+    _doc->draw(static_cast<litehtml::uint_ptr>(&graphicsContext), getScroll().x(), getScroll().y(), &clipPos);
 
 /*qDebug() << "m_lastDocWidth" << m_lastDocWidth;
 qDebug() << "m_lastDocHeight" << m_lastDocHeight;
@@ -444,10 +452,105 @@ void container_qt5::set_caption(const litehtml::tchar_t* caption)
     //qDebug() << __FUNCTION__;
 }
 
+Color toColor(const litehtml::web_color& clr) {
+  return Color(clr.red,clr.green,clr.blue,clr.alpha);
+}
+
 void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders& borders, const litehtml::position& draw_pos, bool root)
 {
     //qDebug() << __FUNCTION__ << " for root = " << root;
-    QPainter *painter = (QPainter *) hdc;
+    //QPainter *painter = (QPainter *) hdc;
+    GraphicsContext* graphicsContext = (GraphicsContext*) hdc;
+    if(!graphicsContext) {
+      return;
+    }
+    QPainter *painter = (QPainter *) graphicsContext->platformContext();
+    if(!painter) {
+      return;
+    }
+
+    int bdr_top		= 0;
+    int bdr_bottom	= 0;
+    int bdr_left	= 0;
+    int bdr_right	= 0;
+
+    if(borders.top.width != 0 && borders.top.style > litehtml::border_style_hidden)
+    {
+      bdr_top = (int) borders.top.width;
+    }
+    if(borders.bottom.width != 0 && borders.bottom.style > litehtml::border_style_hidden)
+    {
+      bdr_bottom = (int) borders.bottom.width;
+    }
+    if(borders.left.width != 0 && borders.left.style > litehtml::border_style_hidden)
+    {
+      bdr_left = (int) borders.left.width;
+    }
+    if(borders.right.width != 0 && borders.right.style > litehtml::border_style_hidden)
+    {
+      bdr_right = (int) borders.right.width;
+    }
+
+    bool topTransparent = false;//style->borderTopIsTransparent();
+    bool bottomTransparent = false;//style->borderBottomIsTransparent();
+    bool rightTransparent = false;//style->borderRightIsTransparent();
+    bool leftTransparent = false;//style->borderLeftIsTransparent();
+
+    bool renderTop = true;//topStyle > BHIDDEN && !topTransparent;
+    bool renderLeft = true;//leftStyle > BHIDDEN && begin && !leftTransparent;
+    bool renderRight = true;//rightStyle > BHIDDEN && end && !rightTransparent;
+    bool renderBottom = true;//bottomStyle > BHIDDEN && !bottomTransparent;
+
+    const Color& topColor = toColor(borders.top.color);//style->visitedDependentColor(CSSPropertyBorderTopColor);
+    const Color& bottomColor = toColor(borders.bottom.color);//style->visitedDependentColor(CSSPropertyBorderBottomColor);
+    const Color& leftColor = toColor(borders.left.color);//style->visitedDependentColor(CSSPropertyBorderLeftColor);
+    const Color& rightColor = toColor(borders.right.color);//style->visitedDependentColor(CSSPropertyBorderRightColor);
+
+    bool renderRadii = false;
+    Path roundedPath;
+    IntSize topLeft, topRight, bottomLeft, bottomRight;
+    topLeft = IntSize(borders.radius.top_left_x, borders.radius.top_left_y);
+    topRight = IntSize(borders.radius.top_right_x, borders.radius.top_right_y);
+    bottomLeft = IntSize(borders.radius.bottom_left_x, borders.radius.bottom_left_y);
+    bottomRight = IntSize(borders.radius.bottom_right_x, borders.radius.bottom_right_y);
+
+    QRect  borderArea = getRect(draw_pos);
+
+    IntRect borderRect(borderArea.x(), borderArea.y(), borderArea.width(), borderArea.height());
+
+    bool hasBorderRadius = true;
+
+    graphicsContext->save();
+
+
+    graphicsContext->drawRect(borderArea);
+    //graphicsContext->setFillColor(topColor, sRGBColorSpace);
+    //graphicsContext->setStrokeColor(topColor, sRGBColorSpace);
+graphicsContext->setFillRule(RULE_EVENODD);
+
+
+    //graphicsContext->drawRect(borderRect);
+    /*graphicsContext->setStrokeThickness(1.0);
+    graphicsContext->setFillColor(topColor, DeviceColorSpace);
+    graphicsContext->fillRect(borderRect);*/
+
+    //graphicsContext->addRoundedRectClip(borderRect, topLeft, topRight, bottomLeft, bottomRight);
+    //graphicsContext->clipOutRoundedRect(innerBorderRect, innerTopLeftRadius, innerTopRightRadius, innerBottomLeftRadius, innerBottomRightRadius);
+
+    /*roundedPath.addRoundedRect(borderRect, topLeft, topRight, bottomLeft, bottomRight);
+    graphicsContext->addPath(roundedPath);
+
+    graphicsContext->setFillRule(RULE_EVENODD);
+    //graphicsContext->setFillColor(fillColor, s->colorSpace());
+    //graphicsContext->setShadow(shadowOffset, shadowBlur, shadowColor, s->colorSpace());
+    graphicsContext->fillPath();*/
+
+    //graphicsContext->drawPath();
+    graphicsContext->restore();
+    return;
+
+
+    ////////////
 
     painter->save();
 
@@ -1067,7 +1170,29 @@ void container_qt5::draw_background(litehtml::uint_ptr hdc, const litehtml::back
 
     //qDebug() << "draw_background" << bg.color.red;
 
-    QPainter* painter = (QPainter*)hdc;
+    GraphicsContext* graphicsContext = (GraphicsContext*) hdc;
+    if(!graphicsContext) {
+      return;
+    }
+    QPainter *painter = (QPainter *) graphicsContext->platformContext();
+    if(!painter) {
+      return;
+    }
+
+    // clip_box. Defines the position of the clipping box. See the background-clip CSS property.
+    IntPoint clip_a(offsetX + bg.clip_box.left(), offsetY + bg.clip_box.top());
+    IntPoint clip_b(offsetX + bg.clip_box.right(), offsetY + bg.clip_box.bottom());
+    QRect clipRect(clip_a, clip_b);
+
+    IntSize topLeft, topRight, bottomLeft, bottomRight;
+    IntRect borderRect(clip_a.x(), clip_a.y(), clip_b.x(), clip_b.y());
+
+    bool renderRadii = false;
+    Path roundedPath;
+
+#ifdef nope
+
+    //QPainter* painter = (QPainter*)hdc;
     //QPainter ptr(m_owner);
     //QPainter* painter = &ptr;
 
@@ -1203,6 +1328,7 @@ void container_qt5::draw_background(litehtml::uint_ptr hdc, const litehtml::back
     }
 
     painter->restore();
+#endif
 }
 
 void container_qt5::get_image_size(const litehtml::tchar_t* src, const litehtml::tchar_t* baseurl, litehtml::size& sz)
@@ -1240,7 +1366,17 @@ void container_qt5::draw_list_marker(litehtml::uint_ptr hdc, const litehtml::lis
     //qDebug() << marker.marker_type << marker.pos.x << "x" << marker.pos.y << marker.pos.left() << marker.pos.right();
     //qDebug() << marker.baseurl << QString::fromStdString(marker.image);
 
-    QPainter *painter = (QPainter *) hdc;
+    //QPainter *painter = (QPainter *) hdc;
+
+    GraphicsContext* graphicsContext = (GraphicsContext*) hdc;
+    if(!graphicsContext) {
+      return;
+    }
+    QPainter *painter = (QPainter *) graphicsContext->platformContext();
+    if(!painter) {
+      return;
+    }
+
     painter->save();
 
     apply_clip( painter );
@@ -1314,7 +1450,16 @@ int container_qt5::pt_to_px(int pt)
 void container_qt5::draw_text(litehtml::uint_ptr hdc, const litehtml::tchar_t* text, litehtml::uint_ptr hFont, litehtml::web_color color, const litehtml::position& pos)
 {
     //qDebug() << __FUNCTION__;
-    QPainter *painter = (QPainter *) hdc;
+    //QPainter *painter = (QPainter *) hdc;
+
+    GraphicsContext* graphicsContext = (GraphicsContext*) hdc;
+    if(!graphicsContext) {
+      return;
+    }
+    QPainter *painter = (QPainter *) graphicsContext->platformContext();
+    if(!painter) {
+      return;
+    }
 
     painter->save();
 

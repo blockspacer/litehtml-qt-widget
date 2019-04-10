@@ -4,7 +4,6 @@
 #include "Path.h"
 
 #include "AffineTransform.h"
-#include "FloatRect.h"
 #include "GraphicsContext.h"
 #include "ImageBuffer.h"
 #include "PlatformString.h"
@@ -12,10 +11,12 @@
 #include <QPainterPath>
 #include <QTransform>
 #include <QString>
+#include "floatrect.h"
 //#include <wtf/OwnPtr.h>
 
 #define _USE_MATH_DEFINES
-#include <math.h>
+//#include <math.h>
+#include <cmath>
 
 #ifndef M_PI
 #   define M_PI 3.14159265358979323846
@@ -407,6 +408,91 @@ float Path::normalAngleAtLength(float length, bool& ok)
     qreal angle = m_path.angleAtPercent(percent);
 
     return angle;
+}
+
+/////////////////
+// https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/platform/graphics/Path.cpp
+
+// Approximation of control point positions on a bezier to simulate a quarter of a circle.
+static const float gCircleControlPoint = 0.448f;
+
+void Path::addRoundedRect(const FloatRect& rect, const FloatSize& roundingRadii)
+{
+    if (rect.isEmpty())
+        return;
+
+    FloatSize radius(roundingRadii);
+    FloatSize halfSize(rect.width() / 2, rect.height() / 2);
+
+    // If rx is greater than half of the width of the rectangle
+    // then set rx to half of the width (required in SVG spec)
+    if (radius.width() > halfSize.width())
+        radius.setWidth(halfSize.width());
+
+    // If ry is greater than half of the height of the rectangle
+    // then set ry to half of the height (required in SVG spec)
+    if (radius.height() > halfSize.height())
+        radius.setHeight(halfSize.height());
+
+    moveTo(FloatPoint(rect.x() + radius.width(), rect.y()));
+
+    if (radius.width() < halfSize.width())
+        addLineTo(FloatPoint(rect.x() + rect.width() - roundingRadii.width(), rect.y()));
+
+    addBezierCurveTo(FloatPoint(rect.x() + rect.width() - radius.width() * gCircleControlPoint, rect.y()), FloatPoint(rect.x() + rect.width(), rect.y() + radius.height() * gCircleControlPoint), FloatPoint(rect.x() + rect.width(), rect.y() + radius.height()));
+
+    if (radius.height() < halfSize.height())
+        addLineTo(FloatPoint(rect.x() + rect.width(), rect.y() + rect.height() - radius.height()));
+
+    addBezierCurveTo(FloatPoint(rect.x() + rect.width(), rect.y() + rect.height() - radius.height() * gCircleControlPoint), FloatPoint(rect.x() + rect.width() - radius.width() * gCircleControlPoint, rect.y() + rect.height()), FloatPoint(rect.x() + rect.width() - radius.width(), rect.y() + rect.height()));
+
+    if (radius.width() < halfSize.width())
+        addLineTo(FloatPoint(rect.x() + radius.width(), rect.y() + rect.height()));
+
+    addBezierCurveTo(FloatPoint(rect.x() + radius.width() * gCircleControlPoint, rect.y() + rect.height()), FloatPoint(rect.x(), rect.y() + rect.height() - radius.height() * gCircleControlPoint), FloatPoint(rect.x(), rect.y() + rect.height() - radius.height()));
+
+    if (radius.height() < halfSize.height())
+        addLineTo(FloatPoint(rect.x(), rect.y() + radius.height()));
+
+    addBezierCurveTo(FloatPoint(rect.x(), rect.y() + radius.height() * gCircleControlPoint), FloatPoint(rect.x() + radius.width() * gCircleControlPoint, rect.y()), FloatPoint(rect.x() + radius.width(), rect.y()));
+
+    closeSubpath();
+}
+
+void Path::addRoundedRect(const FloatRect& rect, const FloatSize& topLeftRadius, const FloatSize& topRightRadius, const FloatSize& bottomLeftRadius, const FloatSize& bottomRightRadius)
+{
+    if (rect.isEmpty())
+        return;
+
+    if (rect.width() < topLeftRadius.width() + topRightRadius.width()
+            || rect.width() < bottomLeftRadius.width() + bottomRightRadius.width()
+            || rect.height() < topLeftRadius.height() + bottomLeftRadius.height()
+            || rect.height() < topRightRadius.height() + bottomRightRadius.height()) {
+        // If all the radii cannot be accommodated, return a rect.
+        addRect(rect);
+        return;
+    }
+
+    moveTo(FloatPoint(rect.x() + topLeftRadius.width(), rect.y()));
+
+    addLineTo(FloatPoint(rect.x() + rect.width() - topRightRadius.width(), rect.y()));
+    addBezierCurveTo(FloatPoint(rect.x() + rect.width() - topRightRadius.width() * gCircleControlPoint, rect.y()),
+                     FloatPoint(rect.x() + rect.width(), rect.y() + topRightRadius.height() * gCircleControlPoint),
+                     FloatPoint(rect.x() + rect.width(), rect.y() + topRightRadius.height()));
+    addLineTo(FloatPoint(rect.x() + rect.width(), rect.y() + rect.height() - bottomRightRadius.height()));
+    addBezierCurveTo(FloatPoint(rect.x() + rect.width(), rect.y() + rect.height() - bottomRightRadius.height() * gCircleControlPoint),
+                     FloatPoint(rect.x() + rect.width() - bottomRightRadius.width() * gCircleControlPoint, rect.y() + rect.height()),
+                     FloatPoint(rect.x() + rect.width() - bottomRightRadius.width(), rect.y() + rect.height()));
+    addLineTo(FloatPoint(rect.x() + bottomLeftRadius.width(), rect.y() + rect.height()));
+    addBezierCurveTo(FloatPoint(rect.x() + bottomLeftRadius.width() * gCircleControlPoint, rect.y() + rect.height()),
+                     FloatPoint(rect.x(), rect.y() + rect.height() - bottomLeftRadius.height() * gCircleControlPoint),
+                     FloatPoint(rect.x(), rect.y() + rect.height() - bottomLeftRadius.height()));
+    addLineTo(FloatPoint(rect.x(), rect.y() + topLeftRadius.height()));
+    addBezierCurveTo(FloatPoint(rect.x(), rect.y() + topLeftRadius.height() * gCircleControlPoint),
+                     FloatPoint(rect.x() + topLeftRadius.width() * gCircleControlPoint, rect.y()),
+                     FloatPoint(rect.x() + topLeftRadius.width(), rect.y()));
+
+    closeSubpath();
 }
 
 // vim: ts=4 sw=4 et

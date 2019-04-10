@@ -1,7 +1,6 @@
 // -*- coding: utf-8 -*-
 
-#ifndef FONTCACHE_H
-#define FONTCACHE_H
+#pragma once
 
 #include <QStringList>
 #include <QFile>
@@ -35,4 +34,3 @@ private:
   static QString defaultFontName;
 };
 
-#endif // FONTCACHE_H

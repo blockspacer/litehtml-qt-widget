@@ -1,5 +1,4 @@
-#ifndef PATHQT_H
-#define PATHQT_H
+#pragma once
 
 //#include "types.h"
 #include <QDebug>
@@ -12,26 +11,9 @@
 #include "fontcache.h"
 #include <cmath>
 
-// https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/platform/graphics/qt/PathQt.cpp#L266
-//#define DEGREES(t) ((t) * 180.0 / M_PI)
+#include "common.h"
 
-// https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/platform/graphics/qt/FloatPointQt.cpp
-#define FloatPoint QPointF
-
-//https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/platform/graphics/qt/FloatRectQt.cpp
-#define FloatRect QRectF
-
-// https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/platform/graphics/FloatSize.h
-#define FloatSize QRectF
-
-// https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/JavaScriptCore/wtf/MathExtras.h
-#ifndef M_PI
-const double piDouble = 3.14159265358979323846;
-const float piFloat = 3.14159265358979323846f;
-#else
-const double piDouble = M_PI;
-const float piFloat = static_cast<float>(M_PI);
-#endif
+#include "affinetransform.h"
 
 // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/platform/graphics/Path.h#L44
 #include <qpainterpath.h>
@@ -39,7 +21,7 @@ typedef QPainterPath PlatformPath;
 typedef PlatformPath PlatformPathPtr;
 
 // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/platform/graphics/transforms/AffineTransform.h#L169
-typedef QTransform AffineTransform;
+//typedef QTransform AffineTransform;
 
 enum WindRule {
     RULE_NONZERO = 0,
@@ -111,5 +93,3 @@ class Path
     private:
         PlatformPathPtr m_path;
 };
-
-#endif // PATHQT_H

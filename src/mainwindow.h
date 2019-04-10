@@ -1,7 +1,6 @@
 // -*- coding: utf-8 -*-
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 
@@ -24,5 +23,3 @@ private:
   litehtmlWidget* m_litehtmlWidget;
   litehtml::context ctxt;
 };
-
-#endif // MAINWINDOW_H

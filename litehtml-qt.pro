@@ -28,13 +28,43 @@ SOURCES += \
     src/main.cpp \
     src/mainwindow.cpp \
     src/fontcache.cpp \
-    pathqt.cpp
+    pathqt.cpp \
+    graphicscontext.cpp \
+    color.cpp \
+    affinetransform.cpp \
+    transformationmatrix.cpp \
+    floatrect.cpp \
+    floatpoint.cpp \
+    intpoint.cpp \
+    intsize.cpp \
+    floatsize.cpp \
+    intrect.cpp \
+    floatquad.cpp \
+    floatpoint3d.cpp
+    # \
+    #vector.cpp
 
 HEADERS += \
         include/litehtml.h \
     src/mainwindow.h \
     src/fontcache.h \
-    pathqt.h
+    pathqt.h \
+    graphicscontext.h \
+    color.h \
+    affinetransform.h \
+    common.h \
+    transformationmatrix.h \
+    floatrect.h \
+    floatpoint.h \
+    intpoint.h \
+    intsize.h \
+    floatsize.h \
+    intrect.h \
+    floatquad.h \
+    floatpoint3d.h
+    # \
+    #vector.h \
+    #vectortraits.h
 
 INCLUDEPATH     += $$PWD
 INCLUDEPATH     += $$PWD/src
