@@ -30,7 +30,6 @@ ui(new Ui::MainWindow)
   <html>
   <head>
   <link rel="stylesheet" href="://res/css/reset.css">
-  <link rel="stylesheet" href="://res/css/test1.css">
   </head>
   <body>
 
@@ -76,6 +75,15 @@ ui(new Ui::MainWindow)
 </style>
 
 <div id="root">
+  <div class="first">
+    <div style="border-style: dashed;padding: 5px;">border-style: dashed; padding: 5px;</div>
+  </div>
+  <div class="first">
+    <div style="border-style: double;padding: 5px;">border-style: double; padding: 5px;</div>
+  </div>
+  <div class="first">
+    <div style="border: 5px solid gold; border-style: double;padding: 5px;">border: 5px solid gold;border-style: double; padding: 5px;</div>
+  </div>
   <div class="first">
     <div style="border: 5px solid pink; border-left-width: 15px;">border: 5px solid pink; border-left-width: 15px;</div>
   </div>
