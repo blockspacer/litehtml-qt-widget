@@ -66,14 +66,14 @@ void GraphicsContext::setStrokeStyle(const StrokeStyle& style)
     setPlatformStrokeStyle(style);
 }
 
-/*void GraphicsContext::setStrokeColor(const Color& color, ColorSpace colorSpace)
+void GraphicsContext::setStrokeColor(const Color& color, ColorSpace colorSpace)
 {
     m_common->state.strokeColor = color;
     m_common->state.strokeColorSpace = colorSpace;
-    m_common->state.strokeGradient.clear();
-    m_common->state.strokePattern.clear();
+    //m_common->state.strokeGradient.clear();
+    //m_common->state.strokePattern.clear();
     setPlatformStrokeColor(color, colorSpace);
-}*/
+}
 
 /*void GraphicsContext::setShadow(const FloatSize& offset, float blur, const Color& color, ColorSpace colorSpace)
 {
@@ -115,10 +115,10 @@ Color GraphicsContext::strokeColor() const
     return m_common->state.strokeColor;
 }
 
-/*ColorSpace GraphicsContext::strokeColorSpace() const
+ColorSpace GraphicsContext::strokeColorSpace() const
 {
     return m_common->state.strokeColorSpace;
-}*/
+}
 
 WindRule GraphicsContext::fillRule() const
 {
@@ -130,24 +130,24 @@ void GraphicsContext::setFillRule(WindRule fillRule)
     m_common->state.fillRule = fillRule;
 }
 
-/*void GraphicsContext::setFillColor(const Color& color, ColorSpace colorSpace)
+void GraphicsContext::setFillColor(const Color& color, ColorSpace colorSpace)
 {
     m_common->state.fillColor = color;
     m_common->state.fillColorSpace = colorSpace;
-    m_common->state.fillGradient.clear();
-    m_common->state.fillPattern.clear();
+    //m_common->state.fillGradient.clear();
+    //m_common->state.fillPattern.clear();
     setPlatformFillColor(color, colorSpace);
-}*/
+}
 
 Color GraphicsContext::fillColor() const
 {
     return m_common->state.fillColor;
 }
 
-/*ColorSpace GraphicsContext::fillColorSpace() const
+ColorSpace GraphicsContext::fillColorSpace() const
 {
     return m_common->state.fillColorSpace;
-}*/
+}
 
 void GraphicsContext::setShouldAntialias(bool b)
 {
@@ -696,14 +696,14 @@ GraphicsContext::GraphicsContext(PlatformGraphicsContext* context)
 {
     ASSERT(m_data->p());
     setPaintingDisabled(!context);
-    /*if (context) {
+    if (context) {
         // Make sure the context starts in sync with our state.
         setPlatformFillColor(fillColor(), DeviceColorSpace);
         setPlatformStrokeColor(strokeColor(), DeviceColorSpace);
 
         // Make sure we start with the correct join mode.
-        setLineJoin(MiterJoin);
-    }*/
+        //setLineJoin(MiterJoin);
+    }
 }
 
 GraphicsContext::~GraphicsContext()
@@ -1735,7 +1735,7 @@ void GraphicsContext::concatCTM(const AffineTransform& transform)
     notImplemented();
 }*/
 
-/*void GraphicsContext::setPlatformStrokeColor(const Color& color, ColorSpace colorSpace)
+void GraphicsContext::setPlatformStrokeColor(const Color& color, ColorSpace colorSpace)
 {
     if (paintingDisabled() || !color.isValid())
         return;
@@ -1745,7 +1745,7 @@ void GraphicsContext::concatCTM(const AffineTransform& transform)
     m_data->solidColor.setColor(color);
     newPen.setBrush(m_data->solidColor);
     p->setPen(newPen);
-}*/
+}
 
 void GraphicsContext::setPlatformStrokeStyle(const StrokeStyle& strokeStyle)
 {
@@ -1773,14 +1773,14 @@ void GraphicsContext::setPlatformStrokeThickness(float thickness)
     p->setPen(newPen);
 }
 
-/*void GraphicsContext::setPlatformFillColor(const Color& color, ColorSpace colorSpace)
+void GraphicsContext::setPlatformFillColor(const Color& color, ColorSpace colorSpace)
 {
     if (paintingDisabled() || !color.isValid())
         return;
 
     m_data->solidColor.setColor(color);
     m_data->p()->setBrush(m_data->solidColor);
-}*/
+}
 
 void GraphicsContext::setPlatformShouldAntialias(bool enable)
 {

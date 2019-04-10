@@ -116,10 +116,10 @@ private:
             , strokeStyle(SolidStroke)
             , strokeThickness(0)
             , strokeColor(Color::black)
-            //, strokeColorSpace(DeviceColorSpace)
+            , strokeColorSpace(DeviceColorSpace)
             , fillRule(RULE_NONZERO)
             , fillColor(Color::black)
-            //, fillColorSpace(DeviceColorSpace)
+            , fillColorSpace(DeviceColorSpace)
             , shouldAntialias(true)
             , paintingDisabled(false)
             , shadowBlur(0)
@@ -132,14 +132,14 @@ private:
         StrokeStyle strokeStyle;
         float strokeThickness;
         Color strokeColor;
-        /*ColorSpace strokeColorSpace;
-        RefPtr<Gradient> strokeGradient;
+        ColorSpace strokeColorSpace;
+        /*RefPtr<Gradient> strokeGradient;
         RefPtr<Pattern> strokePattern;*/
 
         WindRule fillRule;
         Color fillColor;
-        /*ColorSpace fillColorSpace;
-        RefPtr<Gradient> fillGradient;
+        ColorSpace fillColorSpace;
+        /*RefPtr<Gradient> fillGradient;
         RefPtr<Pattern> fillPattern;*/
 
         bool shouldAntialias;
@@ -184,11 +184,11 @@ public:
         void setStrokeThickness(float);
         StrokeStyle strokeStyle() const;
         void setStrokeStyle(const StrokeStyle& style);
-         Color strokeColor() const;
-        /*ColorSpace strokeColorSpace() const;
+        Color strokeColor() const;
+        ColorSpace strokeColorSpace() const;
         void setStrokeColor(const Color&, ColorSpace);
 
-        void setStrokePattern(PassRefPtr<Pattern>);
+        /*void setStrokePattern(PassRefPtr<Pattern>);
         Pattern* strokePattern() const;
 
         void setStrokeGradient(PassRefPtr<Gradient>);
@@ -197,10 +197,10 @@ public:
         WindRule fillRule() const;
         void setFillRule(WindRule);
         Color fillColor() const;
-        /*ColorSpace fillColorSpace() const;
+        ColorSpace fillColorSpace() const;
         void setFillColor(const Color&, ColorSpace);
 
-        void setFillPattern(PassRefPtr<Pattern>);
+        /*void setFillPattern(PassRefPtr<Pattern>);
         Pattern* fillPattern() const;
 
         void setFillGradient(PassRefPtr<Gradient>);
@@ -231,10 +231,10 @@ public:
         void strokeArc(const IntRect&, int startAngle, int angleSpan);
 
         void fillRect(const FloatRect&);
-        /*void fillRect(const FloatRect&, const Color&, ColorSpace);
+        void fillRect(const FloatRect&, const Color&, ColorSpace);
 
 
-        void fillRect(const FloatRect&, Generator&);*/
+        /*void fillRect(const FloatRect&, Generator&);*/
 
 
         //void fillRoundedRect(const IntRect&, const IntSize& topLeft, const IntSize& topRight, const IntSize& bottomLeft, const IntSize& bottomRight, const Color&, ColorSpace);
@@ -368,14 +368,14 @@ public:
         void setPlatformTextDrawingMode(int);
         //void setPlatformFont(const Font& font);
 
-        //void setPlatformStrokeColor(const Color&, ColorSpace);
+        void setPlatformStrokeColor(const Color&, ColorSpace);
         void setPlatformStrokeStyle(const StrokeStyle&);
         void setPlatformStrokeThickness(float);
         /*void setPlatformStrokeGradient(Gradient*);
-        void setPlatformStrokePattern(Pattern*);
+        void setPlatformStrokePattern(Pattern*);*/
 
         void setPlatformFillColor(const Color&, ColorSpace);
-        void setPlatformFillGradient(Gradient*);
+        /*void setPlatformFillGradient(Gradient*);
         void setPlatformFillPattern(Pattern*);*/
 
         void setPlatformShouldAntialias(bool b);

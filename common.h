@@ -40,6 +40,13 @@
 
 //#define tryFastMalloc(string) mallocc<false>(string)
 
+///////
+
+// https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/style/RenderStyleConstants.h#L90
+
+// These have been defined in the order of their precedence for border-collapsing. Do
+// not change this order!
+enum EBorderStyle { BNONE, BHIDDEN, INSET, GROOVE, RIDGE, OUTSET, DOTTED, DASHED, SOLID, DOUBLE };
 
 /////////
 
@@ -150,6 +157,19 @@ typedef char UChar;
 
 // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/platform/graphics/ColorSpace.h
 enum ColorSpace { DeviceColorSpace, sRGBColorSpace };
+
+///////////////////////////////
+
+// https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/RenderObject.h#L81
+
+// Sides used when drawing borders and outlines.  This is in RenderObject rather than RenderBoxModelObject since outlines can
+// be drawn by SVG around bounding boxes.
+enum BoxSide {
+    BSTop,
+    BSBottom,
+    BSLeft,
+    BSRight
+};
 
 ///////////////////////////////
 
