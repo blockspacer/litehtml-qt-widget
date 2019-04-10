@@ -77,6 +77,12 @@ ui(new Ui::MainWindow)
 
 <div id="root">
   <div class="first">
+    <div style="border: 5px solid pink;">border: 5px solid pink</div>
+  </div>
+  <div class="first">
+    <div style="border: 5px solid green; border-left-width: 15px; border-radius: 55px;">border: 5px solid green; border-left-width: 15px; border-radius: 55px;</div>
+  </div>
+  <div class="first">
     <div style="">1px width / 1px radius</div>
   </div>
   <div class="first">

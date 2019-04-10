@@ -531,7 +531,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
+                //painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -554,7 +554,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
+                //painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -592,7 +592,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
+                //painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -615,7 +615,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                painter->scale(1, ry / rx);
+                //painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -658,7 +658,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               auto ry = r_left - bdr_bottom;
               auto p = FloatPoint(draw_pos.left() + r_left,
                   draw_pos.bottom() - r_left);
-              if(true)//if(rx > 0 && ry > 0)
+              if(rx > 0 && ry > 0)
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
@@ -681,7 +681,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               auto ry = r_left;
               auto p = FloatPoint(draw_pos.left() + r_left,
                   draw_pos.bottom() - r_left);
-              if(true)//if(rx > 0 && ry > 0)
+              if(rx > 0 && ry > 0)
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
@@ -719,7 +719,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               auto ry = r_right;
               auto p = FloatPoint(draw_pos.right() - r_right,
                   draw_pos.bottom() - r_right);
-              if(true)//if(rx > 0 && ry > 0)
+              if(rx > 0 && ry > 0)
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
@@ -742,7 +742,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               auto ry = r_right - bdr_bottom;
               auto p = FloatPoint(draw_pos.right() - r_right,
                   draw_pos.bottom() - r_right);
-              if(true)//if(rx > 0 && ry > 0)
+              if(rx > 0 && ry > 0)
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
@@ -794,7 +794,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               auto ry = r_left;
               auto p = FloatPoint(draw_pos.left() + r_left,
                 draw_pos.top() + r_left);
-              if(true)//if(rx > 0 && ry > 0)
+              if(rx > 0 && ry > 0)
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
@@ -817,7 +817,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               auto ry = r_left - bdr_top;
               auto p = FloatPoint(draw_pos.left() + r_left,
                 draw_pos.top() + r_left);
-              if(true)//if(rx > 0 && ry > 0)
+              if(rx > 0 && ry > 0)
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
@@ -861,7 +861,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               auto ry = r_right - bdr_top;
               auto p = FloatPoint(draw_pos.right() - r_right,
                 draw_pos.top() + r_right);
-              if(true)//if(rx > 0 && ry > 0)
+              if(rx > 0 && ry > 0)
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
@@ -884,7 +884,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               auto ry = r_right;
               auto p = FloatPoint(draw_pos.right() - r_right,
                 draw_pos.top() + r_right);
-              if(true)//if(rx > 0 && ry > 0)
+              if(rx > 0 && ry > 0)
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
@@ -941,7 +941,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               auto ry = r_top - bdr_left + (bdr_left - bdr_top);
               auto p = FloatPoint(draw_pos.left() + r_top,
                   draw_pos.top() + r_top);
-              if(true)//if(rx > 0 && ry > 0)
+              if(rx > 0 && ry > 0)
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
@@ -964,7 +964,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               auto ry = r_top;
               auto p = FloatPoint(draw_pos.left() + r_top,
         draw_pos.top() + r_top);
-              if(true)//if(rx > 0 && ry > 0)
+              if(rx > 0 && ry > 0)
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
@@ -1002,7 +1002,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               auto ry = r_bottom;
               auto p = FloatPoint(draw_pos.left() + r_bottom,
                   draw_pos.bottom() - r_bottom);
-              if(true)//if(rx > 0 && ry > 0)
+              if(rx > 0 && ry > 0)
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
@@ -1025,7 +1025,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               auto ry = r_bottom - bdr_left + (bdr_left - bdr_bottom);
               auto p = FloatPoint(draw_pos.left() + r_bottom,
                   draw_pos.bottom() - r_bottom);
-              if(true)//if(rx > 0 && ry > 0)
+              if(rx > 0 && ry > 0)
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());

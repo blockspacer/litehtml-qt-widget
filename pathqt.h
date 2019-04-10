@@ -13,7 +13,7 @@
 #include <cmath>
 
 // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/platform/graphics/qt/PathQt.cpp#L266
-#define DEGREES(t) ((t) * 180.0 / M_PI)
+//#define DEGREES(t) ((t) * 180.0 / M_PI)
 
 // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/platform/graphics/qt/FloatPointQt.cpp
 #define FloatPoint QPointF
