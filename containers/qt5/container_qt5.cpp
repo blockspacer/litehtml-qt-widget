@@ -1350,18 +1350,8 @@ void container_qt5::draw_background(litehtml::uint_ptr hdc, const litehtml::back
       return;
     }
 
-    // clip_box. Defines the position of the clipping box. See the background-clip CSS property.
-    IntPoint clip_a(offsetX + bg.clip_box.left(), offsetY + bg.clip_box.top());
-    IntPoint clip_b(offsetX + bg.clip_box.right(), offsetY + bg.clip_box.bottom());
-    QRect clipRect(clip_a, clip_b);
-
-    IntSize topLeft, topRight, bottomLeft, bottomRight;
-    IntRect borderRect(clip_a.x(), clip_a.y(), clip_b.x(), clip_b.y());
-
-    bool renderRadii = false;
-    Path roundedPath;
-
-#ifdef nope
+#define old_bg_drawer
+#ifdef old_bg_drawer
 
     //QPainter* painter = (QPainter*)hdc;
     //QPainter ptr(m_owner);
@@ -1764,12 +1754,19 @@ void litehtmlWidget::paintEvent(QPaintEvent *event)
     container->repaint(painter);
 }
 
+static QRect adoptQMouseEventCoords(QMouseEvent *event, int offsetX, int offsetY) {
+  return QRect(offsetX+event->x(), offsetY+event->y(), offsetX+event->x(), offsetY+event->y());
+}
+
 void litehtmlWidget::mouseMoveEvent(QMouseEvent *event)
 {
     litehtml::position::vector redraw_boxes;
-    container->setLastMouseCoords(event->x(), event->y(), event->x(), event->y());
 
-    if (container->getDocument()->on_mouse_over(event->x(), event->y(), event->x(), event->y(), redraw_boxes)) {
+    QRect adopted = adoptQMouseEventCoords(event, -container->getScroll().x(), -container->getScroll().y());
+
+    container->setLastMouseCoords(adopted.x(), adopted.y(), adopted.x(), adopted.y());
+
+    if (container->getDocument()->on_mouse_over(adopted.x(), adopted.y(), adopted.x(), adopted.y(), redraw_boxes)) {
       repaint();
     }
 }
@@ -1777,9 +1774,12 @@ void litehtmlWidget::mouseMoveEvent(QMouseEvent *event)
 void litehtmlWidget::mousePressEvent(QMouseEvent *event)
 {
     litehtml::position::vector redraw_boxes;
-    container->setLastMouseCoords(event->x(), event->y(), event->x(), event->y());
 
-    if (container->getDocument()->on_lbutton_down(event->x(), event->y(), event->x(), event->y(), redraw_boxes)) {
+    QRect adopted = adoptQMouseEventCoords(event, -container->getScroll().x(), -container->getScroll().y());
+
+    container->setLastMouseCoords(adopted.x(), adopted.y(), adopted.x(), adopted.y());
+
+    if (container->getDocument()->on_lbutton_down(adopted.x(), adopted.y(), adopted.x(), adopted.y(), redraw_boxes)) {
       repaint();
     }
 }
@@ -1787,9 +1787,12 @@ void litehtmlWidget::mousePressEvent(QMouseEvent *event)
 void litehtmlWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     litehtml::position::vector redraw_boxes;
-    container->setLastMouseCoords(event->x(), event->y(), event->x(), event->y());
 
-    if (container->getDocument()->on_lbutton_up(event->x(), event->y(), event->x(), event->y(), redraw_boxes)) {
+    QRect adopted = adoptQMouseEventCoords(event, -container->getScroll().x(), -container->getScroll().y());
+
+    container->setLastMouseCoords(adopted.x(), adopted.y(), adopted.x(), adopted.y());
+
+    if (container->getDocument()->on_lbutton_up(adopted.x(), adopted.y(), adopted.x(), adopted.y(), redraw_boxes)) {
       repaint();
     }
 }
