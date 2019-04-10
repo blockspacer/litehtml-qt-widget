@@ -17,6 +17,8 @@
 
 #include "common.h"
 
+#include "gradient.h"
+
 // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/platform/graphics/GraphicsContext.h
 //class GraphicsContextPrivate;
 //class GraphicsContextPlatformPrivate;
@@ -133,14 +135,14 @@ private:
         float strokeThickness;
         Color strokeColor;
         ColorSpace strokeColorSpace;
-        /*RefPtr<Gradient> strokeGradient;
-        RefPtr<Pattern> strokePattern;*/
+        RefPtr<Gradient> strokeGradient;
+        /*RefPtr<Pattern> strokePattern;*/
 
         WindRule fillRule;
         Color fillColor;
         ColorSpace fillColorSpace;
-        /*RefPtr<Gradient> fillGradient;
-        RefPtr<Pattern> fillPattern;*/
+        RefPtr<Gradient> fillGradient;
+        /*RefPtr<Pattern> fillPattern;*/
 
         bool shouldAntialias;
 
@@ -189,10 +191,10 @@ public:
         void setStrokeColor(const Color&, ColorSpace);
 
         /*void setStrokePattern(PassRefPtr<Pattern>);
-        Pattern* strokePattern() const;
+        Pattern* strokePattern() const;*/
 
         void setStrokeGradient(PassRefPtr<Gradient>);
-        Gradient* strokeGradient() const;*/
+        Gradient* strokeGradient() const;
 
         WindRule fillRule() const;
         void setFillRule(WindRule);
@@ -201,10 +203,10 @@ public:
         void setFillColor(const Color&, ColorSpace);
 
         /*void setFillPattern(PassRefPtr<Pattern>);
-        Pattern* fillPattern() const;
+        Pattern* fillPattern() const;*/
 
         void setFillGradient(PassRefPtr<Gradient>);
-        Gradient* fillGradient() const;*/
+        Gradient* fillGradient() const;
 
         void setShadowsIgnoreTransforms(bool);
 
@@ -371,12 +373,12 @@ public:
         void setPlatformStrokeColor(const Color&, ColorSpace);
         void setPlatformStrokeStyle(const StrokeStyle&);
         void setPlatformStrokeThickness(float);
-        /*void setPlatformStrokeGradient(Gradient*);
-        void setPlatformStrokePattern(Pattern*);*/
+        void setPlatformStrokeGradient(Gradient*);
+        /*void setPlatformStrokePattern(Pattern*);*/
 
         void setPlatformFillColor(const Color&, ColorSpace);
-        /*void setPlatformFillGradient(Gradient*);
-        void setPlatformFillPattern(Pattern*);*/
+        void setPlatformFillGradient(Gradient*);
+        /*void setPlatformFillPattern(Pattern*);*/
 
         void setPlatformShouldAntialias(bool b);
 

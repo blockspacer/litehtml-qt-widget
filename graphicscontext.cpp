@@ -70,6 +70,7 @@ void GraphicsContext::setStrokeColor(const Color& color, ColorSpace colorSpace)
 {
     m_common->state.strokeColor = color;
     m_common->state.strokeColorSpace = colorSpace;
+    m_common->state.strokeGradient.reset();
     //m_common->state.strokeGradient.clear();
     //m_common->state.strokePattern.clear();
     setPlatformStrokeColor(color, colorSpace);
@@ -135,6 +136,7 @@ void GraphicsContext::setFillColor(const Color& color, ColorSpace colorSpace)
     m_common->state.fillColor = color;
     m_common->state.fillColorSpace = colorSpace;
     //m_common->state.fillGradient.clear();
+    m_common->state.fillGradient.reset();
     //m_common->state.fillPattern.clear();
     setPlatformFillColor(color, colorSpace);
 }
@@ -182,7 +184,7 @@ void GraphicsContext::setFillPattern(PassRefPtr<Pattern> pattern)
     m_common->state.fillGradient.clear();
     m_common->state.fillPattern = pattern;
     setPlatformFillPattern(m_common->state.fillPattern.get());
-}
+}*/
 
 void GraphicsContext::setStrokeGradient(PassRefPtr<Gradient> gradient)
 {
@@ -192,7 +194,7 @@ void GraphicsContext::setStrokeGradient(PassRefPtr<Gradient> gradient)
         return;
     }
     m_common->state.strokeGradient = gradient;
-    m_common->state.strokePattern.clear();
+    //m_common->state.strokePattern.clear();
     setPlatformStrokeGradient(m_common->state.strokeGradient.get());
 }
 
@@ -204,7 +206,7 @@ void GraphicsContext::setFillGradient(PassRefPtr<Gradient> gradient)
         return;
     }
     m_common->state.fillGradient = gradient;
-    m_common->state.fillPattern.clear();
+    //m_common->state.fillPattern.clear();
     setPlatformFillGradient(m_common->state.fillGradient.get());
 }
 
@@ -218,7 +220,7 @@ Gradient* GraphicsContext::strokeGradient() const
     return m_common->state.strokeGradient.get();
 }
 
-Pattern* GraphicsContext::fillPattern() const
+/*Pattern* GraphicsContext::fillPattern() const
 {
     return m_common->state.fillPattern.get();
 }
@@ -488,23 +490,23 @@ void GraphicsContext::fillRect(const FloatRect& rect, Generator& generator)
     generator.fill(this, rect);
 }*/
 
-/*#if !PLATFORM(SKIA)
+//#if !PLATFORM(SKIA)
 void GraphicsContext::setPlatformFillGradient(Gradient*)
 {
 }
 
-void GraphicsContext::setPlatformFillPattern(Pattern*)
+/*void GraphicsContext::setPlatformFillPattern(Pattern*)
 {
-}
+}*/
 
 void GraphicsContext::setPlatformStrokeGradient(Gradient*)
 {
 }
 
-void GraphicsContext::setPlatformStrokePattern(Pattern*)
+/*void GraphicsContext::setPlatformStrokePattern(Pattern*)
 {
-}
-#endif*/
+}*/
+//#endif
 
 /*#if !PLATFORM(CG) && !PLATFORM(SKIA)
 // Implement this if you want to go ahead and push the drawing mode into your native context
@@ -994,11 +996,11 @@ void GraphicsContext::fillPath()
     if (m_common->state.fillPattern) {
         AffineTransform affine;
         p->fillPath(path, QBrush(m_common->state.fillPattern->createPlatformPattern(affine)));
-    } else if (m_common->state.fillGradient) {
+    } else*/ if (m_common->state.fillGradient) {
         QBrush brush(*m_common->state.fillGradient->platformGradient());
         brush.setTransform(m_common->state.fillGradient->gradientSpaceTransform());
         p->fillPath(path, brush);
-    } else*/
+    } else
         p->fillPath(path, p->brush());
 
     m_data->clearCurrentPath();
@@ -1029,13 +1031,13 @@ void GraphicsContext::strokePath()
         pen.setBrush(QBrush(m_common->state.strokePattern->createPlatformPattern(affine)));
         p->setPen(pen);
         p->strokePath(path, pen);
-    } else if (m_common->state.strokeGradient) {
+    } else*/ if (m_common->state.strokeGradient) {
         QBrush brush(*m_common->state.strokeGradient->platformGradient());
         brush.setTransform(m_common->state.strokeGradient->gradientSpaceTransform());
         pen.setBrush(brush);
         p->setPen(pen);
         p->strokePath(path, pen);
-    } else*/
+    } else
         p->strokePath(path, pen);
     m_data->clearCurrentPath();
 }
@@ -1134,18 +1136,18 @@ void GraphicsContext::fillRect(const FloatRect& rect)
             shadow->endShadowLayer(p);
         }
         drawRepeatPattern(p, image, normalizedRect, m_common->state.fillPattern->repeatX(), m_common->state.fillPattern->repeatY());
-    } else if (m_common->state.fillGradient) {
+    } else*/ if (m_common->state.fillGradient) {
         QBrush brush(*m_common->state.fillGradient->platformGradient());
         brush.setTransform(m_common->state.fillGradient->gradientSpaceTransform());
-        QPainter* shadowPainter = m_data->hasShadow() ? shadow->beginShadowLayer(p, normalizedRect) : 0;
+        /*QPainter* shadowPainter = m_data->hasShadow() ? shadow->beginShadowLayer(p, normalizedRect) : 0;
         if (shadowPainter) {
             shadowPainter->fillRect(normalizedRect, brush);
             shadowPainter->setCompositionMode(QPainter::CompositionMode_SourceIn);
             shadowPainter->fillRect(normalizedRect, shadow->m_color);
             shadow->endShadowLayer(p);
-        }
+        }*/
         p->fillRect(normalizedRect, brush);
-    } else*/ {
+    } else {
         /*if (m_data->hasShadow()) {
             if (shadow->m_type == ContextShadow::BlurShadow) {
                 QPainter* shadowPainter = shadow->beginShadowLayer(p, normalizedRect);

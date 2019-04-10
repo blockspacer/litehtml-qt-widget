@@ -40,7 +40,9 @@ SOURCES += \
     floatsize.cpp \
     intrect.cpp \
     floatquad.cpp \
-    floatpoint3d.cpp
+    floatpoint3d.cpp \
+    gradient.cpp \
+    common.cpp
     # \
     #vector.cpp
 
@@ -61,7 +63,8 @@ HEADERS += \
     floatsize.h \
     intrect.h \
     floatquad.h \
-    floatpoint3d.h
+    floatpoint3d.h \
+    gradient.h
     # \
     #vector.h \
     #vectortraits.h

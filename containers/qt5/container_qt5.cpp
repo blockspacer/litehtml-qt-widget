@@ -624,12 +624,14 @@ static void drawLineForBoxSide(ColorSpace colorSpace, GraphicsContext* graphicsC
         case SOLID: {
             graphicsContext->setStrokeStyle(NoStroke);
             graphicsContext->setFillColor(c, colorSpace);
+
             ASSERT(x2 >= x1);
             ASSERT(y2 >= y1);
             if (!adjbw1 && !adjbw2) {
                 graphicsContext->drawRect(IntRect(x1, y1, x2 - x1, y2 - y1));
                 return;
             }
+
             FloatPoint quad[4];
             switch (s) {
                 case BSTop:
@@ -1028,8 +1030,32 @@ static void drawBoxSideFromPath(GraphicsContext* graphicsContext, IntRect border
     }
 
     graphicsContext->setStrokeStyle(NoStroke);
+
     graphicsContext->setFillColor(c, colorSpace);
+
     graphicsContext->drawRect(borderRect);
+
+        // TODO: css gradient
+        // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/css/CSSGradientValue.cpp#L72
+        // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/css/CSSParser.cpp#L4705
+        ///qDebug() << "graphicsContext!";
+        /*graphicsContext->save();
+        //graphicsContext->setStrokeStyle(SolidStroke);
+        IntPoint sliderTopLeft(borderRect.x(), borderRect.y());
+        IntPoint sliderTopRight(borderRect.x()+borderRect.width(), borderRect.y()+borderRect.y());
+        sliderTopRight.move(borderRect.x(), borderRect.y()+borderRect.y());
+        RefPtr<Gradient> gradient = Gradient::create(sliderTopLeft, sliderTopRight);
+        Color startColor(0, 0, 255, 255);// = object->style()->visitedDependentColor(CSSPropertyColor);
+        Color endColor(0, 255, 0, 255);// = object->style()->visitedDependentColor(CSSPropertyColor);
+        gradient->addColorStop(0.0, startColor);
+        gradient->addColorStop(1.0, endColor);
+        graphicsContext->setFillGradient(gradient);
+        graphicsContext->setStrokeGradient(gradient);
+        //graphicsContext->setStrokeStyle(NoStroke);
+        graphicsContext->setStrokeGradient(gradient);
+        graphicsContext->setFillGradient(gradient);
+        graphicsContext->fillRect(borderRect);
+        graphicsContext->restore();*/
 }
 
 static void paintBorder(
@@ -1281,6 +1307,30 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
       graphicsContext,
       draw_pos.x, draw_pos.y, draw_pos.width, draw_pos.height, true, true
     );
+
+      // TODO: css gradient
+      // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/css/CSSGradientValue.cpp#L72
+        /*        graphicsContext->save();
+    //graphicsContext->setStrokeStyle(SolidStroke);
+    IntPoint sliderTopLeft(0, 0);
+    IntPoint sliderTopRight(400, 400);
+    sliderTopRight.move(0, 400);
+    RefPtr<Gradient> gradient = Gradient::create(sliderTopLeft, sliderTopRight);
+    Color startColor(0, 0, 255, 255);// = object->style()->visitedDependentColor(CSSPropertyColor);
+    Color endColor(0, 255, 0, 255);// = object->style()->visitedDependentColor(CSSPropertyColor);
+    gradient->addColorStop(0.0, startColor);
+    gradient->addColorStop(1.0, endColor);
+    graphicsContext->setFillGradient(gradient);
+    graphicsContext->setStrokeGradient(gradient);
+
+        //graphicsContext->setStrokeStyle(NoStroke);
+        graphicsContext->setStrokeGradient(gradient);
+        graphicsContext->setFillGradient(gradient);
+        graphicsContext->fillRect(IntRect(0,0, 400, 400));
+        graphicsContext->restore();*/
+
+
+
 
     graphicsContext->restore();
 }
