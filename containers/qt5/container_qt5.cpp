@@ -531,7 +531,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
+                painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -540,7 +540,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   start_angle, true);
                 painter->restore();
               } else {
-                path.moveTo(p);
+                //path.moveTo(p);
               }
               //painter->restore();
             }
@@ -554,7 +554,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
+                painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -563,7 +563,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   end_angle, false);
                 painter->restore();
               } else {
-                path.moveTo(p);
+                //path.moveTo(p);
               }
               //painter->restore();
             }
@@ -592,7 +592,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
+                painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -601,7 +601,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   end_angle, false);
                 painter->restore();
               } else {
-                path.moveTo(p);
+                //path.moveTo(p);
               }
               //painter->restore();
             }
@@ -615,7 +615,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
+                painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -624,7 +624,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   start_angle, true);
                 painter->restore();
               } else {
-                path.moveTo(p);
+                //path.moveTo(p);
               }
               //painter->restore();
             }
@@ -662,7 +662,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
+                painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -671,7 +671,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   end_angle, false);
                 painter->restore();
               } else {
-                path.moveTo(p);
+                //path.moveTo(p);
               }
               //painter->restore();
             }
@@ -685,7 +685,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
+                painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -694,7 +694,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   start_angle, true);
                 painter->restore();
               } else {
-                path.moveTo(p);
+                //path.moveTo(p);
               }
               //painter->restore();
             }
@@ -723,7 +723,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
+                painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -732,7 +732,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   start_angle, true);
                 painter->restore();
               } else {
-                path.moveTo(p);
+                //path.moveTo(p);
               }
               //painter->restore();
             }
@@ -746,7 +746,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
+                painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -755,7 +755,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   end_angle, false);
                 painter->restore();
               } else {
-                path.moveTo(p);
+                //path.moveTo(p);
               }
               //painter->restore();
             }
@@ -798,7 +798,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
+                painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -807,7 +807,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   start_angle, true);
                 painter->restore();
               } else {
-                path.moveTo(p);
+                //path.moveTo(p);
               }
               //painter->restore();
             }
@@ -821,7 +821,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
+                painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -830,7 +830,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   end_angle, false);
                 painter->restore();
               } else {
-                path.moveTo(p);
+                //path.moveTo(p);
               }
               //painter->restore();
             }
@@ -865,7 +865,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
+                painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -874,7 +874,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   end_angle, false);
                 painter->restore();
               } else {
-                path.moveTo(p);
+                //path.moveTo(p);
               }
               //painter->restore();
             }
@@ -888,7 +888,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
+                painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -897,7 +897,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   start_angle, true);
                 painter->restore();
               } else {
-                path.moveTo(p);
+                //path.moveTo(p);
               }
               //painter->restore();
             }
@@ -945,7 +945,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
+                painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -954,7 +954,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   end_angle, false);
                 painter->restore();
               } else {
-                path.moveTo(p);
+                //path.moveTo(p);
               }
               //painter->restore();
             }
@@ -968,7 +968,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
+                painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -977,7 +977,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   start_angle, true);
                 painter->restore();
               } else {
-                path.moveTo(p);
+                //path.moveTo(p);
               }
               //painter->restore();
             }
@@ -1006,7 +1006,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
+                painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -1015,7 +1015,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   start_angle, true);
                 painter->restore();
               } else {
-                path.moveTo(p);
+                //path.moveTo(p);
               }
               //painter->restore();
             }
@@ -1029,7 +1029,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
               {
                 painter->save();
                 path.platformPath().translate(p.x(), p.y());
-                //painter->scale(1, ry / rx);
+                painter->scale(1, ry / rx);
                 path.platformPath().translate(-p.x(), -p.y());
                 path.addArc(
                   p,
@@ -1038,7 +1038,7 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
                   end_angle, false);
                 painter->restore();
               } else {
-                path.moveTo(p);
+                //path.moveTo(p);
               }
               //painter->restore();
             }
@@ -1270,27 +1270,27 @@ void container_qt5::draw_list_marker(litehtml::uint_ptr hdc, const litehtml::lis
     painter->restore();
 }
 /*
-		list_style_type_none,
-		list_style_type_circle,
-		list_style_type_disc,
-		list_style_type_square,
-		list_style_type_armenian,
-		list_style_type_cjk_ideographic,
-		list_style_type_decimal,
-		list_style_type_decimal_leading_zero,
-		list_style_type_georgian,
-		list_style_type_hebrew,
-		list_style_type_hiragana,
-		list_style_type_hiragana_iroha,
-		list_style_type_katakana,
-		list_style_type_katakana_iroha,
-		list_style_type_lower_alpha,
-		list_style_type_lower_greek,
-		list_style_type_lower_latin,
-		list_style_type_lower_roman,
-		list_style_type_upper_alpha,
-		list_style_type_upper_latin,
-		list_style_type_upper_roman,
+    list_style_type_none,
+    list_style_type_circle,
+    list_style_type_disc,
+    list_style_type_square,
+    list_style_type_armenian,
+    list_style_type_cjk_ideographic,
+    list_style_type_decimal,
+    list_style_type_decimal_leading_zero,
+    list_style_type_georgian,
+    list_style_type_hebrew,
+    list_style_type_hiragana,
+    list_style_type_hiragana_iroha,
+    list_style_type_katakana,
+    list_style_type_katakana_iroha,
+    list_style_type_lower_alpha,
+    list_style_type_lower_greek,
+    list_style_type_lower_latin,
+    list_style_type_lower_roman,
+    list_style_type_upper_alpha,
+    list_style_type_upper_latin,
+    list_style_type_upper_roman,
 */
 
 const litehtml::tchar_t* container_qt5::get_default_font_name() const
