@@ -25,12 +25,14 @@ ui(new Ui::MainWindow)
   //qDebug() << master_css;
   ctxt.load_master_stylesheet(master_css.constData());
 
-  std::string htmlStr = "";
+  std::string htmlStr = u8"";
+
   htmlStr += R"raw(
   <html>
   <head>
   <link rel="stylesheet" href="://res/css/reset.css">
   <link rel="stylesheet" href="://res/css/bootstrap.css">
+  <link rel="stylesheet" href="://res/css/test1.css">
   </head>
   <body>
 
@@ -248,45 +250,57 @@ ui(new Ui::MainWindow)
   Lorem Ipsum<input width="50px" height="50px" type="checkbox" name="nameOfChoice" value="1" style="width:50px;height:50px;background:darkgrey;">
 
   <customtag>customtag</customtag>
+
+  <div id='home'>dddd</div>
+
+  <div id='hoverme'>hoverme</div>
+
+  <ul><li>OneĞ Ğ†Ğ Â°Ğ Ñ—Ğ Ğ†Ğ Â°Ğ Ñ—</li><li>Zwei\u6211\u662F\u4E2D\u6587</li><li>Trois</li></ul>
+  <bold>123SFSDFDFSDF</bold>
+  <strong>emphasized text</strong>
+  <span style='font-weight: bold;'>bold text</span>
+  <p>Line1.1 Line1.2<br />Line2</p><ul><li>One</li><li>Zwei</li><li>Trois</li></ul>
+  <table><tr><th>H1</th><th>H2</th></tr><tr><td>C1.1</td><td>C1.2</td></tr><tr><td>C2.1</td><td>C2.2</td></tr></table>
+
+
+  Lorem Ipsum<input width="50px" height="50px" type="checkbox" name="nameOfChoice" value="1" style="width:50px;height:50px;background:darkgrey;">
+
+  <customtag>customtag</customtag>
   <link rel="stylesheet" href="://res/css/reset.css">
   <link rel="stylesheet" href="://res/css/bootstrap.css">
   <link rel="stylesheet" href="://res/css/test1.css">
 
   <div id='home'>dddd</div>
 
-  <div id='hoverme'>hoverme</div>
+  <div style='margin:15px;font: "Droid Sans";background:#CCC;border-bottom:6px solid yellow;width:30px;height:30px'>Ğ¢Ğ•ĞšĞ¡Ğ¢1 Ğ£Ğ¡text1</div>
+  <div style='font: "Arial Unicode MS";background:cyan;border-right:6px solid yellow;width:30px;height:30px'>Ğ¢Ğ•ĞšĞ¡Ğ¢2</div>
+  <div style='font: "Cousine Regular";background:#EEE;border:3px solid lightblue;width:30px;height:30px'>Ğ¢Ğ•ĞšĞ¡Ğ¢3</div>
+  <div style='font: "Font Awesome 5 Free";background:pink;border-left:16px solid grey;width:30px;height:30px'>
+  )raw";
 
-  <div style='margin:15px;font: "Droid Sans";background:#CCC;border-bottom:6px solid yellow;width:30px;height:30px'>ĞÓÑtext1</div>
-  <div style='font: "Arial Unicode MS";background:cyan;border-right:6px solid yellow;width:30px;height:30px'>ĞÓÑtext2</div>
-  <div style='font: "Cousine Regular";background:#EEE;border:3px solid lightblue;width:30px;height:30px'>ĞÓÑtext3</div>
-  <div style='font: "Font Awesome 5 Free";background:pink;border-left:16px solid grey;width:30px;height:30px'>ĞÓÑtext4\uf15c ?</div>
+  htmlStr += "\uf15c ? ";
+  htmlStr += u8"\uf15c";
+  htmlStr += u8"\uf118";
+  htmlStr += u8"\uf118 ? \uf118";
 
 
-  <ul><li>Oneâûàûâàûâàâàïóôôôûûûûêàêïìàûìâà</li><li>Zwei\u6211\u662F\u4E2D\u6587</li><li>Trois</li></ul>
+  htmlStr += R"raw(\uf118 ? \uf118</div>
+
+  <ul><li>OneĞ Ğ†Ğ Â°Ğ Ñ—Ğ Ğ†Ğ Â°Ğ Ñ—</li><li>Zwei\u6211\u662F\u4E2D\u6587</li><li>Trois</li></ul>
   <bold>123SFSDFDFSDF</bold>
   <strong>emphasized text</strong>
   <span style='font-weight: bold;'>bold text</span>
   <p>Line1.1 Line1.2<br />Line2</p><ul><li>One</li><li>Zwei</li><li>Trois</li></ul>
   <table><tr><th>H1</th><th>H2</th></tr><tr><td>C1.1</td><td>C1.2</td></tr><tr><td>C2.1</td><td>C2.2</td></tr></table>
-  <ul><li>Oneâûàûâàûâàâàïóôôôûûûûêàêïìàûìâà</li><li>Zwei\u6211\u662F\u4E2D\u6587</li><li>Trois</li></ul>
-  <bold>123SFSDFDFSDF</bold>
-  <strong>emphasized text</strong>
-  <span style='font-weight: bold;'>bold text</span>
-  <p>Line1.1 Line1.2<br />Line2</p><ul><li>One</li><li>Zwei</li><li>Trois</li></ul>
-  <table><tr><th>H1</th><th>H2</th></tr><tr><td>C1.1</td><td>C1.2</td></tr><tr><td>C2.1</td><td>C2.2</td></tr></table>
-  <ul><li>Oneâûàûâàûâàâàïóôôôûûûûêàêïìàûìâà</li><li>Zwei\u6211\u662F\u4E2D\u6587</li><li>Trois</li></ul>
-  <bold>123SFSDFDFSDF</bold>
-  <strong>emphasized text</strong>
-  <span style='font-weight: bold;'>bold text</span>
-  <p>Line1.1 Line1.2<br />Line2</p><ul><li>One</li><li>Zwei</li><li>Trois</li></ul>
-  <table><tr><th>H1</th><th>H2</th></tr><tr><td>C1.1</td><td>C1.2</td></tr><tr><td>C2.1</td><td>C2.2</td></tr></table>
+  <img src=':/res/img/test.png' alt=''>
+  <img src=':/res/img/test2.png' alt=''>
 
   </body>
   </html>)raw";
 
   const char* html = htmlStr.c_str();
 
-  //QString html2 = QString::fromUtf8(qPrintable(u8"F?llungRaupeStepÑ‹Ğ²Ğ°Ñ‹Ğ²Ğ°text"));//tr("F?llungRaupeStepÑ‹Ğ²Ğ°Ñ‹Ğ²Ğ°text");
+  //QString html2 = QString::fromUtf8(qPrintable(u8"F?llungRaupeStepĞ¡â€¹Ğ Ğ†Ğ Â°Ğ¡â€¹Ğ Ğ†Ğ Â°text"));//tr("F?llungRaupeStepĞ¡â€¹Ğ Ğ†Ğ Â°Ğ¡â€¹Ğ Ğ†Ğ Â°text");
 
 
   //auto doc = litehtml::document::createFromUTF8("<html><body><ul><li>One</li><li>Zwei</li><li>Trois</li></ul></body></html>", &c, &ctxt);
@@ -299,9 +313,6 @@ ui(new Ui::MainWindow)
   m_litehtmlWidget->show();
 
   ui->scrollAreaVerticalLayout->addWidget(m_litehtmlWidget);
-
-  m_litehtmlWidget->repaint();
-
   //c->setGeometry(0, 0, 500, 1200);
 
   /*//ui->scrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
