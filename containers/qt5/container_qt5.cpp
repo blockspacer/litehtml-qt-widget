@@ -157,14 +157,23 @@ void container_qt5::set_document(std::shared_ptr< litehtml::document > doc)
 
 void container_qt5::setScroll(const QPoint& val) {
   m_Scroll = val;
+
+  // allows resizing of painting area
+  _doc->media_changed();
 }
 
 void container_qt5::setScrollX(const int& val) {
   m_Scroll.setX(val);
+
+  // allows resizing of painting area
+  _doc->media_changed();
 }
 
 void container_qt5::setScrollY(const int& val) {
   m_Scroll.setY(val);
+
+  // allows resizing of painting area
+  _doc->media_changed();
 }
 
 QPoint container_qt5::getScroll() const {
@@ -183,6 +192,7 @@ void container_qt5::repaint(QPainter& painter)
 
     /// \note don`t allow render size < 1
     _doc->render(std::max(rc.width(), 1));
+    //_doc->render(5000);
 
     litehtml::position clipPos;
     clipPos.width 	= rc.width();
@@ -304,8 +314,10 @@ void container_qt5::get_client_rect(litehtml::position& client) const
     QRect	rc = m_owner->rect();
     client.x = rc.left();
     client.y = rc.top();
-    client.width = rc.width();
-    client.height = rc.height();
+
+    // ISSUE: draw body with 100% background size
+    client.width = rc.width()-m_Scroll.x();//std::max(_doc->width(), rc.width());
+    client.height = rc.height()-m_Scroll.y();//_doc->height();//std::max(_doc->height(), rc.height());
 }
 
 // Deletes the last clipping.
@@ -1354,6 +1366,7 @@ IntRect static toIntRect(const litehtml::position& pos) {
 
 static void calculateBackgroundImageGeometry(
   //const FillLayer* fillLayer,
+  int maxRootWidth, int maxRootHeight,
   int offsetX, int offsetY,
   const litehtml::background_paint& bg_paint,
   int tx, int ty, int w, int h,
@@ -1410,8 +1423,9 @@ static void calculateBackgroundImageGeometry(
         // the background positioning area.
         if (bg_paint.is_root) {
             // TODO >>>>>>>>>>>
+
             //positioningAreaSize = IntSize(toRenderBox(this)->width() - left - right, toRenderBox(this)->height() - top - bottom);
-            positioningAreaSize = IntSize(clip_box.width() - left - right, clip_box.height()  - top - bottom);
+            positioningAreaSize = IntSize(maxRootWidth - left - right, maxRootHeight  - top - bottom);
             // TODO >>>>>>>>>>>
             left += 0;//bg_paint.origin_box.left();//marginLeft();
             top += 0;//bg_paint.origin_box.top();;
@@ -1465,14 +1479,16 @@ static void calculateBackgroundImageGeometry(
     destRect.intersect(IntRect(tx, ty, w, h));
 }
 
-static void paintFillLayerExtended(GraphicsContext* graphicsContext, const Color& c
-//, const FillLayer* bgLayer
-, int offsetX, int offsetY
-, const litehtml::background_paint& bg_paint
-, ColorSpace colorSpace
-//, int tx, int ty, int w, int h, InlineFlowBox* box,
-, CompositeOperator op
-//, RenderObject* backgroundObject
+static void paintFillLayerExtended(
+  int maxRootWidth, int maxRootHeight,
+  GraphicsContext* graphicsContext, const Color& c
+  //, const FillLayer* bgLayer
+  , int offsetX, int offsetY
+  , const litehtml::background_paint& bg_paint
+  , ColorSpace colorSpace
+  //, int tx, int ty, int w, int h, InlineFlowBox* box,
+  , CompositeOperator op
+  //, RenderObject* backgroundObject
 )
 {
     /*QPoint clip_a(bg_paint.clip_box.left(), bg_paint.clip_box.top());
@@ -1510,6 +1526,20 @@ static void paintFillLayerExtended(GraphicsContext* graphicsContext, const Color
       ||  bg_paint.border_radius.bottom_left_y > 0
       ||  bg_paint.border_radius.bottom_right_x > 0
       ||  bg_paint.border_radius.bottom_right_y > 0;
+
+    /*if(bg_paint.is_root) {
+          tx = 0;
+          ty = 0;
+          w = 5000;//maxRootWidth;
+          h = 5000;//maxRootHeight;
+          qDebug() << "isRoot" << bg_paint.color.red;
+
+        IntRect rect(tx, ty,
+          w, h);
+          graphicsContext->fillRect(rect, c, colorSpace);
+        } else {
+        return;
+        }*/
 
    bool clippedToBorderRadius = false;
    if (hasBorderRadius) {
@@ -1635,7 +1665,7 @@ static void paintFillLayerExtended(GraphicsContext* graphicsContext, const Color
 
     // Only fill with a base color (e.g., white) if we're the root document, since iframes/frames with
     // no background in the child document should show the parent's background.
-    bool isOpaqueRoot = false;
+    bool isOpaqueRoot = isRoot;
     /*if (isRoot) {
         isOpaqueRoot = true;
         if (!bgLayer->next() && !(bgColor.isValid() && bgColor.alpha() == 255) && view()->frameView()) {
@@ -1667,29 +1697,39 @@ static void paintFillLayerExtended(GraphicsContext* graphicsContext, const Color
     // Paint the color first underneath all images.
     //if (!bgLayer->next())
     {
+
+        /*if(isRoot) {
+          tx = 0;
+          ty = 0;
+          w = 5000;//maxRootWidth;
+          h = 5000;//maxRootHeight;
+          qDebug() << "isRoot" << bg_paint.color.red;
+        }*/
+
         // IntRect rect(tx, ty, w, h);
         //IntRect rect(bg.position_x, bg.position_y, bg.clip_box.width, bg.clip_box.height);
         IntRect rect(tx, ty,
           w, h);
 
+
         // don`t draw background outside of element
         intersect_clip(rect);
 
         //rect.intersect(paintInfo.rect);
-        /*apply_clip( graphicsContext->platformContext() );
+        //apply_clip( graphicsContext->platformContext() );
 
         // If we have an alpha and we are painting the root element, go ahead and blend with the base background color.
         if (isOpaqueRoot) {
-            Color baseColor = toColor(bg.color);//view()->frameView()->baseBackgroundColor();
+            Color baseColor = bgColor;//toColor(bg.color);//view()->frameView()->baseBackgroundColor();
             if (baseColor.alpha() > 0) {
                 graphicsContext->save();
-                //graphicsContext->setCompositeOperation(CompositeCopy);
+                graphicsContext->setCompositeOperation(CompositeCopy);
                 //graphicsContext->fillRect(rect, baseColor, style()->colorSpace());
                 graphicsContext->fillRect(rect, baseColor, colorSpace);
                 graphicsContext->restore();
             } else
                 graphicsContext->clearRect(rect);
-        }*/
+        }
 
         if (bgColor.isValid() && bgColor.alpha() > 0)
             graphicsContext->fillRect(rect, bgColor, colorSpace);
@@ -1720,6 +1760,7 @@ static void paintFillLayerExtended(GraphicsContext* graphicsContext, const Color
             IntSize tileSize;
 
             calculateBackgroundImageGeometry(
+              maxRootWidth, maxRootHeight,
               //bgLayer,
               offsetX, offsetY,
               bg_paint,
@@ -1808,6 +1849,7 @@ void container_qt5::draw_background(litehtml::uint_ptr hdc, const litehtml::back
     }
 
     paintFillLayerExtended(
+      _doc->width(), _doc->height(),
       graphicsContext,
       toColor(bg.color),
       offsetX, offsetY,
@@ -2284,6 +2326,9 @@ void litehtmlWidget::mouseMoveEvent(QMouseEvent *event)
     if (container->getDocument()->on_mouse_over(adopted.x(), adopted.y(), adopted.x(), adopted.y(), redraw_boxes)) {
       repaint();
     }
+
+    // allows resizing of painting area
+    container->_doc->media_changed();
 }
 
 void litehtmlWidget::mousePressEvent(QMouseEvent *event)
@@ -2297,6 +2342,9 @@ void litehtmlWidget::mousePressEvent(QMouseEvent *event)
     if (container->getDocument()->on_lbutton_down(adopted.x(), adopted.y(), adopted.x(), adopted.y(), redraw_boxes)) {
       repaint();
     }
+
+    // allows resizing of painting area
+    container->_doc->media_changed();
 }
 
 void litehtmlWidget::mouseReleaseEvent(QMouseEvent *event)
@@ -2310,10 +2358,14 @@ void litehtmlWidget::mouseReleaseEvent(QMouseEvent *event)
     if (container->getDocument()->on_lbutton_up(adopted.x(), adopted.y(), adopted.x(), adopted.y(), redraw_boxes)) {
       repaint();
     }
+
+    // allows resizing of painting area
+    container->_doc->media_changed();
 }
 
 void litehtmlWidget::resizeEvent(QResizeEvent *event)
 {
+  // allows resizing of painting area
   container->_doc->media_changed();
 
   /*QRect	rc = rect( );
