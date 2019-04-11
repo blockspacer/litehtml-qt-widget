@@ -6,6 +6,8 @@
 #include <QtCore>
 #include <QVector>
 
+#include <QSet>
+#include <QHash>
 #include <QDebug>
 #include <QFont>
 #include <QFontMetrics>
@@ -25,6 +27,8 @@
 #include <iostream>
 #include <cmath>
 #include <string>
+#include <memory>
+
 
 /*#include "floatpoint.h"
 #include "floatrect.h"
@@ -32,8 +36,6 @@
 #include "intsize.h"
 #include "floatsize.h"
 #include "intrect.h"*/
-
-///////
 
 // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/JavaScriptCore/wtf/FastMalloc.cpp
 //#define fastMalloc malloc
@@ -71,7 +73,22 @@ const size_t notFound = static_cast<size_t>(-1);
 ////////////
 
 // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/JavaScriptCore/wtf/StdLibExtras.h
-//#define reinterpret_cast_ptr reinterpret_cast
+#define reinterpret_cast_ptr reinterpret_cast
+
+// https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/JavaScriptCore/wtf/StdLibExtras.h#L34
+#ifndef DEFINE_STATIC_LOCAL
+#define DEFINE_STATIC_LOCAL(type, name, arguments) \
+    static type& name = *new type arguments
+#endif
+
+// OBJECT_OFFSETOF: Like the C++ offsetof macro, but you can use it with classes.
+// The magic number 0x4000 is insignificant. We use it to avoid using NULL, since
+// NULL can cause compiler problems, especially in cases of multiple inheritance.
+#define OBJECT_OFFSETOF(class, field) (reinterpret_cast<ptrdiff_t>(&(reinterpret_cast<class*>(0x4000)->field)) - 0x4000)
+
+// STRINGIZE: Can convert any value to quoted string, even expandable macros
+#define STRINGIZE(exp) #exp
+#define STRINGIZE_VALUE_OF(exp) STRINGIZE(exp)
 
 //#define WTF std
 
@@ -102,6 +119,14 @@ struct NamedColor {
 };
 
 typedef QString String;
+
+template <class Key>
+using HashSet = QSet<Key>;
+template <class Key, class Value>
+using HashMap = QHash<Key, Value>;
+//template <typename A, typename B>
+//typedef QHash<A,B> HashSet<A,B>;
+
 typedef char UChar;
 
 
@@ -155,8 +180,14 @@ typedef char UChar;
 
     //#define Vector QVector
 
-    #define PassRefPtr std::shared_ptr
     #define RefPtr std::shared_ptr
+    #define PassRefPtr std::shared_ptr
+
+    #define OwnPtr std::unique_ptr
+    #define PassOwnPtr std::unique_ptr
+
+    #define adoptOwnPtr std::make_unique
+
 
     #define adoptRef std::make_shared
 
@@ -183,8 +214,8 @@ enum BoxSide {
 // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/JavaScriptCore/wtf/MathExtras.h
 
 #include <cmath>
-#include <float.h>
-#include <stdlib.h>
+#include <cfloat>
+#include <cstdlib>
 
 /*#if OS(SOLARIS)
 #include <ieeefp.h>

@@ -4,13 +4,13 @@
 
 #include "common.h"
 
-#include <string.h> // for memcpy
+//#include <string.h> // for memcpy
 
 #include <QTransform>
 
 #include <memory>
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 #include "floatquad.h"
 

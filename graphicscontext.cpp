@@ -256,7 +256,7 @@ bool GraphicsContext::paintingDisabled() const
     return m_common->state.paintingDisabled;
 }
 
-/*void GraphicsContext::drawImage(Image* image, ColorSpace styleColorSpace, const IntPoint& p, CompositeOperator op)
+void GraphicsContext::drawImage(Image* image, ColorSpace styleColorSpace, const IntPoint& p, CompositeOperator op)
 {
     drawImage(image, styleColorSpace, p, IntRect(0, 0, -1, -1), op);
 }
@@ -276,7 +276,7 @@ void GraphicsContext::drawImage(Image* image, ColorSpace styleColorSpace, const 
     drawImage(image, styleColorSpace, FloatRect(dest), srcRect, op, useLowQualityScale);
 }
 
-#if !OS(WINCE) || PLATFORM(QT)
+/*#if !OS(WINCE) || PLATFORM(QT)
 void GraphicsContext::drawText(const Font& font, const TextRun& run, const IntPoint& point, int from, int to)
 {
     if (paintingDisabled())
@@ -328,7 +328,7 @@ void GraphicsContext::drawHighlightForText(const Font& font, const TextRun& run,
         return;
 
     fillRect(font.selectionRectForText(run, point, h, from, to), backgroundColor, colorSpace);
-}
+}*/
 
 void GraphicsContext::drawImage(Image* image, ColorSpace styleColorSpace, const FloatRect& dest, const FloatRect& src, CompositeOperator op, bool useLowQualityScale)
 {
@@ -390,7 +390,7 @@ void GraphicsContext::drawTiledImage(Image* image, ColorSpace styleColorSpace, c
         restore();
 }
 
-void GraphicsContext::drawImageBuffer(ImageBuffer* image, ColorSpace styleColorSpace, const IntPoint& p, CompositeOperator op)
+/*void GraphicsContext::drawImageBuffer(ImageBuffer* image, ColorSpace styleColorSpace, const IntPoint& p, CompositeOperator op)
 {
     drawImageBuffer(image, styleColorSpace, p, IntRect(0, 0, -1, -1), op);
 }

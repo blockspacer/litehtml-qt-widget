@@ -9,6 +9,10 @@
 
 #include "graphicscontext.h"
 
+#include "image.h"
+#include "imagesource.h"
+#include "stillimageqt.h"
+
 #include "fontcache.h"
 #include "pathqt.h"
 #include <cmath>
@@ -1471,8 +1475,8 @@ static void paintFillLayerExtended(GraphicsContext* graphicsContext, const Color
 //, RenderObject* backgroundObject
 )
 {
-    QPoint clip_a(bg_paint.clip_box.left(), bg_paint.clip_box.top());
-    QPoint clip_b(bg_paint.clip_box.right(), bg_paint.clip_box.bottom());
+    /*QPoint clip_a(bg_paint.clip_box.left(), bg_paint.clip_box.top());
+    QPoint clip_b(bg_paint.clip_box.right(), bg_paint.clip_box.bottom());*/
 
     /*IntRect origin_box = toIntRect( bg_paint.origin_box );
     IntRect border_box = toIntRect( bg_paint.border_box );
@@ -1727,34 +1731,46 @@ static void paintFillLayerExtended(GraphicsContext* graphicsContext, const Color
             // don`t draw background outside of element
             intersect_clip(destRect);
 
-            auto imscaled = img->scaled(tileSize.width(), tileSize.height(), Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+            QImage imscaled = img->scaled(tileSize.width(), tileSize.height(), Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
 
-            QBrush *brushTiledImage = new QBrush(imscaled);
-            brushTiledImage->setStyle(Qt::BrushStyle::TexturePattern);
+            //QBrush *brushTiledImage = new QBrush(imscaled);
+            //brushTiledImage->setStyle(Qt::BrushStyle::TexturePattern);
 
             //graphicsContext->platformContext()->setBackground(*brushTiledImage);
             //graphicsContext->platformContext()->drawImage(
              // bg_paint.clip_box.x, bg_paint.clip_box.y, imscaled, 0, 0, bg_paint.clip_box.x - bg_paint.clip_box.x, bg_paint.clip_box.y - bg_paint.clip_box.y );
-            qDebug() << "drawn image" << bg_paint.image.c_str() << bg_paint.baseurl.c_str()
+            /*qDebug() << "drawn image" << bg_paint.image.c_str() << bg_paint.baseurl.c_str()
               << tileSize.width() << tileSize.height()
               << destRect.location().x() << destRect.location().y() << destRect.width() << destRect.height();
-
+*/
 
     //apply_clip( graphicsContext->platformContext() );
     //QBrush *brushTiledImage = new QBrush(imscaled);
-            graphicsContext->platformContext()->drawImage(
+            /*graphicsContext->platformContext()->drawImage(
               //clip_a.x(), clip_a.y(), imscaled, 0, 0, clip_b.x() - clip_a.x(), clip_b.y() - clip_a.y() );
               destRect.x(), destRect.y(), imscaled, 0, 0, destRect.width(), destRect.height() );
-
+*/
             //graphicsContext->platformContext()->drawLine(0, 0, 400, 400);
             if (!destRect.isEmpty()) {
                 phase += destRect.location() - destOrigin;
                 //CompositeOperator compositeOp = op == CompositeSourceOver ? bgLayer->composite() : op;
                 CompositeOperator compositeOp = op; // TODO
-                //RenderObject* clientForBackgroundImage = backgroundObject ? backgroundObject : this;
-                //Image* image = bg->image(clientForBackgroundImage, tileSize);
-                //bool useLowQualityScaling = shouldPaintAtLowQuality(graphicsContext, image, tileSize);
-                //graphicsContext->drawTiledImage(image, style()->colorSpace(), destRect, phase, tileSize, compositeOp, useLowQualityScaling);
+
+                // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/style/FillLayer.h#L67
+                //StyleImage bg;  // is FillLayer->image()
+                QPixmap pixmap;
+                if (pixmap.convertFromImage(imscaled)) {
+
+                  StillImage stillImage ( pixmap );
+                  Image* image = &stillImage;
+
+                  //RenderObject* clientForBackgroundImage = backgroundObject ? backgroundObject : this;
+                  //Image* image = bg->image(clientForBackgroundImage, tileSize);
+                  bool useLowQualityScaling = false;//shouldPaintAtLowQuality(graphicsContext, image, tileSize);
+                  graphicsContext->drawTiledImage(image, colorSpace, destRect, phase, tileSize, compositeOp, useLowQualityScaling);
+                } else {
+                  qWarning() << "error converting image to pixmap";
+                }
             }
           }
         }

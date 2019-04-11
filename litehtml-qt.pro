@@ -22,7 +22,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-CONFIG += c++11
+CONFIG += c++14
 
 SOURCES += \
     src/main.cpp \
@@ -42,7 +42,20 @@ SOURCES += \
     floatquad.cpp \
     floatpoint3d.cpp \
     gradient.cpp \
-    common.cpp
+    common.cpp \
+    image.cpp \
+    imagesource.cpp \
+    imagedecoderqt.cpp \
+    imagedecoder.cpp \# \
+    stillimageqt.cpp \
+    bitmapimage.cpp \
+    imageobserver.cpp \
+    mimetyperegistry.cpp \
+    mimetyperegistryqt.cpp \
+    sharedbuffer.cpp \
+    purgeablebuffer.cpp \
+    rgba32bufferqt.cpp
+    #pngimagedecoder.cpp
     # \
     #vector.cpp
 
@@ -64,7 +77,20 @@ HEADERS += \
     intrect.h \
     floatquad.h \
     floatpoint3d.h \
-    gradient.h
+    gradient.h \
+    image.h \
+    imagesource.h \
+    imagedecoderqt.h \
+    imagedecoder.h \# \
+    stillimageqt.h \
+    bitmapimage.h \
+    imageobserver.h \
+    mimetyperegistry.h \
+    mimetyperegistryqt.h \
+    sharedbuffer.h \
+    purgeablebuffer.h \
+    rgba32bufferqt.h
+    #pngimagedecoder.h
     # \
     #vector.h \
     #vectortraits.h

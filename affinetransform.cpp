@@ -5,9 +5,9 @@
 #include <cmath>
 #include <string>
 
-#include <stdio.h>
+#include <cstdio>
 
-  //#include <math.h>
+  //#include <cmath>
   #include <iostream>
 
 /*#include "config.h"
