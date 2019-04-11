@@ -255,7 +255,7 @@ ui(new Ui::MainWindow)
 
   <div id='hoverme'>hoverme</div>
 
-  <ul><li>OneРІР°РїРІР°Рї</li><li>Zwei\u6211\u662F\u4E2D\u6587</li><li>Trois</li></ul>
+  <ul><li>One� І� °� ї� І� °� ї</li><li>Zwei\u6211\u662F\u4E2D\u6587</li><li>Trois</li></ul>
   <bold>123SFSDFDFSDF</bold>
   <strong>emphasized text</strong>
   <span style='font-weight: bold;'>bold text</span>
@@ -286,7 +286,7 @@ ui(new Ui::MainWindow)
 
   htmlStr += R"raw(\uf118 ? \uf118</div>
 
-  <ul><li>OneРІР°РїРІР°Рї</li><li>Zwei\u6211\u662F\u4E2D\u6587</li><li>Trois</li></ul>
+  <ul><li>One� І� °� ї� І� °� ї</li><li>Zwei\u6211\u662F\u4E2D\u6587</li><li>Trois</li></ul>
   <bold>123SFSDFDFSDF</bold>
   <strong>emphasized text</strong>
   <span style='font-weight: bold;'>bold text</span>
@@ -299,19 +299,6 @@ ui(new Ui::MainWindow)
 <style>
 * {
   box-sizing: border-box;
-}
-
-body {
-  font-family: Arial;
-  padding: 10px;
-  background: #f1f1f1;
-}
-
-/* Header/Blog Title */
-.header {
-  padding: 30px;
-  text-align: center;
-  background: white;
 }
 
 .header h1 {
@@ -456,12 +443,57 @@ body {
 </div>
 
 
+<style>
+div.polaroid {
+  width: 250px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  text-align: center;
+}
+
+div.container {
+  padding: 10px;
+}
+</style>
+</head>
+<body>
+
+<h2>Polaroid Images / Cards</h2>
+
+<p>The box-shadow property can be used to create paper-like cards:</p>
+
+<div class="polaroid">
+  <img src=':/res/img/test.png' alt="Norway" style="width:100%">
+  <div class="container">
+    <p>Hardanger, Norway</p>
+  </div>
+</div>
+
+<style>
+#borderimg {
+  border: 10px solid transparent;
+  padding: 15px;
+ border: 5px solid grey;
+ border-image: url(':/res/img/test.png');
+}
+</style>
+</head>
+<body>
+
+<h1>The border-image Property</h1>
+
+<p>Here, the middle sections of the image are repeated to create the border:</p>
+<p id="borderimg">border-image: url(border.png) 30 round;</p>
+
+<p>Here is the original image:</p><img src="border.png">
+<p><strong>Note:</strong> Internet Explorer 10, and earlier versions, do not support the border-image property.</p>
+
+
   </body>
   </html>)raw";
 
   const char* html = htmlStr.c_str();
 
-  //QString html2 = QString::fromUtf8(qPrintable(u8"F?llungRaupeStepС‹РІР°С‹РІР°text"));//tr("F?llungRaupeStepС‹РІР°С‹РІР°text");
+  //QString html2 = QString::fromUtf8(qPrintable(u8"F?llungRaupeStepС‹� І� °С‹� І� °text"));//tr("F?llungRaupeStepС‹� І� °С‹� І� °text");
 
 
   //auto doc = litehtml::document::createFromUTF8("<html><body><ul><li>One</li><li>Zwei</li><li>Trois</li></ul></body></html>", &c, &ctxt);

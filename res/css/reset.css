@@ -16,6 +16,15 @@ head {
     overflow: visible;
 }
 
+body {
+  display:block;
+  margin:0px;
+  padding:0px;
+  height:100%;
+  width:100%;
+  overflow: visible;
+}
+
 meta {
     display: none
 }
@@ -34,15 +43,6 @@ style {
 
 script {
     display: none
-}
-
-body {
-  display:block;
-  margin:8px;
-  height:100%;
-  width:100%;
-  padding:0px;
-  overflow: visible;
 }
 
 p {

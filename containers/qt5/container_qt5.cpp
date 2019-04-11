@@ -1102,6 +1102,8 @@ static void paintBorder(
   int tx, int ty, int w, int h,
   bool begin = true, bool end = true)
 {
+    // TODO
+    // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/RenderBoxModelObject.cpp#L880
     /*if (paintNinePieceImage(graphicsContext, tx, ty, w, h, style, borderImage()))
         return;*/
 
@@ -1266,6 +1268,8 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
       // we are in <html>, so no borders here
       return;
     }
+
+    // borders.top.image // TODO: add border-image to litehtml
 
     GraphicsContext* graphicsContext = (GraphicsContext*) hdc;
     if(!graphicsContext) {
