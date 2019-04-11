@@ -141,7 +141,7 @@ ui(new Ui::MainWindow)
       <div style="border: 5px solid pink; border-left-width: 15px;">border: 5px solid pink; border-left-width: 15px;</div>
     </div>
     <div class="first">
-      <div style="border: 5px solid green; border-left-width: 15px; border-radius: 55px;">border: 5px solid green; border-left-width: 15px; border-radius: 55px;</div>
+      <div style="border: 5px solid green; background: orange; border-left-width: 15px; border-radius: 55px;">border: 5px solid green; background: orange; border-left-width: 15px; border-radius: 55px;</div>
     </div>
     <div class="first">
       <div style="">1px width / 1px radius</div>
@@ -171,6 +171,10 @@ ui(new Ui::MainWindow)
       <div class="bunt">Bunt</div>
     </div>
   </div>
+
+  <img src=':/res/img/test.png' alt='' width="200" height="200" style="width:200px;height:200px">
+  <img src=':/res/img/test2.png' alt='' width="200px" height="200px" style="width:200px;height:200px">
+
   <div id="root" class="second">
     <div class="first">
       <div style="">1px width / 1px radius</div>
@@ -210,6 +214,10 @@ ui(new Ui::MainWindow)
     border-left:1px solid red;
     width:50px;
     height:50px
+    background-size:     cover;                      /* <------ */
+    background-repeat:   no-repeat;
+    background-position: center center;              /* optional, center the image */
+
   }
 
   #home:hover         { background: no-repeat url(':/res/img/test2.png') -29px 0px; overflow:hidden; }
@@ -243,18 +251,27 @@ ui(new Ui::MainWindow)
   <div style='margin:15px;font: "Droid Sans";background:#CCC;border-bottom:6px solid yellow;width:30px;height:30px'>ĞÓÑtext1</div>
   <div style='font: "Arial Unicode MS";background:cyan;border-right:6px solid yellow;width:30px;height:30px'>ĞÓÑtext2</div>
   <div style='font: "Cousine Regular";background:#EEE;border:3px solid lightblue;width:30px;height:30px'>ĞÓÑtext3</div>
-  <div style='font: "Font Awesome 5 Free";background:pink;border-left:16px solid grey;width:30px;height:30px'>
+  <div style='font: "Font Awesome 5 Free";background:pink;border-left:16px solid grey;width:30px;height:30px'>ĞÓÑtext4\uf15c ?</div>
 
-  \uf15c ?
+
   <ul><li>Oneâûàûâàûâàâàïóôôôûûûûêàêïìàûìâà</li><li>Zwei\u6211\u662F\u4E2D\u6587</li><li>Trois</li></ul>
   <bold>123SFSDFDFSDF</bold>
   <strong>emphasized text</strong>
   <span style='font-weight: bold;'>bold text</span>
   <p>Line1.1 Line1.2<br />Line2</p><ul><li>One</li><li>Zwei</li><li>Trois</li></ul>
   <table><tr><th>H1</th><th>H2</th></tr><tr><td>C1.1</td><td>C1.2</td></tr><tr><td>C2.1</td><td>C2.2</td></tr></table>
-  <img src=':/res/img/test.png' alt=''>
-  <img src=':/res/img/test2.png' alt=''>
-
+  <ul><li>Oneâûàûâàûâàâàïóôôôûûûûêàêïìàûìâà</li><li>Zwei\u6211\u662F\u4E2D\u6587</li><li>Trois</li></ul>
+  <bold>123SFSDFDFSDF</bold>
+  <strong>emphasized text</strong>
+  <span style='font-weight: bold;'>bold text</span>
+  <p>Line1.1 Line1.2<br />Line2</p><ul><li>One</li><li>Zwei</li><li>Trois</li></ul>
+  <table><tr><th>H1</th><th>H2</th></tr><tr><td>C1.1</td><td>C1.2</td></tr><tr><td>C2.1</td><td>C2.2</td></tr></table>
+  <ul><li>Oneâûàûâàûâàâàïóôôôûûûûêàêïìàûìâà</li><li>Zwei\u6211\u662F\u4E2D\u6587</li><li>Trois</li></ul>
+  <bold>123SFSDFDFSDF</bold>
+  <strong>emphasized text</strong>
+  <span style='font-weight: bold;'>bold text</span>
+  <p>Line1.1 Line1.2<br />Line2</p><ul><li>One</li><li>Zwei</li><li>Trois</li></ul>
+  <table><tr><th>H1</th><th>H2</th></tr><tr><td>C1.1</td><td>C1.2</td></tr><tr><td>C2.1</td><td>C2.2</td></tr></table>
 
   </body>
   </html>)raw";
