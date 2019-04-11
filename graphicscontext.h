@@ -323,7 +323,7 @@ public:
 
         void setAlpha(float);
 
-        /*void setCompositeOperation(CompositeOperator);*/
+        void setCompositeOperation(CompositeOperator);
 
         void beginPath();
         void addPath(const Path&);
@@ -352,8 +352,7 @@ public:
         //void pushTransparencyLayerInternal(const QRect &rect, qreal opacity, QPixmap& alphaMask);
         QPen pen();
 
-        /*static QPainter::CompositionMode toQtCompositionMode(CompositeOperator op);
-        */
+        static QPainter::CompositionMode toQtCompositionMode(CompositeOperator op);
 
         /*ContextShadow* contextShadow();*/
 

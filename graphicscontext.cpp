@@ -569,7 +569,7 @@ void GraphicsContext::adjustLineToPixelBoundaries(FloatPoint& p1, FloatPoint& p2
 ///////////////////////////////////////////////////////////////////////
 
 
-/*QPainter::CompositionMode GraphicsContext::toQtCompositionMode(CompositeOperator op)
+QPainter::CompositionMode GraphicsContext::toQtCompositionMode(CompositeOperator op)
 {
     switch (op) {
     case CompositeClear:
@@ -604,7 +604,7 @@ void GraphicsContext::adjustLineToPixelBoundaries(FloatPoint& p1, FloatPoint& p2
     }
 
     return QPainter::CompositionMode_SourceOver;
-}*/
+}
 
 static inline Qt::PenCapStyle toQtLineCap(LineCap lc)
 {
@@ -1536,14 +1536,14 @@ void GraphicsContext::setAlpha(float opacity)
     p->setOpacity(opacity);
 }
 
-/*void GraphicsContext::setCompositeOperation(CompositeOperator op)
+void GraphicsContext::setCompositeOperation(CompositeOperator op)
 {
     if (paintingDisabled())
         return;
 
     if (m_data->p()->paintEngine()->hasFeature(QPaintEngine::PorterDuff))
         m_data->p()->setCompositionMode(toQtCompositionMode(op));
-}*/
+}
 
 void GraphicsContext::clip(const Path& path)
 {

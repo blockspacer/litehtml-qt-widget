@@ -1466,7 +1466,9 @@ static void paintFillLayerExtended(GraphicsContext* graphicsContext, const Color
 , int offsetX, int offsetY
 , const litehtml::background_paint& bg_paint
 , ColorSpace colorSpace
-//, int tx, int ty, int w, int h, InlineFlowBox* box, CompositeOperator op, RenderObject* backgroundObject
+//, int tx, int ty, int w, int h, InlineFlowBox* box,
+, CompositeOperator op
+//, RenderObject* backgroundObject
 )
 {
     QPoint clip_a(bg_paint.clip_box.left(), bg_paint.clip_box.top());
@@ -1745,14 +1747,15 @@ static void paintFillLayerExtended(GraphicsContext* graphicsContext, const Color
               destRect.x(), destRect.y(), imscaled, 0, 0, destRect.width(), destRect.height() );
 
             //graphicsContext->platformContext()->drawLine(0, 0, 400, 400);
-            //if (!destRect.isEmpty()) {
-            //    phase += destRect.location() - destOrigin;
-            //    CompositeOperator compositeOp = op == CompositeSourceOver ? bgLayer->composite() : op;
-            //    //RenderObject* clientForBackgroundImage = backgroundObject ? backgroundObject : this;
-            //    Image* image = bg->image(clientForBackgroundImage, tileSize);
-            //    bool useLowQualityScaling = shouldPaintAtLowQuality(graphicsContext, image, tileSize);
-            //    graphicsContext->drawTiledImage(image, style()->colorSpace(), destRect, phase, tileSize, compositeOp, useLowQualityScaling);
-            //}
+            if (!destRect.isEmpty()) {
+                phase += destRect.location() - destOrigin;
+                //CompositeOperator compositeOp = op == CompositeSourceOver ? bgLayer->composite() : op;
+                CompositeOperator compositeOp = op; // TODO
+                //RenderObject* clientForBackgroundImage = backgroundObject ? backgroundObject : this;
+                //Image* image = bg->image(clientForBackgroundImage, tileSize);
+                //bool useLowQualityScaling = shouldPaintAtLowQuality(graphicsContext, image, tileSize);
+                //graphicsContext->drawTiledImage(image, style()->colorSpace(), destRect, phase, tileSize, compositeOp, useLowQualityScaling);
+            }
           }
         }
     }
@@ -1793,7 +1796,8 @@ void container_qt5::draw_background(litehtml::uint_ptr hdc, const litehtml::back
       toColor(bg.color),
       offsetX, offsetY,
       bg,
-      sRGBColorSpace);
+      sRGBColorSpace,
+      CompositeSourceOver);
 
 /*
     painter->save();

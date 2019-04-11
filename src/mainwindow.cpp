@@ -175,6 +175,14 @@ ui(new Ui::MainWindow)
   <img src=':/res/img/test.png' alt='' width="200" height="200" style="width:200px;height:200px">
   <img src=':/res/img/test2.png' alt='' width="200px" height="200px" style="width:200px;height:200px">
 
+  <div style="background-image: url(':/res/img/test.png');background-repeat: repeat-y;width:400px;height:400px;">
+    background-repeat: repeat-y;
+  </div>
+
+  <div style="background-image: url(':/res/img/test.png');background-repeat: repeat;width:400px;height:400px;">
+    background-repeat: repeat;
+  </div>
+
   <div id="root" class="second">
     <div class="first">
       <div style="">1px width / 1px radius</div>
