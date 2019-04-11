@@ -481,14 +481,14 @@ void GraphicsContext::setTextDrawingMode(int mode)
     if (paintingDisabled())
         return;
     setPlatformTextDrawingMode(mode);
-}
+}*/
 
 void GraphicsContext::fillRect(const FloatRect& rect, Generator& generator)
 {
     if (paintingDisabled())
         return;
     generator.fill(this, rect);
-}*/
+}
 
 //#if !PLATFORM(SKIA)
 void GraphicsContext::setPlatformFillGradient(Gradient*)
@@ -604,7 +604,7 @@ void GraphicsContext::adjustLineToPixelBoundaries(FloatPoint& p1, FloatPoint& p2
     }
 
     return QPainter::CompositionMode_SourceOver;
-}
+}*/
 
 static inline Qt::PenCapStyle toQtLineCap(LineCap lc)
 {
@@ -632,7 +632,7 @@ static inline Qt::PenJoinStyle toQtLineJoin(LineJoin lj)
     }
 
     return Qt::MiterJoin;
-}*/
+}
 
 static Qt::PenStyle toQPenStyle(StrokeStyle style)
 {
@@ -704,7 +704,7 @@ GraphicsContext::GraphicsContext(PlatformGraphicsContext* context)
         setPlatformStrokeColor(strokeColor(), DeviceColorSpace);
 
         // Make sure we start with the correct join mode.
-        //setLineJoin(MiterJoin);
+        setLineJoin(MiterJoin);
     }
 }
 
@@ -1168,7 +1168,7 @@ void GraphicsContext::fillRect(const FloatRect& rect)
 }
 
 
-/*void GraphicsContext::fillRect(const FloatRect& rect, const Color& color, ColorSpace colorSpace)
+void GraphicsContext::fillRect(const FloatRect& rect, const Color& color, ColorSpace colorSpace)
 {
     if (paintingDisabled() || !color.isValid())
         return;
@@ -1177,7 +1177,7 @@ void GraphicsContext::fillRect(const FloatRect& rect)
     QPainter* p = m_data->p();
     QRectF normalizedRect = rect.normalized();
 
-    if (m_data->hasShadow()) {
+    /*if (m_data->hasShadow()) {
         ContextShadow* shadow = contextShadow();
 
         if (shadow->m_type != ContextShadow::BlurShadow) {
@@ -1191,7 +1191,7 @@ void GraphicsContext::fillRect(const FloatRect& rect)
                 shadow->endShadowLayer(p);
             }
         }
-    }
+    }*/
 
     p->fillRect(normalizedRect, m_data->solidColor);
 }
@@ -1204,13 +1204,13 @@ void GraphicsContext::fillRoundedRect(const IntRect& rect, const IntSize& topLef
     Path path;
     path.addRoundedRect(rect, topLeft, topRight, bottomLeft, bottomRight);
     QPainter* p = m_data->p();
-    if (m_data->hasShadow()) {
+    /*if (m_data->hasShadow()) {
         p->translate(m_data->shadow.offset());
         p->fillPath(path.platformPath(), QColor(m_data->shadow.m_color));
         p->translate(-m_data->shadow.offset());
-    }
+    }*/
     p->fillPath(path.platformPath(), QColor(color));
-}*/
+}
 
 void GraphicsContext::beginPath()
 {
@@ -1467,7 +1467,7 @@ void GraphicsContext::strokeRect(const FloatRect& rect, float width)
     strokePath();
 }
 
-/*void GraphicsContext::setLineCap(LineCap lc)
+void GraphicsContext::setLineCap(LineCap lc)
 {
     if (paintingDisabled())
         return;
@@ -1476,7 +1476,7 @@ void GraphicsContext::strokeRect(const FloatRect& rect, float width)
     QPen nPen = p->pen();
     nPen.setCapStyle(toQtLineCap(lc));
     p->setPen(nPen);
-}*/
+}
 
 void GraphicsContext::setLineDash(const DashArray& dashes, float dashOffset)
 {
@@ -1500,7 +1500,7 @@ void GraphicsContext::setLineDash(const DashArray& dashes, float dashOffset)
     p->setPen(pen);
 }
 
-/*void GraphicsContext::setLineJoin(LineJoin lj)
+void GraphicsContext::setLineJoin(LineJoin lj)
 {
     if (paintingDisabled())
         return;
@@ -1509,7 +1509,7 @@ void GraphicsContext::setLineDash(const DashArray& dashes, float dashOffset)
     QPen nPen = p->pen();
     nPen.setJoinStyle(toQtLineJoin(lj));
     p->setPen(nPen);
-}*/
+}
 
 void GraphicsContext::setMiterLimit(float limit)
 {

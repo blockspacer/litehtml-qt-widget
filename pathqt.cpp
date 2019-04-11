@@ -12,6 +12,7 @@
 #include <QTransform>
 #include <QString>
 #include "floatrect.h"
+#include "graphicscontext.h"
 //#include <wtf/OwnPtr.h>
 
 #define _USE_MATH_DEFINES
@@ -93,13 +94,13 @@ bool Path::contains(const FloatPoint& point, WindRule rule) const
     return contains;
 }
 
-/*static GraphicsContext* scratchContext()
+static GraphicsContext* scratchContext()
 {
     static QImage image(1, 1, QImage::Format_ARGB32_Premultiplied);
     static QPainter painter(&image);
     static GraphicsContext* context = new GraphicsContext(&painter);
     return context;
-}*/
+}
 
 /*bool Path::strokeContains(StrokeStyleApplier* applier, const FloatPoint& point) const
 {

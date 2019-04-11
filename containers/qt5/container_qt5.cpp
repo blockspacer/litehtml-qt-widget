@@ -53,6 +53,15 @@ static void	apply_clip( QPainter* pnt )
   */
 }
 
+static void	intersect_clip( IntRect& rect ) {
+  if(!m_clips.empty())
+  {
+    litehtml::position clip_pos = m_clips.back();
+    rect.intersect(IntRect(clip_pos.x, clip_pos.y, clip_pos.width, clip_pos.height));
+    //pnt->setClipRect( clip_pos.left(), clip_pos.top(), clip_pos.width, clip_pos.height );
+  }
+}
+
 static QString make_url( const char* url, const char* basepath, QUrl* pUrl = nullptr )
 {
   /*QUrl	u = QUrl::fromUserInput( url, (basepath && basepath[0]) ? basepath : m_base_url );
@@ -1335,6 +1344,261 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
     graphicsContext->restore();
 }
 
+static void paintFillLayerExtended(GraphicsContext* graphicsContext, const Color& c
+//, const FillLayer* bgLayer
+, int offsetX, int offsetY
+, const litehtml::background_paint& bg_paint
+, ColorSpace colorSpace
+//, int tx, int ty, int w, int h, InlineFlowBox* box, CompositeOperator op, RenderObject* backgroundObject
+)
+{
+    if (graphicsContext->paintingDisabled())
+        return;
+
+    int tx = bg_paint.clip_box.left();
+    //qDebug() << bg.position_x << bg.clip_box.left();
+    int ty = bg_paint.clip_box.top();
+    int w = bg_paint.clip_box.width;
+    int h = bg_paint.clip_box.height;
+
+    bool includeLeftEdge = true;//box ? box->includeLogicalLeftEdge() : true;
+    bool includeRightEdge = true;//box ? box->includeLogicalRightEdge() : true;
+    int bLeft =  bg_paint.border_box.left();//includeLeftEdge ? borderLeft() : 0;
+    int bRight = bg_paint.border_box.right();//includeRightEdge ? borderRight() : 0;
+    int pLeft = bg_paint.origin_box.left();//includeLeftEdge ? paddingLeft() : 0;
+    int pRight = bg_paint.origin_box.right();//includeRightEdge ? paddingRight() : 0;
+
+    bool hasBorderRadius = bg_paint.border_radius.top_left_x > 0
+      ||  bg_paint.border_radius.top_left_y > 0
+      ||  bg_paint.border_radius.top_right_x > 0
+      ||  bg_paint.border_radius.top_right_y > 0
+      ||  bg_paint.border_radius.bottom_left_x > 0
+      ||  bg_paint.border_radius.bottom_left_y > 0
+      ||  bg_paint.border_radius.bottom_right_x > 0
+      ||  bg_paint.border_radius.bottom_right_y > 0;
+
+
+    bool clippedToBorderRadius = false;
+   if (hasBorderRadius) {
+        IntRect borderRect(tx, ty,
+          w, h);
+
+        if (borderRect.isEmpty())
+            return;
+
+        graphicsContext->save();
+
+        litehtml::borders border_radiuses;
+        border_radiuses.radius.top_left_x = bg_paint.border_radius.top_left_x;
+        border_radiuses.radius.top_left_y = bg_paint.border_radius.top_left_y;
+        border_radiuses.radius.top_right_x = bg_paint.border_radius.top_right_x;
+        border_radiuses.radius.top_right_y = bg_paint.border_radius.top_right_y;
+        border_radiuses.radius.bottom_left_x = bg_paint.border_radius.bottom_left_x;
+        border_radiuses.radius.bottom_left_y = bg_paint.border_radius.bottom_left_y;
+        border_radiuses.radius.bottom_right_x = bg_paint.border_radius.bottom_right_x;
+        border_radiuses.radius.bottom_right_y = bg_paint.border_radius.bottom_right_y;
+
+        IntSize topLeft, topRight, bottomLeft, bottomRight;
+        getBorderRadiiForRect(borderRect,
+          border_radiuses,
+          topLeft, topRight, bottomLeft, bottomRight);
+
+        graphicsContext->addRoundedRectClip(borderRect, includeLeftEdge ? topLeft : IntSize(),
+                                                includeRightEdge ? topRight : IntSize(),
+                                                includeLeftEdge ? bottomLeft : IntSize(),
+                                                includeRightEdge ? bottomRight : IntSize());
+        clippedToBorderRadius = true;
+    }
+
+    bool hasOverflowClip = w > 0 && h > 0;
+    bool clippedWithLocalScrolling = hasOverflowClip && bg_paint.attachment == litehtml::background_attachment::background_attachment_fixed;//bg.hasOverflowClip() && bgLayer->attachment() == LocalBackgroundAttachment;
+    if (clippedWithLocalScrolling) {
+        // Clip to the overflow area.
+        graphicsContext->save();
+
+        // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/RenderBoxModelObject.cpp#L538
+        // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/RenderBox.cpp#L1043
+        FloatRect overflowClipRect = FloatRect(bg_paint.clip_box.left(), bg_paint.clip_box.top(), bg_paint.clip_box.width, bg_paint.clip_box.height);
+
+        //graphicsContext->clip(toRenderBox(this)->overflowClipRect(tx, ty));
+        graphicsContext->clip(overflowClipRect);
+
+        // Now adjust our tx, ty, w, h to reflect a scrolled content box with borders at the ends.
+        IntSize offset(bg_paint.origin_box.width, bg_paint.origin_box.height);//layer()->scrolledContentOffset();
+        tx -= offset.width();
+        ty -= offset.height();
+        //w = bLeft + layer()->scrollWidth() + bRight;
+        //h = borderTop() + layer()->scrollHeight() + borderBottom();
+        int scrollWidth = w;
+        w = bLeft + scrollWidth + bRight;
+        int scrollHeight = h;
+        w = bg_paint.border_box.top() + scrollHeight +  bg_paint.border_box.bottom();
+    }
+/*
+    if (bgLayer->clip() == PaddingFillBox || bgLayer->clip() == ContentFillBox) {
+        // Clip to the padding or content boxes as necessary.
+        bool includePadding = bgLayer->clip() == ContentFillBox;
+        int x = tx + bLeft + (includePadding ? pLeft : 0);
+        int y = ty + borderTop() + (includePadding ? paddingTop() : 0);
+        int width = w - bLeft - bRight - (includePadding ? pLeft + pRight : 0);
+        int height = h - borderTop() - borderBottom() - (includePadding ? paddingTop() + paddingBottom() : 0);
+        graphicsContext->save();
+        graphicsContext->clip(IntRect(x, y, width, height));
+    } else if (bgLayer->clip() == TextFillBox) {
+        // We have to draw our text into a mask that can then be used to clip background drawing.
+        // First figure out how big the mask has to be.  It should be no bigger than what we need
+        // to actually render, so we should intersect the dirty rect with the border box of the background.
+        IntRect maskRect(tx, ty, w, h);
+        maskRect.intersect(paintInfo.rect);
+
+        // Now create the mask.
+        OwnPtr<ImageBuffer> maskImage = ImageBuffer::create(maskRect.size());
+        if (!maskImage)
+            return;
+
+        GraphicsContext* maskImageContext = maskImage->context();
+        maskImageContext->translate(-maskRect.x(), -maskRect.y());
+
+        // Now add the text to the clip.  We do this by painting using a special paint phase that signals to
+        // InlineTextBoxes that they should just add their contents to the clip.
+        PaintInfo info(maskImageContext, maskRect, PaintPhaseTextClip, true, 0, 0);
+        if (box)
+            box->paint(info, tx - box->x(), ty - box->y());
+        else {
+            int x = isBox() ? toRenderBox(this)->x() : 0;
+            int y = isBox() ? toRenderBox(this)->y() : 0;
+            paint(info, tx - x, ty - y);
+        }
+
+        // The mask has been created.  Now we just need to clip to it.
+        graphicsContext->save();
+        graphicsContext->clipToImageBuffer(maskImage.get(), maskRect);
+    }*/
+
+    //StyleImage* bg = bgLayer->image();
+    //bool shouldPaintBackgroundImage = bg && bg->canRender(style()->effectiveZoom());
+    Color bgColor = c;
+/*
+    // When this style flag is set, change existing background colors and images to a solid white background.
+    // If there's no bg color or image, leave it untouched to avoid affecting transparency.
+    // We don't try to avoid loading the background images, because this style flag is only set
+    // when printing, and at that point we've already loaded the background images anyway. (To avoid
+    // loading the background images we'd have to do this check when applying styles rather than
+    // while rendering.)
+    if (style()->forceBackgroundsToWhite()) {
+        // Note that we can't reuse this variable below because the bgColor might be changed
+        bool shouldPaintBackgroundColor = !bgLayer->next() && bgColor.isValid() && bgColor.alpha() > 0;
+        if (shouldPaintBackgroundImage || shouldPaintBackgroundColor) {
+            bgColor = Color::white;
+            shouldPaintBackgroundImage = false;
+        }
+    }*/
+
+    // is_root is true for the root item (<body>) so you have
+    //  to apply the background to entire client area/window.
+    bool isRoot = bg_paint.is_root;//this->isRoot();
+
+    // Only fill with a base color (e.g., white) if we're the root document, since iframes/frames with
+    // no background in the child document should show the parent's background.
+    bool isOpaqueRoot = false;
+    /*if (isRoot) {
+        isOpaqueRoot = true;
+        if (!bgLayer->next() && !(bgColor.isValid() && bgColor.alpha() == 255) && view()->frameView()) {
+            Element* ownerElement = document()->ownerElement();
+            if (ownerElement) {
+                if (!ownerElement->hasTagName(frameTag)) {
+                    // Locate the <body> element using the DOM.  This is easier than trying
+                    // to crawl around a render tree with potential :before/:after content and
+                    // anonymous blocks created by inline <body> tags etc.  We can locate the <body>
+                    // render object very easily via the DOM.
+                    HTMLElement* body = document()->body();
+                    if (body) {
+                        // Can't scroll a frameset document anyway.
+                        isOpaqueRoot = body->hasLocalName(framesetTag);
+                    }
+#if ENABLE(SVG)
+                    else {
+                        // SVG documents and XML documents with SVG root nodes are transparent.
+                        isOpaqueRoot = !document()->hasSVGRootNode();
+                    }
+#endif
+                }
+            } else
+                isOpaqueRoot = !view()->frameView()->isTransparent();
+        }
+        view()->frameView()->setContentIsOpaque(isOpaqueRoot);
+    }*/
+
+    // Paint the color first underneath all images.
+    //if (!bgLayer->next())
+    {
+        // IntRect rect(tx, ty, w, h);
+        //IntRect rect(bg.position_x, bg.position_y, bg.clip_box.width, bg.clip_box.height);
+        IntRect rect(tx, ty,
+          w, h);
+
+        // don`t draw background outside of element
+        intersect_clip(rect);
+
+        //rect.intersect(paintInfo.rect);
+        /*apply_clip( graphicsContext->platformContext() );
+
+        // If we have an alpha and we are painting the root element, go ahead and blend with the base background color.
+        if (isOpaqueRoot) {
+            Color baseColor = toColor(bg.color);//view()->frameView()->baseBackgroundColor();
+            if (baseColor.alpha() > 0) {
+                graphicsContext->save();
+                //graphicsContext->setCompositeOperation(CompositeCopy);
+                //graphicsContext->fillRect(rect, baseColor, style()->colorSpace());
+                graphicsContext->fillRect(rect, baseColor, colorSpace);
+                graphicsContext->restore();
+            } else
+                graphicsContext->clearRect(rect);
+        }*/
+
+        if (bgColor.isValid() && bgColor.alpha() > 0)
+            graphicsContext->fillRect(rect, bgColor, colorSpace);
+    }
+
+    // no progressive loading of the background image
+    /*if (shouldPaintBackgroundImage) {
+        IntRect destRect;
+        IntPoint phase;
+        IntSize tileSize;
+
+        calculateBackgroundImageGeometry(bgLayer, tx, ty, w, h, destRect, phase, tileSize);
+
+        IntPoint destOrigin = destRect.location();
+
+        //destRect.intersect(paintInfo.rect);
+        // don`t draw background outside of element
+        intersect_clip(destRect);
+
+        if (!destRect.isEmpty()) {
+            phase += destRect.location() - destOrigin;
+            CompositeOperator compositeOp = op == CompositeSourceOver ? bgLayer->composite() : op;
+            RenderObject* clientForBackgroundImage = backgroundObject ? backgroundObject : this;
+            Image* image = bg->image(clientForBackgroundImage, tileSize);
+            bool useLowQualityScaling = shouldPaintAtLowQuality(graphicsContext, image, tileSize);
+            graphicsContext->drawTiledImage(image, style()->colorSpace(), destRect, phase, tileSize, compositeOp, useLowQualityScaling);
+        }
+    }*/
+
+    /*if (bgLayer->clip() != BorderFillBox)
+        // Undo the background clip
+        graphicsContext->restore();*/
+
+    if (clippedToBorderRadius)
+        // Undo the border radius clip
+        graphicsContext->restore();
+
+    /*if (clippedWithLocalScrolling) // Undo the clip for local background attachments.
+        graphicsContext->restore();*/
+}
+
+// https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/RenderBoxModelObject.cpp#L502
+// https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/RenderBox.cpp#L786
+// https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/style/RenderStyle.h#L563
 void container_qt5::draw_background(litehtml::uint_ptr hdc, const litehtml::background_paint& bg)
 {
     Q_ASSERT(hdc);
@@ -1350,7 +1614,9 @@ void container_qt5::draw_background(litehtml::uint_ptr hdc, const litehtml::back
       return;
     }
 
-#define old_bg_drawer
+    paintFillLayerExtended(graphicsContext, toColor(bg.color), offsetX, offsetY, bg, sRGBColorSpace);
+
+//#define old_bg_drawer
 #ifdef old_bg_drawer
 
     //QPainter* painter = (QPainter*)hdc;

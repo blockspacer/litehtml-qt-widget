@@ -33,172 +33,228 @@ ui(new Ui::MainWindow)
   <link rel="stylesheet" href="://res/css/bootstrap.css">
   </head>
   <body>
-<style>
-      h1{
-        color: green;
-        text-align: center;
-      }
-      div.one{
-        margin-top: 40px;
-        text-align: center;
-      }
-      button{
-        margin-top: 10px;
-      }
-    </style>
-<div class="container">
-      <h1>Geek</h1>
 
-      <!-- Bootstrap Button Classes -->
-      <div class="one">
-        <button type="button" class="btn btn-primary">Primary</button>
-        <button type="button" class="btn btn-secondary">Secondary</button>
-        <button type="button" class="btn btn-success">Success</button>
-        <button type="button" class="btn btn-danger">Danger</button>
-        <button type="button" class="btn btn-warning">Warning</button>
-        <button type="button" class="btn btn-info">Info</button>
-        <button type="button" class="btn btn-light">Light</button>
-        <button type="button" class="btn btn-dark">Dark</button>
-        <button type="button" class="btn btn-link">Link</button>
-      </div>
+  <style>
+    h1{
+      color: green;
+      text-align: center;
+    }
+    div.one{
+      margin-top: 40px;
+      text-align: center;
+    }
+    button{
+      margin-top: 10px;
+    }
+  </style>
+  <div class="container">
+    <h1>Geek</h1>
 
+    <!-- Bootstrap Button Classes -->
+    <div class="one">
+      <button type="button" class="btn btn-primary">Primary</button>
+      <button type="button" class="btn btn-secondary">Secondary</button>
+      <button type="button" class="btn btn-success">Success</button>
+      <button type="button" class="btn btn-danger">Danger</button>
+      <button type="button" class="btn btn-warning">Warning</button>
+      <button type="button" class="btn btn-info">Info</button>
+      <button type="button" class="btn btn-light">Light</button>
+      <button type="button" class="btn btn-dark">Dark</button>
+      <button type="button" class="btn btn-link">Link</button>
     </div>
 
-<style>
-#root {
-    width: 500px;
-    display: inline;
-}
-.first {
-    background-color: #ddd;
-    padding: 10px;
-    color: black;
-    margin-bottom: 5px;
-    border-bottom: 1px solid red;
-}
-.first div {
-    background-color: white;
-    border: 1px solid black;
-    height: 50px;
-    line-height: 100%;
-    text-align: center;
-    vertical-align: middle;
-}
-#root.second .first div {
-    border-color: red;
-    background-color: #aaa;
-    color: white;
-}
-.first .bunt {
-    border-radius: 25px;
-    border-top: 5px solid silver;
-    border-right: 5px solid blue;
-    border-bottom: 5px solid black;
-    border-left: 5px solid red;
-}
-.first .bunt2 {
-    border-radius: 5px;
-    border-top: 5px solid red;
-    border-right: 1px solid blue;
-    border-left: 1px solid blue;
-    border-bottom: 1px solid blue;
-}
-</style>
+  </div>
 
-<div id="root">
-  <div class="first">
-    <div style="border-image: url(:/res/img/test.png) 30 round round; border-width: 3px;">border-image</div>
+  <style>
+  #root {
+      width: 500px;
+      display: inline;
+  }
+  .first {
+      background-color: #ddd;
+      padding: 10px;
+      color: black;
+      margin-bottom: 5px;
+      border-bottom: 1px solid red;
+  }
+  .first div {
+      background-color: white;
+      border: 1px solid black;
+      height: 50px;
+      line-height: 100%;
+      text-align: center;
+      vertical-align: middle;
+  }
+  #root.second .first div {
+      border-color: red;
+      background-color: #aaa;
+      color: white;
+  }
+  .first .bunt {
+      border-radius: 25px;
+      border-top: 5px solid silver;
+      border-right: 5px solid blue;
+      border-bottom: 5px solid black;
+      border-left: 5px solid red;
+  }
+  .first .bunt2 {
+      border-radius: 5px;
+      border-top: 5px solid red;
+      border-right: 1px solid blue;
+      border-left: 1px solid blue;
+      border-bottom: 1px solid blue;
+  }
+  </style>
+
+  <div id="root">
+    <div class="first">
+      <div style="border-image: url(:/res/img/test.png) 30 round round; border-width: 3px;">border-image</div>
+    </div>
+    <div class="first">
+      <div style="border-image: linear-gradient(to left, #61c69d 0%, #2d72bc 100%); border-image-slice: 1; border-width: 3px;">border-image: linear-gradient(to left, #61c69d 0%, #2d72bc 100%); border-image-slice: 1; border-width: 3px;</div>
+    </div>
+    <div class="first">
+      <div style="border: 5px solid gold;border-style: inset;padding: 5px;">border-style: inset; padding: 5px;</div>
+    </div>
+    <div class="first">
+      <div style="border: 5px solid gold;border-style: outset;padding: 5px;">border-style: outset; padding: 5px;</div>
+    </div>
+    <div class="first">
+      <div style="border-style: dashed;padding: 5px;">border-style: dashed; padding: 5px;</div>
+    </div>
+    <div class="first">
+      <div style="border-style: double;padding: 5px;">border-style: double; padding: 5px;</div>
+    </div>
+    <div class="first">
+      <div style="border: 5px solid gold; border-style: double;padding: 5px;">border: 5px solid gold;border-style: double; padding: 5px;</div>
+    </div>
+    <div class="first">
+      <div style="border: 15px solid rgba(255,0,0,0.0);background:gold;">border: 15px solid rgba(255,0,0,0.0);</div>
+    </div>
+    <div class="first">
+      <div style="border: 15px solid rgba(255,0,0,0.5);background:gold;">border: 15px solid rgba(255,0,0,0.5);</div>
+    </div>
+    <div class="first">
+      <div style="border: 15px solid rgba(255,0,0,1.0);background:gold;">border: 15px solid rgba(255,0,0,1.0);</div>
+    </div>
+    <div class="first">
+      <div style="border: 5px solid pink; border-left-width: 15px;">border: 5px solid pink; border-left-width: 15px;</div>
+    </div>
+    <div class="first">
+      <div style="border: 5px solid green; border-left-width: 15px; border-radius: 55px;">border: 5px solid green; border-left-width: 15px; border-radius: 55px;</div>
+    </div>
+    <div class="first">
+      <div style="">1px width / 1px radius</div>
+    </div>
+    <div class="first">
+      <div style="border-width: 5px">5px width / 0px radius</div>
+    </div>
+    <div class="first">
+      <div style="border-radius: 1px;">1px width / 1px radius</div>
+    </div>
+    <div class="first">
+      <div style="border-width: 5px; border-radius: 5px;">5px width / 5px radius</div>
+    </div>
+    <div class="first">
+      <div style="border-radius: 5px;">1px width / 5px radius</div>
+    </div>
+    <div class="first">
+      <div style="border-width: 5px; border-radius: 15px;">5px width / 15px radius</div>
+    </div>
+    <div class="first">
+      <div style="border-width: 5px; border-left-width: 15px; border-right-width: 15px; border-radius: 15px;">5px 15px width / 15px radius</div>
+    </div>
+    <div class="first">
+      <div style="border-width: 5px; border-left-width: 15px; border-right-width: 15px; border-radius: 25px;">5px 15px width / 25px radius</div>
+    </div>
+    <div class="first">
+      <div class="bunt">Bunt</div>
+    </div>
   </div>
-  <div class="first">
-    <div style="border-image: linear-gradient(to left, #61c69d 0%, #2d72bc 100%); border-image-slice: 1; border-width: 3px;">border-image: linear-gradient(to left, #61c69d 0%, #2d72bc 100%); border-image-slice: 1; border-width: 3px;</div>
+  <div id="root" class="second">
+    <div class="first">
+      <div style="">1px width / 1px radius</div>
+    </div>
+    <div class="first">
+      <div style="border-width: 5px">5px width / 0px radius</div>
+    </div>
+    <div class="first">
+      <div style="border-radius: 1px;">1px width / 1px radius</div>
+    </div>
+    <div class="first">
+      <div style="border-width: 5px; border-radius: 5px;">5px width / 5px radius</div>
+    </div>
+    <div class="first">
+      <div style="border-radius: 5px;">1px width / 5px radius</div>
+    </div>
+    <div class="first">
+      <div style="border-width: 5px; border-radius: 15px;">5px width / 15px radius</div>
+    </div>
+    <div class="first">
+      <div style="border-width: 5px; border-left-width: 15px; border-right-width: 15px; border-radius: 15px;">5px 15px width / 15px radius</div>
+    </div>
+    <div class="first">
+      <div style="border-width: 5px; border-left-width: 15px; border-right-width: 15px; border-radius: 25px;">5px 15px width / 25px radius</div>
+    </div>
+    <div class="first">
+      <div class="bunt2">Bunt 2</div>
+    </div>
   </div>
-  <div class="first">
-    <div style="border: 5px solid gold;border-style: inset;padding: 5px;">border-style: inset; padding: 5px;</div>
-  </div>
-  <div class="first">
-    <div style="border: 5px solid gold;border-style: outset;padding: 5px;">border-style: outset; padding: 5px;</div>
-  </div>
-  <div class="first">
-    <div style="border-style: dashed;padding: 5px;">border-style: dashed; padding: 5px;</div>
-  </div>
-  <div class="first">
-    <div style="border-style: double;padding: 5px;">border-style: double; padding: 5px;</div>
-  </div>
-  <div class="first">
-    <div style="border: 5px solid gold; border-style: double;padding: 5px;">border: 5px solid gold;border-style: double; padding: 5px;</div>
-  </div>
-  <div class="first">
-    <div style="border: 15px solid rgba(255,0,0,0.0);">border: 15px solid rgba(255,0,0,0.0);</div>
-  </div>
-  <div class="first">
-    <div style="border: 15px solid rgba(255,0,0,0.1);">border: 15px solid rgba(255,0,0,0.1);</div>
-  </div>
-  <div class="first">
-    <div style="border: 15px solid rgba(255,0,0,1.0);">border: 15px solid rgba(255,0,0,1.0);</div>
-  </div>
-  <div class="first">
-    <div style="border: 5px solid pink; border-left-width: 15px;">border: 5px solid pink; border-left-width: 15px;</div>
-  </div>
-  <div class="first">
-    <div style="border: 5px solid green; border-left-width: 15px; border-radius: 55px;">border: 5px solid green; border-left-width: 15px; border-radius: 55px;</div>
-  </div>
-  <div class="first">
-    <div style="">1px width / 1px radius</div>
-  </div>
-  <div class="first">
-    <div style="border-width: 5px">5px width / 0px radius</div>
-  </div>
-  <div class="first">
-    <div style="border-radius: 1px;">1px width / 1px radius</div>
-  </div>
-  <div class="first">
-    <div style="border-width: 5px; border-radius: 5px;">5px width / 5px radius</div>
-  </div>
-  <div class="first">
-    <div style="border-radius: 5px;">1px width / 5px radius</div>
-  </div>
-  <div class="first">
-    <div style="border-width: 5px; border-radius: 15px;">5px width / 15px radius</div>
-  </div>
-  <div class="first">
-    <div style="border-width: 5px; border-left-width: 15px; border-right-width: 15px; border-radius: 15px;">5px 15px width / 15px radius</div>
-  </div>
-  <div class="first">
-    <div style="border-width: 5px; border-left-width: 15px; border-right-width: 15px; border-radius: 25px;">5px 15px width / 25px radius</div>
-  </div>
-  <div class="first">
-    <div class="bunt">Bunt</div>
-  </div>
-</div>
-<div id="root" class="second">
-  <div class="first">
-    <div style="">1px width / 1px radius</div>
-  </div>
-  <div class="first">
-    <div style="border-width: 5px">5px width / 0px radius</div>
-  </div>
-  <div class="first">
-    <div style="border-radius: 1px;">1px width / 1px radius</div>
-  </div>
-  <div class="first">
-    <div style="border-width: 5px; border-radius: 5px;">5px width / 5px radius</div>
-  </div>
-  <div class="first">
-    <div style="border-radius: 5px;">1px width / 5px radius</div>
-  </div>
-  <div class="first">
-    <div style="border-width: 5px; border-radius: 15px;">5px width / 15px radius</div>
-  </div>
-  <div class="first">
-    <div style="border-width: 5px; border-left-width: 15px; border-right-width: 15px; border-radius: 15px;">5px 15px width / 15px radius</div>
-  </div>
-  <div class="first">
-    <div style="border-width: 5px; border-left-width: 15px; border-right-width: 15px; border-radius: 25px;">5px 15px width / 25px radius</div>
-  </div>
-  <div class="first">
-    <div class="bunt2">Bunt 2</div>
-  </div>
-</div>
+
+  <style>
+  #home {
+    background: no-repeat url(':/res/img/test2.png') 0px 0px;
+    overflow:hidden;
+    margin:15px;
+    font: "Droid Sans";
+    border-left:1px solid red;
+    width:50px;
+    height:50px
+  }
+
+  #home:hover         { background: no-repeat url(':/res/img/test2.png') -29px 0px; overflow:hidden; }
+  #home:active        { background: no-repeat url(':/res/img/test2.png') -58px 0px; overflow:hidden; }
+
+  #hoverme {
+    background: red;
+    overflow:hidden;
+    margin:15px;
+    font: "Droid Sans";
+    border-left:1px solid red;
+    width:50px;
+    height:50px
+  }
+
+  #hoverme:hover         { background: green; overflow:hidden;cursor:pointer; }
+  #hoverme:active        { background: orange; overflow:hidden;cursor:pointer; }
+  </style>
+
+  Lorem Ipsum<input width="50px" height="50px" type="checkbox" name="nameOfChoice" value="1" style="width:50px;height:50px;background:darkgrey;">
+
+  <customtag>customtag</customtag>
+  <link rel="stylesheet" href="://res/css/reset.css">
+  <link rel="stylesheet" href="://res/css/bootstrap.css">
+  <link rel="stylesheet" href="://res/css/test1.css">
+
+  <div id='home'>dddd</div>
+
+  <div id='hoverme'>hoverme</div>
+
+  <div style='margin:15px;font: "Droid Sans";background:#CCC;border-bottom:6px solid yellow;width:30px;height:30px'>–”—text1</div>
+  <div style='font: "Arial Unicode MS";background:cyan;border-right:6px solid yellow;width:30px;height:30px'>–”—text2</div>
+  <div style='font: "Cousine Regular";background:#EEE;border:3px solid lightblue;width:30px;height:30px'>–”—text3</div>
+  <div style='font: "Font Awesome 5 Free";background:pink;border-left:16px solid grey;width:30px;height:30px'>
+
+  \uf15c ?
+  <ul><li>One‚˚‡˚‚‡˚‚‡‚‡ÔÛÙÙÙ˚˚˚˚Í‡ÍÔÏ‡˚Ï‚‡</li><li>Zwei\u6211\u662F\u4E2D\u6587</li><li>Trois</li></ul>
+  <bold>123SFSDFDFSDF</bold>
+  <strong>emphasized text</strong>
+  <span style='font-weight: bold;'>bold text</span>
+  <p>Line1.1 Line1.2<br />Line2</p><ul><li>One</li><li>Zwei</li><li>Trois</li></ul>
+  <table><tr><th>H1</th><th>H2</th></tr><tr><td>C1.1</td><td>C1.2</td></tr><tr><td>C2.1</td><td>C2.2</td></tr></table>
+  <img src=':/res/img/test.png' alt=''>
+  <img src=':/res/img/test2.png' alt=''>
+
 
   </body>
   </html>)raw";

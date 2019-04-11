@@ -236,10 +236,10 @@ public:
         void fillRect(const FloatRect&, const Color&, ColorSpace);
 
 
-        /*void fillRect(const FloatRect&, Generator&);*/
+        void fillRect(const FloatRect&, Generator&);
 
 
-        //void fillRoundedRect(const IntRect&, const IntSize& topLeft, const IntSize& topRight, const IntSize& bottomLeft, const IntSize& bottomRight, const Color&, ColorSpace);
+        void fillRoundedRect(const IntRect&, const IntSize& topLeft, const IntSize& topRight, const IntSize& bottomLeft, const IntSize& bottomRight, const Color&, ColorSpace);
 
         void clearRect(const FloatRect&);
 
@@ -315,9 +315,9 @@ public:
         void drawFocusRing(const QVector<IntRect>&, int width, int offset, const Color&);
         void drawFocusRing(const QVector<Path>&, int width, int offset, const Color&);
 
-        /*void setLineCap(LineCap);*/
+        void setLineCap(LineCap);
         void setLineDash(const DashArray&, float dashOffset);
-        //void setLineJoin(LineJoin);
+        void setLineJoin(LineJoin);
 
         void setMiterLimit(float);
 

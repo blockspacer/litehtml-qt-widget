@@ -7,20 +7,8 @@ html {
   font-size:14px;
   margin:0px;
   padding:0px;
+  background: lightgreen;
 }
-
-#home {
-  background: no-repeat url(':/res/img/test2.png') 0px 0px;
-  overflow:hidden;
-  margin:15px;
-  font: "Droid Sans";
-  border-left:1px solid red;
-  width:50px;
-  height:50px
-}
-
-#home:hover         { background: no-repeat url(':/res/img/test2.png') -29px 0px; overflow:hidden; }
-#home:active        { background: no-repeat url(':/res/img/test2.png') -58px 0px; overflow:hidden; }
 
 head {
     display: none
