@@ -330,7 +330,7 @@ void BitmapImage::draw(GraphicsContext* ctxt, const FloatRect& dst,
     FloatSize shadowOffset;
     float shadowBlur;
     Color shadowColor;
-    /*if (ctxt->getShadow(shadowOffset, shadowBlur, shadowColor)) {
+    if (ctxt->getShadow(shadowOffset, shadowBlur, shadowColor)) {
         FloatRect shadowImageRect(normalizedDst);
         shadowImageRect.move(shadowOffset.width(), shadowOffset.height());
 
@@ -342,7 +342,7 @@ void BitmapImage::draw(GraphicsContext* ctxt, const FloatRect& dst,
         p.drawPixmap(QRect(0, 0, normalizedDst.width(), normalizedDst.height()), *image, normalizedSrc);
         p.end();
         painter->drawImage(shadowImageRect, shadowImage, normalizedSrc);
-    }*/
+    }
 
     // Test using example site at
     // http://www.meyerweb.com/eric/css/edge/complexspiral/demo.html

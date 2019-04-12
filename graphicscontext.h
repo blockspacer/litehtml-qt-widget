@@ -13,6 +13,8 @@
 
 #include "pathqt.h"
 
+#include "contextshadow.h"
+
 #include "color.h"
 
 #include "common.h"
@@ -82,13 +84,13 @@ public:
     // Only used by SVG for now.
     QPainterPath currentPath;
 
-    //ContextShadow shadow;
-    //QStack<ContextShadow> shadowStack;
+    ContextShadow shadow;
+    QStack<ContextShadow> shadowStack;
 
-    /*bool hasShadow() const
+    bool hasShadow() const
     {
         return shadow.m_type != ContextShadow::NoShadow;
-    }*/
+    }
 
     inline void clearCurrentPath()
     {
@@ -311,9 +313,9 @@ public:
         /*void beginTransparencyLayer(float opacity);
         void endTransparencyLayer();*/
 
-        /*void setShadow(const FloatSize&, float blur, const Color&, ColorSpace);
+        void setShadow(const FloatSize&, float blur, const Color&, ColorSpace);
         bool getShadow(FloatSize&, float&, Color&) const;
-        void clearShadow();*/
+        void clearShadow();
 
         void drawFocusRing(const QVector<IntRect>&, int width, int offset, const Color&);
         void drawFocusRing(const QVector<Path>&, int width, int offset, const Color&);
@@ -357,7 +359,7 @@ public:
 
         static QPainter::CompositionMode toQtCompositionMode(CompositeOperator op);
 
-        /*ContextShadow* contextShadow();*/
+        ContextShadow* contextShadow();
 
         /*void setSharedGraphicsContext3D(SharedGraphicsContext3D*, DrawingBuffer*, const IntSize&);
         */
@@ -384,9 +386,9 @@ public:
 
         void setPlatformShouldAntialias(bool b);
 
-        /*void setPlatformShadow(const FloatSize&, float blur, const Color&, ColorSpace);
+        void setPlatformShadow(const FloatSize&, float blur, const Color&, ColorSpace);
 
-        void clearPlatformShadow();*/
+        void clearPlatformShadow();
 
         static void adjustLineToPixelBoundaries(FloatPoint& p1, FloatPoint& p2, float strokeWidth, const StrokeStyle&);
 

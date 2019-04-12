@@ -56,7 +56,7 @@ void StillImage::draw(GraphicsContext* ctxt, const FloatRect& dst,
 
     // TODO
 
-    /*if (ctxt->getShadow(shadowOffset, shadowBlur, shadowColor)) {
+    if (ctxt->getShadow(shadowOffset, shadowBlur, shadowColor)) {
         FloatRect shadowImageRect(normalizedDst);
         shadowImageRect.move(shadowOffset.width(), shadowOffset.height());
 
@@ -68,7 +68,7 @@ void StillImage::draw(GraphicsContext* ctxt, const FloatRect& dst,
         p.drawPixmap(QRect(0, 0, normalizedDst.width(), normalizedDst.height()), *m_pixmap, normalizedSrc);
         p.end();
         painter->drawImage(shadowImageRect, shadowImage, normalizedSrc);
-    }*/
+    }
 
     painter->drawPixmap(normalizedDst, *m_pixmap, normalizedSrc);
     painter->setCompositionMode(oldCompositionMode);

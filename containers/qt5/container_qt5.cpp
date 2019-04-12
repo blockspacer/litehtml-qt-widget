@@ -9,6 +9,8 @@
 
 #include "graphicscontext.h"
 
+#include "shadowdata.h"
+
 #include "image.h"
 #include "imagesource.h"
 #include "stillimageqt.h"
@@ -1204,7 +1206,7 @@ static bool paintNinePieceImage(GraphicsContext* graphicsContext,
     //borders.image.repeat == litehtml::background_repeat::background_repeat_repeat ? Image::TileRule::RoundTile : Image::TileRule::StretchTile;
     Image::TileRule vRule = Image::TileRule::StretchTile;
 
-    if(!borders.image.css_prop.empty()) {
+    /*if(!borders.image.css_prop.empty()) {
       //qDebug() << "drawLeft borders.left.width" << borders.left.width;
       //qDebug() << "drawLeft borders.top.width" << borders.top.width;
       //qDebug() << "drawLeft borders.right.width" << borders.right.width;
@@ -1216,7 +1218,7 @@ static bool paintNinePieceImage(GraphicsContext* graphicsContext,
       qDebug() << "borders.image baseurl" << borders.image.baseurl.c_str();
       qDebug() << "borders.image image_path" << borders.image.image_path.c_str();
       qDebug() << "borders.image image_size" << borders.image.image_size.width  << borders.image.image_size.height;
-    }
+    }*/
 
     int leftWidth = fitToBorder ? borders.left.width : leftSlice; //fitToBorder ? style->borderLeftWidth() : leftSlice;
     int topWidth = fitToBorder ? borders.top.width : topSlice; //fitToBorder ? style->borderTopWidth() : topSlice;
@@ -1834,6 +1836,7 @@ static void paintFillLayerExtended(
   int maxRootWidth, int maxRootHeight,
   GraphicsContext* graphicsContext, const Color& c
   //, const FillLayer* bgLayer
+  , bool hasBorderRadius
   , int offsetX, int offsetY
   , const litehtml::background_paint& bg_paint
   , ColorSpace colorSpace
@@ -1868,15 +1871,6 @@ static void paintFillLayerExtended(
     int bRight = bg_paint.border_box.right();//includeRightEdge ? borderRight() : 0;
     int pLeft = bg_paint.origin_box.left();//includeLeftEdge ? paddingLeft() : 0;
     int pRight = bg_paint.origin_box.right();//includeRightEdge ? paddingRight() : 0;
-
-    bool hasBorderRadius = bg_paint.border_radius.top_left_x > 0
-      ||  bg_paint.border_radius.top_left_y > 0
-      ||  bg_paint.border_radius.top_right_x > 0
-      ||  bg_paint.border_radius.top_right_y > 0
-      ||  bg_paint.border_radius.bottom_left_x > 0
-      ||  bg_paint.border_radius.bottom_left_y > 0
-      ||  bg_paint.border_radius.bottom_right_x > 0
-      ||  bg_paint.border_radius.bottom_right_y > 0;
 
     /*if(bg_paint.is_root) {
           tx = 0;
@@ -1925,7 +1919,11 @@ static void paintFillLayerExtended(
     }
 
     bool hasOverflowClip = w > 0 && h > 0;
-    bool clippedWithLocalScrolling = false;//hasOverflowClip && bg_paint.attachment == litehtml::background_attachment::background_attachment_fixed;//bg.hasOverflowClip() && bgLayer->attachment() == LocalBackgroundAttachment;
+    // TODO: add local background-attachment to litehtml
+    // see https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/css/CSSStyleSelector.cpp#L5747
+    bool clippedWithLocalScrolling = false;
+    //bool clippedWithLocalScrolling = hasOverflowClip && bg_paint.attachment == litehtml::background_attachment::background_attachment_fixed;
+    //bg.hasOverflowClip() && bgLayer->attachment() == LocalBackgroundAttachment;
     if (clippedWithLocalScrolling) {
         // Clip to the overflow area.
         graphicsContext->save();
@@ -1949,17 +1947,24 @@ static void paintFillLayerExtended(
         w = bg_paint.border_box.top() + scrollHeight +  bg_paint.border_box.bottom();
     }
 
-/*
-    if (bgLayer->clip() == PaddingFillBox || bgLayer->clip() == ContentFillBox) {
+     // TODO
+    /*int borderTop = bg_paint.border_box.top();
+    int borderBottom = bg_paint.border_box.bottom();
+    int paddingTop = bg_paint.origin_box.top();
+    int paddingBottom = bg_paint.origin_box.bottom();
+
+    //if (bgLayer->clip() == PaddingFillBox || bgLayer->clip() == ContentFillBox) {
         // Clip to the padding or content boxes as necessary.
-        bool includePadding = bgLayer->clip() == ContentFillBox;
+        // TODO
+        bool includePadding = true;//bgLayer->clip() == ContentFillBox;
         int x = tx + bLeft + (includePadding ? pLeft : 0);
-        int y = ty + borderTop() + (includePadding ? paddingTop() : 0);
+        int y = ty + borderTop + (includePadding ? paddingTop : 0);
         int width = w - bLeft - bRight - (includePadding ? pLeft + pRight : 0);
-        int height = h - borderTop() - borderBottom() - (includePadding ? paddingTop() + paddingBottom() : 0);
+        int height = h - borderTop - borderBottom - (includePadding ? paddingTop + paddingBottom : 0);
         graphicsContext->save();
         graphicsContext->clip(IntRect(x, y, width, height));
-    } else if (bgLayer->clip() == TextFillBox) {
+
+} else if (bgLayer->clip() == TextFillBox) {
         // We have to draw our text into a mask that can then be used to clip background drawing.
         // First figure out how big the mask has to be.  It should be no bigger than what we need
         // to actually render, so we should intersect the dirty rect with the border box of the background.
@@ -2177,14 +2182,236 @@ static void paintFillLayerExtended(
         // Undo the border radius clip
         graphicsContext->restore();
 
-    /*if (clippedWithLocalScrolling) // Undo the clip for local background attachments.
-        graphicsContext->restore();*/
+    if (clippedWithLocalScrolling) // Undo the clip for local background attachments.
+        graphicsContext->restore();
+}
+
+// https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/RenderBoxModelObject.cpp
+static inline void uniformlyExpandBorderRadii(int delta, IntSize& topLeft, IntSize& topRight, IntSize& bottomLeft, IntSize& bottomRight)
+{
+    topLeft.expand(delta, delta);
+    topLeft.clampNegativeToZero();
+    topRight.expand(delta, delta);
+    topRight.clampNegativeToZero();
+    bottomLeft.expand(delta, delta);
+    bottomLeft.clampNegativeToZero();
+    bottomRight.expand(delta, delta);
+    bottomRight.clampNegativeToZero();
+}
+
+// https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/RenderBoxModelObject.cpp#L1611
+static void paintBoxShadow(GraphicsContext* context,
+  const litehtml::background_paint& bg_paint,
+  int tx, int ty, int w, int h,
+  //const RenderStyle* s,
+  ShadowStyle shadowStyle,
+  ColorSpace colorSpace,
+  ShadowData* boxShadow,
+  bool hasBorderRadius,
+  bool hasOpaqueBackground, // if color.alpha == 255
+  bool begin, bool end)
+{
+    /// \note boxShadow initialized with nullptr
+    if (!boxShadow) {
+      return;
+    }
+
+    // FIXME: Deal with border-image.  Would be great to use border-image as a mask.
+
+    if (context->paintingDisabled())
+        return;
+
+    IntRect rect(tx, ty, w, h);
+    IntSize topLeft;
+    IntSize topRight;
+    IntSize bottomLeft;
+    IntSize bottomRight;
+
+    int borderTop = bg_paint.border_box.top();
+    int borderBottom = bg_paint.border_box.bottom();
+    int borderLeft = bg_paint.border_box.left();
+    int borderRight = bg_paint.border_box.right();
+
+    litehtml::borders border_radiuses;
+    border_radiuses.radius.top_left_x = bg_paint.border_radius.top_left_x;
+    border_radiuses.radius.top_left_y = bg_paint.border_radius.top_left_y;
+    border_radiuses.radius.top_right_x = bg_paint.border_radius.top_right_x;
+    border_radiuses.radius.top_right_y = bg_paint.border_radius.top_right_y;
+    border_radiuses.radius.bottom_left_x = bg_paint.border_radius.bottom_left_x;
+    border_radiuses.radius.bottom_left_y = bg_paint.border_radius.bottom_left_y;
+    border_radiuses.radius.bottom_right_x = bg_paint.border_radius.bottom_right_x;
+    border_radiuses.radius.bottom_right_y = bg_paint.border_radius.bottom_right_y;
+
+    //bool hasBorderRadius = s->hasBorderRadius();
+    if (hasBorderRadius && (begin || end)) {
+        IntSize topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius;
+        getBorderRadiiForRect(rect, border_radiuses, topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius);
+
+        if (begin) {
+            if (shadowStyle == Inset) {
+                topLeftRadius.expand(-borderLeft, -borderTop);
+                topLeftRadius.clampNegativeToZero();
+                bottomLeftRadius.expand(-borderLeft, -borderBottom);
+                bottomLeftRadius.clampNegativeToZero();
+            }
+            topLeft = topLeftRadius;
+            bottomLeft = bottomLeftRadius;
+        }
+        if (end) {
+            if (shadowStyle == Inset) {
+                topRightRadius.expand(-borderRight, -borderTop);
+                topRightRadius.clampNegativeToZero();
+                bottomRightRadius.expand(-borderRight, -borderBottom);
+                bottomRightRadius.clampNegativeToZero();
+            }
+            topRight = topRightRadius;
+            bottomRight = bottomRightRadius;
+        }
+    }
+
+    if (shadowStyle == Inset) {
+        rect.move(begin ? borderLeft : 0, borderTop);
+        rect.setWidth(rect.width() - (begin ? borderLeft : 0) - (end ? borderRight : 0));
+        rect.setHeight(rect.height() - borderTop - borderBottom);
+    }
+
+    //bool hasOpaqueBackground = s->visitedDependentColor(CSSPropertyBackgroundColor).isValid()
+    //  && s->visitedDependentColor(CSSPropertyBackgroundColor).alpha() == 255;
+    for (const ShadowData* shadow = boxShadow/*s->boxShadow()*/; shadow; shadow = shadow->next()) {
+        if (shadow->style() != shadowStyle)
+            continue;
+
+        IntSize shadowOffset(shadow->x(), shadow->y());
+        int shadowBlur = shadow->blur();
+        int shadowSpread = shadow->spread();
+        const Color& shadowColor = shadow->color();
+
+        if (shadow->style() == Normal) {
+            IntRect fillRect(rect);
+            fillRect.inflate(shadowSpread);
+            if (fillRect.isEmpty())
+                continue;
+
+            IntRect shadowRect(rect);
+            shadowRect.inflate(shadowBlur + shadowSpread);
+            shadowRect.move(shadowOffset);
+
+            context->save();
+            context->clip(shadowRect);
+
+            // Move the fill just outside the clip, adding 1 pixel separation so that the fill does not
+            // bleed in (due to antialiasing) if the context is transformed.
+            IntSize extraOffset(w + max(0, shadowOffset.width()) + shadowBlur + 2 * shadowSpread + 1, 0);
+            shadowOffset -= extraOffset;
+            fillRect.move(extraOffset);
+
+            context->setShadow(shadowOffset, shadowBlur, shadowColor, colorSpace);
+            if (hasBorderRadius) {
+                IntRect rectToClipOut = rect;
+                IntSize topLeftToClipOut = topLeft;
+                IntSize topRightToClipOut = topRight;
+                IntSize bottomLeftToClipOut = bottomLeft;
+                IntSize bottomRightToClipOut = bottomRight;
+
+                if (shadowSpread < 0)
+                    uniformlyExpandBorderRadii(shadowSpread, topLeft, topRight, bottomLeft, bottomRight);
+
+                // If the box is opaque, it is unnecessary to clip it out. However, doing so saves time
+                // when painting the shadow. On the other hand, it introduces subpixel gaps along the
+                // corners. Those are avoided by insetting the clipping path by one pixel.
+                if (hasOpaqueBackground) {
+                    rectToClipOut.inflate(-1);
+                    uniformlyExpandBorderRadii(-1, topLeftToClipOut, topRightToClipOut, bottomLeftToClipOut, bottomRightToClipOut);
+                }
+
+                if (!rectToClipOut.isEmpty())
+                    context->clipOutRoundedRect(rectToClipOut, topLeftToClipOut, topRightToClipOut, bottomLeftToClipOut, bottomRightToClipOut);
+                context->fillRoundedRect(fillRect, topLeft, topRight, bottomLeft, bottomRight, Color::black, colorSpace);
+            } else {
+                IntRect rectToClipOut = rect;
+
+                // If the box is opaque, it is unnecessary to clip it out. However, doing so saves time
+                // when painting the shadow. On the other hand, it introduces subpixel gaps along the
+                // edges if they are not pixel-aligned. Those are avoided by insetting the clipping path
+                // by one pixel.
+                if (hasOpaqueBackground) {
+                    AffineTransform currentTransformation = context->getCTM();
+                    if (currentTransformation.a() != 1 || (currentTransformation.d() != 1 && currentTransformation.d() != -1)
+                            || currentTransformation.b() || currentTransformation.c())
+                        rectToClipOut.inflate(-1);
+                }
+
+                if (!rectToClipOut.isEmpty())
+                    context->clipOut(rectToClipOut);
+                context->fillRect(fillRect, Color::black, colorSpace);
+            }
+
+            context->restore();
+        } else {
+            // Inset shadow.
+            IntRect holeRect(rect);
+            holeRect.inflate(-shadowSpread);
+
+            if (holeRect.isEmpty()) {
+                if (hasBorderRadius)
+                    context->fillRoundedRect(rect, topLeft, topRight, bottomLeft, bottomRight, shadowColor, colorSpace);
+                else
+                    context->fillRect(rect, shadowColor, colorSpace);
+                continue;
+            }
+            if (!begin) {
+                holeRect.move(-max(shadowOffset.width(), 0) - shadowBlur, 0);
+                holeRect.setWidth(holeRect.width() + max(shadowOffset.width(), 0) + shadowBlur);
+            }
+            if (!end)
+                holeRect.setWidth(holeRect.width() - min(shadowOffset.width(), 0) + shadowBlur);
+
+            Color fillColor(shadowColor.red(), shadowColor.green(), shadowColor.blue(), 255);
+
+            IntRect outerRect(rect);
+            outerRect.inflateX(w - 2 * shadowSpread);
+            outerRect.inflateY(h - 2 * shadowSpread);
+
+            context->save();
+
+            Path path;
+            if (hasBorderRadius) {
+                path.addRoundedRect(rect, topLeft, topRight, bottomLeft, bottomRight);
+                context->clip(path);
+                path.clear();
+            } else
+                context->clip(rect);
+
+            IntSize extraOffset(2 * w + max(0, shadowOffset.width()) + shadowBlur - 2 * shadowSpread + 1, 0);
+            context->translate(extraOffset.width(), extraOffset.height());
+            shadowOffset -= extraOffset;
+
+            path.addRect(outerRect);
+
+            if (hasBorderRadius) {
+                if (shadowSpread > 0)
+                    uniformlyExpandBorderRadii(-shadowSpread, topLeft, topRight, bottomLeft, bottomRight);
+                path.addRoundedRect(holeRect, topLeft, topRight, bottomLeft, bottomRight);
+            } else
+                path.addRect(holeRect);
+
+            context->beginPath();
+            context->addPath(path);
+
+            context->setFillRule(RULE_EVENODD);
+            context->setFillColor(fillColor, colorSpace);
+            context->setShadow(shadowOffset, shadowBlur, shadowColor, colorSpace);
+            context->fillPath();
+
+            context->restore();
+        }
+    }
 }
 
 // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/RenderBoxModelObject.cpp#L502
 // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/RenderBox.cpp#L786
 // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/style/RenderStyle.h#L563
-void container_qt5::draw_background(litehtml::uint_ptr hdc, const litehtml::background_paint& bg)
+void container_qt5::draw_background(litehtml::uint_ptr hdc, const litehtml::background_paint& bg_paint)
 {
     Q_ASSERT(hdc);
 
@@ -2199,14 +2426,74 @@ void container_qt5::draw_background(litehtml::uint_ptr hdc, const litehtml::back
       return;
     }
 
+    ColorSpace colorSpace = sRGBColorSpace;
+
+    bool hasBorderRadius = bg_paint.border_radius.top_left_x > 0
+      ||  bg_paint.border_radius.top_left_y > 0
+      ||  bg_paint.border_radius.top_right_x > 0
+      ||  bg_paint.border_radius.top_right_y > 0
+      ||  bg_paint.border_radius.bottom_left_x > 0
+      ||  bg_paint.border_radius.bottom_left_y > 0
+      ||  bg_paint.border_radius.bottom_right_x > 0
+      ||  bg_paint.border_radius.bottom_right_y > 0;
+
+    Color color = toColor(bg_paint.color);
+
+    bool hasOpaqueBackground = color.alpha() == 255;
+
+    ShadowStyle shadowStyle = ShadowStyle::Normal;
+    // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/css/CSSStyleSelector.cpp#L4832
+    ShadowData* boxShadow = nullptr;//new ShadowData(5, 5, 50, 50, shadowStyle, color);//Color(255,0,255,255) );//color.isValid() ? color : Color::transparent);
+
+    // /// \note with offsetX
+    int tx = /*offsetX+*/bg_paint.clip_box.left();
+    //qDebug() << bg.position_x << bg.clip_box.left();
+
+    // /// \note with offsetY
+    int ty = /*offsetY+*/bg_paint.clip_box.top();
+
+    int w = bg_paint.clip_box.width;
+    int h = bg_paint.clip_box.height;
+
+    // border-fit can adjust where we paint our border and background.  If set, we snugly fit our line box descendants.  (The iChat
+    // balloon layout is an example of this).
+    // borderFitAdjust(tx, width);
+
+    // FIXME: Should eventually give the theme control over whether the box shadow should paint, since controls could have
+    // custom shadows of their own.
+    /// \note skips all nested shadows with different ShadowStyle
+    paintBoxShadow(graphicsContext, bg_paint,
+      tx, ty, w, h,
+      ShadowStyle::Normal, // force ShadowStyle::Normal
+      colorSpace,
+      boxShadow,
+      hasBorderRadius,
+      hasOpaqueBackground,
+      true,
+      true);
+
+    // TODO: multiple layers
+    // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/RenderBox.cpp#L786
     paintFillLayerExtended(
       _doc->width(), _doc->height(),
       graphicsContext,
-      toColor(bg.color),
+      color,
+      hasBorderRadius,
       offsetX, offsetY,
-      bg,
-      sRGBColorSpace,
+      bg_paint,
+      colorSpace,
       CompositeSourceOver);
+
+    /// \note skips all nested shadows with different ShadowStyle
+    paintBoxShadow(graphicsContext, bg_paint,
+      tx, ty, w, h,
+      ShadowStyle::Inset, // force ShadowStyle::Inset
+      colorSpace,
+      boxShadow,
+      hasBorderRadius,
+      hasOpaqueBackground,
+      true,
+      true);
 
 /*
     painter->save();

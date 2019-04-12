@@ -55,7 +55,9 @@ SOURCES += \
     sharedbuffer.cpp \
     purgeablebuffer.cpp \
     rgba32bufferqt.cpp \
-    styleimage.cpp
+    styleimage.cpp \
+    contextshadow.cpp \
+    shadowdata.cpp
     #pngimagedecoder.cpp
     # \
     #vector.cpp
@@ -91,7 +93,9 @@ HEADERS += \
     sharedbuffer.h \
     purgeablebuffer.h \
     rgba32bufferqt.h \
-    styleimage.h
+    styleimage.h \
+    contextshadow.h \
+    shadowdata.h
     #pngimagedecoder.h
     # \
     #vector.h \
