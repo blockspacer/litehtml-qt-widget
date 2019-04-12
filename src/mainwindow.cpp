@@ -31,7 +31,6 @@ ui(new Ui::MainWindow)
   <html>
   <head>
   <link rel="stylesheet" href="://res/css/reset.css">
-  <link rel="stylesheet" href="://res/css/bootstrap.css">
   <link rel="stylesheet" href="://res/css/test1.css">
   </head>
   <body>
@@ -49,8 +48,21 @@ ui(new Ui::MainWindow)
       margin-top: 10px;
     }
   </style>
+
+
+
+
   <div class="container">
     <h1>Geek</h1>
+
+jkljkljkl
+
+
+    <div style="box-shadow: -4px -10px 5px 0px rgba(0,0,0,0.75) , 4px 10px 5px 0px rgba(110,0,0,0.75) , 18px 10px 5px 0px rgba(10,220,0,0.75);">
+      <div> box-shadow </div>
+    </div>
+
+jkljkljkljkl
 
     <!-- Bootstrap Button Classes -->
     <div class="one">
@@ -409,9 +421,32 @@ ui(new Ui::MainWindow)
     width: 100%;
   }
 }
+
+div.polaroid {
+  width: 250px;
+  height: 250px;
+  text-align: center;
+}
+
+div.container {
+  padding: 10px;
+}
+#borderimg {
+  border: 10px solid transparent;
+  padding: 15px;
+ border: 5px solid grey;
+ border-image: url(':/res/img/test2.png');
+}
 </style>
-</head>
-<body>
+
+<h2>Polaroid Images / Cards</h2>
+
+<div class="polaroid">
+  <img src=':/res/img/test2.png' alt="Norway" style="width:100%">
+  <div class="container">
+    <p>Hardanger, Norway</p>
+  </div>
+</div>
 
 <div class="header">
   <h1>My Website</h1>
@@ -464,43 +499,6 @@ ui(new Ui::MainWindow)
 <div class="footer">
   <h2>Footer</h2>
 </div>
-
-
-<style>
-div.polaroid {
-  width: 250px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  text-align: center;
-}
-
-div.container {
-  padding: 10px;
-}
-</style>
-</head>
-<body>
-
-<h2>Polaroid Images / Cards</h2>
-
-<p>The box-shadow property can be used to create paper-like cards:</p>
-
-<div class="polaroid">
-  <img src=':/res/img/test2.png' alt="Norway" style="width:100%">
-  <div class="container">
-    <p>Hardanger, Norway</p>
-  </div>
-</div>
-
-<style>
-#borderimg {
-  border: 10px solid transparent;
-  padding: 15px;
- border: 5px solid grey;
- border-image: url(':/res/img/test2.png');
-}
-</style>
-</head>
-<body>
 
 <h1>The border-image Property</h1>
 

@@ -1,5 +1,8 @@
 #include "common.h"
 
+#include "litehtml.h"
+#include "color.h"
+
 ////////////////////////////////
 
 // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/platform/graphics/GraphicsTypes.cpp
@@ -157,4 +160,8 @@ bool parseTextBaseline(const String& s, TextBaseline& baseline)
         return true;
     }
     return false;
+}
+
+Color toColor(const litehtml::web_color &clr) {
+  return Color(clr.red,clr.green,clr.blue,clr.alpha);
 }

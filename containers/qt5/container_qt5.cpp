@@ -11,6 +11,7 @@
 
 #include "shadowdata.h"
 
+#include "common.h"
 #include "image.h"
 #include "imagesource.h"
 #include "stillimageqt.h"
@@ -477,10 +478,6 @@ void container_qt5::set_base_url(const litehtml::tchar_t* base_url)
 void container_qt5::set_caption(const litehtml::tchar_t* caption)
 {
     //qDebug() << __FUNCTION__;
-}
-
-static Color toColor(const litehtml::web_color& clr) {
-  return Color(clr.red,clr.green,clr.blue,clr.alpha);
 }
 
 static IntRect borderInnerRect(const IntRect& borderRect, unsigned short topWidth, unsigned short bottomWidth, unsigned short leftWidth, unsigned short rightWidth)
@@ -2286,6 +2283,9 @@ static void paintBoxShadow(GraphicsContext* context,
         int shadowSpread = shadow->spread();
         const Color& shadowColor = shadow->color();
 
+    //if (shadow)
+    //  qDebug() << "shadow shadowColor " << shadowColor.red()<<shadowColor.green()<< shadowColor.blue()<< shadowColor.alpha();
+
         if (shadow->style() == Normal) {
             IntRect fillRect(rect);
             fillRect.inflate(shadowSpread);
@@ -2439,11 +2439,14 @@ void container_qt5::draw_background(litehtml::uint_ptr hdc, const litehtml::back
 
     Color color = toColor(bg_paint.color);
 
-    bool hasOpaqueBackground = color.alpha() == 255;
+    bool hasOpaqueBackground = color.isValid() && color.alpha() == 255;
 
     ShadowStyle shadowStyle = ShadowStyle::Normal;
     // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/css/CSSStyleSelector.cpp#L4832
-    ShadowData* boxShadow = nullptr;//new ShadowData(5, 5, 50, 50, shadowStyle, color);//Color(255,0,255,255) );//color.isValid() ? color : Color::transparent);
+    ShadowData* boxShadow = bg_paint.box_shadow;//new ShadowData(5, 5, 50, 50, shadowStyle, color);//Color(255,0,255,255) );//color.isValid() ? color : Color::transparent);
+
+    //boxShadow->setNext()
+    //boxShadow->set
 
     // /// \note with offsetX
     int tx = /*offsetX+*/bg_paint.clip_box.left();

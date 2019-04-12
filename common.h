@@ -29,6 +29,13 @@
 #include <string>
 #include <memory>
 
+namespace litehtml {
+  class web_color;
+}
+
+class Color;
+
+Color toColor(const litehtml::web_color& clr);
 
 /*#include "floatpoint.h"
 #include "floatrect.h"

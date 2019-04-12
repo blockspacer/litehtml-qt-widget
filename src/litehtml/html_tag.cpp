@@ -8,6 +8,10 @@
 #include <locale>
 #include "el_before_after.h"
 
+#include "common.h"
+#include "shadowdata.h"
+#include "color.h"
+
 litehtml::html_tag::html_tag(const std::shared_ptr<litehtml::document>& doc) : litehtml::element(doc)
 {
 	m_box_sizing			= box_sizing_content_box;
@@ -1483,7 +1487,7 @@ void litehtml::html_tag::parse_background()
 	if(str)
 	{
 		string_vector res;
-		split_string(str, res, _t(" \t"));
+    split_string(str, res, _t(" \t"));
 		if(res.size() > 0)
 		{
 			if(res.size() == 1)
@@ -1628,6 +1632,152 @@ void litehtml::html_tag::parse_background()
 	{
 		doc->container()->load_image(m_bg.m_image.c_str(), m_bg.m_baseurl.empty() ? 0 : m_bg.m_baseurl.c_str(), true);
 	}
+
+  // parse background-image
+  css::parse_css_url(get_style_property(_t("background-image"), false, _t("")), m_bg.m_image);
+  m_bg.m_baseurl = get_style_property(_t("background-image-baseurl"), false, _t(""));
+
+  if(!m_bg.m_image.empty())
+  {
+    doc->container()->load_image(m_bg.m_image.c_str(), m_bg.m_baseurl.empty() ? 0 : m_bg.m_baseurl.c_str(), true);
+  }
+
+  // TODO box-shadow https://developer.mozilla.org/ru/docs/Web/CSS/box-shadow
+  // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/css/CSSStyleSelector.cpp#L4832
+  // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/css/CSSParser.cpp#L4207
+  // https://github.com/Mage15/Leaf/blob/61237630a42e931739d4b7312bc73b75cd1224c9/LeafStyle/PropertyClasses/SpecificProperties/BoxShadowProperty.cs#L24
+  // https://github.com/animehunter/clanlib-2.3/blob/7013c39f4cd1f25b0dad3bedfdb7a5cf593b1bb7/Sources/CSSLayout/BoxTree/PropertyParsers/css_parser_shadow.cpp#L40
+  tstring box_shadow = get_style_property(_t("box-shadow"), false, _t(""));
+  if(!box_shadow.empty())
+  {
+    string_vector tokens;
+    split_string(box_shadow, tokens, _t(" \t")); // TODO: rgba(   150,0,  140,1  ) - support spaces
+    ShadowData* shadowData = nullptr;
+    ShadowStyle shadowStyle = ShadowStyle::Normal;
+    bool isFirst = true;
+    //qDebug() << "box-shadow" << box_shadow.data() << tokens.size();
+    if(tokens.size() > 0)
+    {
+      int processed_num = 0;
+      for(std::vector<tstring>::iterator tok = tokens.begin(); tok != tokens.end(); tok++)
+      {
+        //int idx = value_index(tok->c_str(), "inset;inherit;initial", -1);
+        if(!t_strcasecmp(tok->c_str(), _t("inset")))
+        {
+          shadowStyle = ShadowStyle::Inset;
+        } else if(!t_strcasecmp(tok->c_str(), _t("none")))
+        {
+          continue;
+        } else
+        {
+          int remaining_tokens = tokens.size() - processed_num;
+
+          css_length		css_x, css_y, css_blur, css_spread;
+          int x, y, blur, spread;
+          Color color;
+
+          if (remaining_tokens >= 5) {
+            //qDebug() << "box-shadow" << box_shadow.data() << tokens.size() << remaining_tokens << (tok)->c_str();
+
+            {
+              const tstring tokstr = (tok)->c_str();
+              if (!t_strcasecmp(tokstr.c_str(), _t(","))) {
+                continue;
+              }
+              css_x.fromString(	tokstr,		"",	1);
+            }
+
+            {
+              tstring tokstr = (++tok)->c_str();
+              if (tokstr == ",") { // TODO
+                continue;
+              }
+              css_y.fromString(	tokstr,		"",	1);
+              processed_num++;
+            }
+
+            {
+              tstring tokstr = (++tok)->c_str();
+              if (tokstr == ",") { // TODO
+                continue;
+              }
+              css_blur.fromString(	tokstr,		"",	1);
+              processed_num++;
+            }
+
+            {
+              tstring tokstr = (++tok)->c_str();
+              if (tokstr == ",") { // TODO
+                continue;
+              }
+              css_spread.fromString(	tokstr,		"",	1);
+              processed_num++;
+            }
+
+            web_color clr = web_color::from_string((++tok)->c_str(), doc->container());
+            //qDebug() << "box-shadow clr " << (tok)->c_str();
+            color = toColor(clr);
+
+            x =  doc->cvt_units(css_x, m_font_size);
+            y =  doc->cvt_units(css_y, m_font_size);
+            blur =  doc->cvt_units(css_blur, m_font_size);
+            spread =  doc->cvt_units(css_spread, m_font_size);
+
+            // TODO: free mem
+            if (isFirst) {
+              shadowData = new ShadowData(
+                x,
+                y,
+                blur,
+                spread,
+                shadowStyle,
+                color);
+
+              m_bg.m_box_shadow = shadowData;
+
+              isFirst = false;
+
+              //qDebug() << "first m_bg.m_box_shadow" << color.red()<<color.green()<< color.blue()<< color.alpha();
+            } else {
+              ShadowData* shadowDataNew = new ShadowData(
+                x,
+                y,
+                blur,
+                spread,
+                shadowStyle,
+                color);
+              shadowData->setNext(shadowDataNew);
+
+              shadowData = shadowDataNew; // TODO: free mem
+
+              //qDebug() << "added m_bg.m_box_shadow" << color.red()<<color.green()<< color.blue()<< color.alpha();
+            }
+
+            //qDebug() << "box-shadow data " << x << y << blur << spread << clr.red << color.green() << color.blue() << color.alpha();
+          } else {
+            continue;
+          }
+
+/*	document::ptr doc = get_document();
+
+  doc->cvt_units(m_bg.m_position.x,		m_font_size);
+  doc->cvt_units(m_bg.m_position.y,		m_font_size);
+  doc->cvt_units(m_bg.m_position.width,	m_font_size);
+  doc->cvt_units(m_bg.m_position.height,	m_font_size);*/
+
+
+
+          processed_num++;
+        }
+      }
+
+    }
+
+    //if (m_bg.m_box_shadow)
+    //  qDebug() << "m_bg.m_box_shadow" << m_bg.m_box_shadow->color().red()<< m_bg.m_box_shadow->color().green()<< m_bg.m_box_shadow->color().blue()<< m_bg.m_box_shadow->color().alpha();
+
+  }
+
 }
 
 void litehtml::html_tag::add_positioned(const element::ptr &el)
@@ -2969,6 +3119,8 @@ void litehtml::html_tag::init_background_paint(position pos, background_paint &b
 	bg_paint.border_radius	= m_css_borders.radius.calc_percents(border_box.width, border_box.height);;
 	bg_paint.border_box		= border_box;
 	bg_paint.is_root		= have_parent() ? false : true;
+
+  bg_paint.box_shadow		= bg->m_box_shadow;
 }
 
 litehtml::visibility litehtml::html_tag::get_visibility() const
@@ -3923,17 +4075,19 @@ litehtml::element::ptr litehtml::html_tag::get_element_by_point(int x, int y, in
 
 const litehtml::background* litehtml::html_tag::get_background(bool own_only)
 {
+  const bool has_bg = !m_bg.m_image.empty() || m_bg.m_color.alpha || m_bg.m_box_shadow;
+
 	if(own_only)
 	{
 		// return own background with check for empty one
-		if(m_bg.m_image.empty() && !m_bg.m_color.alpha)
+    if(!has_bg)
 		{
 			return 0;
 		}
 		return &m_bg;
 	}
 
-	if(m_bg.m_image.empty() && !m_bg.m_color.alpha)
+  if(!has_bg)
 	{
 		// if this is root element (<html>) try to get background from body
 		if (!have_parent())
@@ -3956,7 +4110,7 @@ const litehtml::background* litehtml::html_tag::get_background(bool own_only)
 		if (el_parent)
 		{
 			if (!el_parent->get_background(true))
-			{
+      {
 				// parent of body will draw background for body
 				return 0;
 			}
