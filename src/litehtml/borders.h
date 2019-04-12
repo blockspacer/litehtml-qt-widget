@@ -213,6 +213,21 @@ namespace litehtml
 		}
 	};
 
+  struct borders_image
+  {
+    tstring				image_path;
+    tstring				baseurl;
+    size					image_size;
+    tstring				css_prop;
+
+    // TODO: slice sides https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/css/CSSStyleSelector.cpp#L6163
+    int		slice;
+
+    int		width;
+    int		outset;
+    background_repeat		repeat;
+  };
+
 	struct css_borders
 	{
 		css_border			left;
@@ -220,6 +235,7 @@ namespace litehtml
 		css_border			right;
 		css_border			bottom;
 		css_border_radius	radius;
+    borders_image image;
 
 		css_borders()
 		{
@@ -233,6 +249,7 @@ namespace litehtml
 			top		= val.top;
 			bottom	= val.bottom;
 			radius	= val.radius;
+      image	= val.image;
 		}
 
 		css_borders& operator=(const css_borders& val)
@@ -242,9 +259,10 @@ namespace litehtml
 			top		= val.top;
 			bottom	= val.bottom;
 			radius	= val.radius;
+      image	= val.image;
 			return *this;
 		}
-	};
+  };
 
 	struct borders
 	{
@@ -252,7 +270,8 @@ namespace litehtml
 		border			top;
 		border			right;
 		border			bottom;
-		border_radiuses	radius;
+    border_radiuses	radius;
+    borders_image image;
 
 		borders()
 		{
@@ -266,6 +285,7 @@ namespace litehtml
 			top = val.top;
 			bottom = val.bottom;
 			radius = val.radius;
+      image = val.image;
 		}
 
 		borders(const css_borders& val)
@@ -274,6 +294,7 @@ namespace litehtml
 			right = val.right;
 			top = val.top;
 			bottom = val.bottom;
+      image = val.image;
 		}
 
 		borders& operator=(const borders& val)

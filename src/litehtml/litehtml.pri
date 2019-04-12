@@ -37,6 +37,48 @@ SOURCES += \
     $$PWD/web_color.cpp
 
 HEADERS += \
+        $$PWD/web_color.h \
+        $$PWD/utf8_strings.h \
+        $$PWD/types.h \
+        $$PWD/table.h \
+        $$PWD/stylesheet.h \
+        $$PWD/style.h \
+        $$PWD/os_types.h \
+        $$PWD/media_query.h \
+        $$PWD/iterators.h \
+        $$PWD/html_tag.h \
+        $$PWD/html.h \
+        $$PWD/el_tr.h \
+        $$PWD/el_title.h \
+        $$PWD/el_text.h \
+        $$PWD/el_td.h \
+        $$PWD/el_table.h \
+        $$PWD/el_style.h \
+        $$PWD/el_space.h \
+        $$PWD/el_script.h \
+        $$PWD/el_para.h \
+        $$PWD/el_link.h \
+        $$PWD/el_image.h \
+        $$PWD/el_font.h \
+        $$PWD/element.h \
+        $$PWD/el_div.h \
+        $$PWD/el_comment.h \
+        $$PWD/el_cdata.h \
+        $$PWD/el_break.h \
+        $$PWD/el_body.h \
+        $$PWD/el_before_after.h \
+        $$PWD/el_base.h \
+        $$PWD/el_anchor.h \
+        $$PWD/css_selector.h \
+        $$PWD/css_position.h \
+        $$PWD/css_offsets.h \
+        $$PWD/css_margins.h \
+        $$PWD/css_length.h \
+        $$PWD/context.h \
+        $$PWD/box.h \
+        $$PWD/borders.h \
+        $$PWD/background.h \
+        $$PWD/attributes.h \
         $$PWD/document.h
 
 INCLUDEPATH     += $$PWD

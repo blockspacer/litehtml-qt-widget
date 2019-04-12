@@ -149,7 +149,37 @@ void litehtml::style::add_property( const tchar_t* name, const tchar_t* val, con
 				}
 			}
 		}
-	} else if(	!t_strcmp(name, _t("border-left"))	||
+  } else if(!t_strcmp(name, _t("border-image")))
+  {
+    string_vector tokens;
+    split_string(val, tokens, _t(" "));
+
+    // TODO: border-image-slice, outset, gradient
+    /*
+      border-image:
+      url("https://mdn.mozillademos.org/files/4127/border.png")  // source //
+      27 /                    // slice //
+      36px 28px 18px 8px /    // width //
+      18px 14px 9px 4px       // outset //
+      round;                  // repeat //
+
+      border-image: repeating-linear-gradient(45deg, #f33, #3bf, #f33 30px) 60;
+     */
+    if(tokens.size() >= 3)
+    {
+      add_property(_t("border-image-source"), tokens[0].c_str(), baseurl, important);
+      add_property(_t("border-image-width"), tokens[1].c_str(), baseurl, important);
+      add_property(_t("border-image-repeat"), tokens[2].c_str(), baseurl, important);
+    } else if(tokens.size() == 2)
+    {
+      add_property(_t("border-image-source"), tokens[0].c_str(), baseurl, important);
+      add_property(_t("border-image-width"), tokens[1].c_str(), baseurl, important);
+    } else if(tokens.size() == 1)
+    {
+      add_property(_t("border-image-source"), tokens[0].c_str(), baseurl, important);
+    }
+
+  } else if(	!t_strcmp(name, _t("border-left"))	||
 		!t_strcmp(name, _t("border-right"))	||
 		!t_strcmp(name, _t("border-top"))	||
 		!t_strcmp(name, _t("border-bottom")) )

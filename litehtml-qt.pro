@@ -54,7 +54,8 @@ SOURCES += \
     mimetyperegistryqt.cpp \
     sharedbuffer.cpp \
     purgeablebuffer.cpp \
-    rgba32bufferqt.cpp
+    rgba32bufferqt.cpp \
+    styleimage.cpp
     #pngimagedecoder.cpp
     # \
     #vector.cpp
@@ -89,7 +90,8 @@ HEADERS += \
     mimetyperegistryqt.h \
     sharedbuffer.h \
     purgeablebuffer.h \
-    rgba32bufferqt.h
+    rgba32bufferqt.h \
+    styleimage.h
     #pngimagedecoder.h
     # \
     #vector.h \

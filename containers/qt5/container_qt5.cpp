@@ -256,7 +256,7 @@ void container_qt5::get_media_features(litehtml::media_features& media) const
     media.device_width = rc.width();
     media.device_height = rc.height();
 
-    qDebug() << "=> " << media.width << "x" << media.height;
+    //qDebug() << "=> " << media.width << "x" << media.height;
 }
 
 // see https://github.com/litehtml/litebrowser/blob/master/src/ToolbarWnd.cpp#L572
@@ -1083,6 +1083,332 @@ static void drawBoxSideFromPath(GraphicsContext* graphicsContext, IntRect border
         graphicsContext->restore();*/
 }
 
+static bool paintNinePieceImage(GraphicsContext* graphicsContext,
+  const litehtml::borders& borders,
+  bool fitToBorder, //style->borderImage() == ninePieceImage;
+  int tx, int ty, int w, int h,
+  //const RenderStyle* style,
+  ColorSpace colorSpace,
+  //const NinePieceImage& ninePieceImage,
+  CompositeOperator op)
+{
+    QImage* img = getImage( borders.image.image_path.c_str(), borders.image.baseurl.c_str() );
+    if (!img) {
+      return false;
+    }
+
+    //RenderObject* clientForBackgroundImage = backgroundObject ? backgroundObject : this;
+    //Image* image = bg->image(clientForBackgroundImage, tileSize);
+    //bool useLowQualityScaling = false;//shouldPaintAtLowQuality(graphicsContext, image, tileSize);
+    //graphicsContext->drawTiledImage(image, colorSpace, destRect, phase, tileSize, compositeOp, useLowQualityScaling);
+
+    /*IntRect destRect;
+    IntPoint phase;
+    IntSize tileSize;
+
+    calculateBackgroundImageGeometry(
+      maxRootWidth, maxRootHeight,
+      //bgLayer,
+      offsetX, offsetY,
+      bg_paint,
+      tx, ty, w, h, destRect, phase, tileSize);
+
+    IntPoint destOrigin = destRect.location();
+
+    //destRect.intersect(paintInfo.rect);
+    // don`t draw background outside of element
+    intersect_clip(destRect);
+
+    QImage imscaled = img->scaled(tileSize.width(), tileSize.height(), Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+            //graphicsContext->platformContext()->drawLine(0, 0, 400, 400);
+            if (!destRect.isEmpty()) {
+                phase += destRect.location() - destOrigin;
+                //CompositeOperator compositeOp = op == CompositeSourceOver ? bgLayer->composite() : op;
+                CompositeOperator compositeOp = op; // TODO
+
+                // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/style/FillLayer.h#L67
+                //StyleImage bg;  // is FillLayer->image()
+                QPixmap pixmap;
+                if (pixmap.convertFromImage(imscaled)) {
+
+                  StillImage stillImage ( pixmap );
+                  Image* image = &stillImage;
+
+                  //RenderObject* clientForBackgroundImage = backgroundObject ? backgroundObject : this;
+                  //Image* image = bg->image(clientForBackgroundImage, tileSize);
+                  bool useLowQualityScaling = false;//shouldPaintAtLowQuality(graphicsContext, image, tileSize);
+                  graphicsContext->drawTiledImage(image, colorSpace, destRect, phase, tileSize, compositeOp, useLowQualityScaling);
+                } else {
+                  qWarning() << "error converting image to pixmap";
+                }
+            }
+
+    */
+
+    /*StyleImage* styleImage = ninePieceImage.image();
+    if (!styleImage)
+        return false;
+
+    if (!styleImage->isLoaded())
+        return true; // Never paint a nine-piece image incrementally, but don't paint the fallback borders either.
+
+    if (!styleImage->canRender(style->effectiveZoom()))
+        return false;
+
+    // FIXME: border-image is broken with full page zooming when tiling has to happen, since the tiling function
+    // doesn't have any understanding of the zoom that is in effect on the tile.
+    styleImage->setImageContainerSize(IntSize(w, h));
+    IntSize imageSize = styleImage->imageSize(this, 1.0f);*/
+    IntSize imageSize = IntSize(borders.image.image_size.width, borders.image.image_size.height);
+
+    if (borders.image.width > 1) { // default 1
+      imageSize.setWidth(borders.image.width);
+    }
+
+    //IntSize imageSize = IntSize(img->width(), img->height());
+
+    int imageWidth = imageSize.width();
+    int imageHeight = imageSize.height();
+
+    // TODO >>>
+    int topSliceCalc = /*borders.image.slice/100.0 * */imageSize.height();//borders.top.width;
+    if (borders.image.slice) {
+      topSliceCalc *= (double)borders.image.slice/100.0;
+    }
+    int bottomSliceCalc = /*borders.image.slice/100.0 * */imageSize.height();//borders.bottom.width;
+    if (borders.image.slice) {
+      bottomSliceCalc *= (double)borders.image.slice/100.0;
+    }
+    int leftSliceCalc = /*borders.image.slice/100.0 * */imageSize.width();//borders.left.width;
+    if (borders.image.slice) {
+      leftSliceCalc *= (double)borders.image.slice/100.0;
+    }
+    int rightSliceCalc = /*borders.image.slice/100.0 * */imageSize.width();//borders.right.width;
+    if (borders.image.slice) {
+      rightSliceCalc *= (double)borders.image.slice/100.0;
+    }
+    //int topSliceCalc =  borders.top.width;
+    //int bottomSliceCalc = borders.bottom.width;
+    //int leftSliceCalc = borders.left.width;
+    //int rightSliceCalc = borders.right.width;
+
+    int topSlice = std::min(imageSize.height(), topSliceCalc);//min(imageHeight, ninePieceImage.slices().top().calcValue(imageHeight));
+    int bottomSlice = std::min(imageSize.height(), bottomSliceCalc);//min(imageHeight, ninePieceImage.slices().bottom().calcValue(imageHeight));
+    int leftSlice = std::min(imageSize.width(), leftSliceCalc);//min(imageWidth, ninePieceImage.slices().left().calcValue(imageWidth));
+    int rightSlice = std::min(imageSize.width(), rightSliceCalc);//min(imageWidth, ninePieceImage.slices().right().calcValue(imageWidth));
+
+    //ENinePieceImageRule hRule = ninePieceImage.horizontalRule();
+    //ENinePieceImageRule vRule = ninePieceImage.verticalRule();
+    // TODO
+    Image::TileRule hRule = Image::TileRule::StretchTile;
+    //borders.image.repeat == litehtml::background_repeat::background_repeat_repeat ? Image::TileRule::RoundTile : Image::TileRule::StretchTile;
+    Image::TileRule vRule = Image::TileRule::StretchTile;
+
+    if(!borders.image.css_prop.empty()) {
+      //qDebug() << "drawLeft borders.left.width" << borders.left.width;
+      //qDebug() << "drawLeft borders.top.width" << borders.top.width;
+      //qDebug() << "drawLeft borders.right.width" << borders.right.width;
+      //qDebug() << "drawLeft borders.bottom.width" << borders.bottom.width;
+      qDebug() << "borders.image.css_prop" << borders.image.css_prop.c_str();
+      qDebug() << "borders.image.slice" << borders.image.slice;
+      qDebug() << "borders.image.width" << borders.image.width;
+      qDebug() << "borders.image.repeat" << borders.image.repeat;
+      qDebug() << "borders.image baseurl" << borders.image.baseurl.c_str();
+      qDebug() << "borders.image image_path" << borders.image.image_path.c_str();
+      qDebug() << "borders.image image_size" << borders.image.image_size.width  << borders.image.image_size.height;
+    }
+
+    int leftWidth = fitToBorder ? borders.left.width : leftSlice; //fitToBorder ? style->borderLeftWidth() : leftSlice;
+    int topWidth = fitToBorder ? borders.top.width : topSlice; //fitToBorder ? style->borderTopWidth() : topSlice;
+    int rightWidth = fitToBorder ? borders.right.width : rightSlice; //fitToBorder ? style->borderRightWidth() : rightSlice;
+    int bottomWidth = fitToBorder ? borders.bottom.width : bottomSlice; //fitToBorder ? style->borderBottomWidth() : bottomSlice;
+
+    bool drawLeft = leftSlice > 0 && leftWidth > 0;
+    bool drawTop = topSlice > 0 && topWidth > 0;
+    bool drawRight = rightSlice > 0 && rightWidth > 0;
+    bool drawBottom = bottomSlice > 0 && bottomWidth > 0;
+    bool drawMiddle = (imageWidth - leftSlice - rightSlice) > 0 && (w - leftWidth - rightWidth) > 0 &&
+                      (imageHeight - topSlice - bottomSlice) > 0 && (h - topWidth - bottomWidth) > 0;
+
+
+
+    //Image* image = styleImage->image(this, imageSize);
+    //ColorSpace colorSpace = style->colorSpace();
+
+    if (drawLeft) {
+        // Paint the top and bottom left corners.
+
+        // The top left corner rect is (tx, ty, leftWidth, topWidth)
+        // The rect to use from within the image is obtained from our slice, and is (0, 0, leftSlice, topSlice)
+        if (drawTop)
+        {
+          IntRect tileSize = IntRect(0, 0, imageWidth, imageHeight);
+          QImage imscaledLeft = img->scaled(tileSize.width(), tileSize.height(), Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+          QPixmap pixmap;
+          if (!pixmap.convertFromImage(imscaledLeft)) {
+            qWarning() << "error converting image to pixmap";
+            return false;
+          }
+          StillImage stillImage ( pixmap );
+          Image* image = &stillImage;
+          // Have to scale and tile into the border rect.
+          graphicsContext->drawImage(image, colorSpace, IntRect(tx, ty, leftWidth, topWidth),
+                                       IntRect(0, 0, leftSlice, topSlice), op);
+        }
+
+        // The bottom left corner rect is (tx, ty + h - bottomWidth, leftWidth, bottomWidth)
+        // The rect to use from within the image is (0, imageHeight - bottomSlice, leftSlice, botomSlice)
+        if (drawBottom)
+        {
+          IntRect tileSize = IntRect(0, 0, imageWidth, imageHeight);
+          QImage imscaledLeft = img->scaled(tileSize.width(), tileSize.height(), Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+          QPixmap pixmap;
+          if (!pixmap.convertFromImage(imscaledLeft)) {
+            qWarning() << "error converting image to pixmap";
+            return false;
+          }
+          StillImage stillImage ( pixmap );
+          Image* image = &stillImage;
+          // Have to scale and tile into the border rect.
+          graphicsContext->drawImage(image, colorSpace, IntRect(tx, ty + h - bottomWidth, leftWidth, bottomWidth),
+                                       IntRect(0, imageHeight - bottomSlice, leftSlice, bottomSlice), op);
+
+        }
+
+        // Paint the left edge.
+        {
+          IntRect tileSize = IntRect(0, 0, imageWidth, imageHeight);
+          QImage imscaledLeft = img->scaled(tileSize.width(), tileSize.height(), Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+          QPixmap pixmap;
+          if (!pixmap.convertFromImage(imscaledLeft)) {
+            qWarning() << "error converting image to pixmap";
+            return false;
+          }
+          StillImage stillImage ( pixmap );
+          Image* image = &stillImage;
+          // Have to scale and tile into the border rect.
+          graphicsContext->drawTiledImage(image, colorSpace, IntRect(tx, ty + topWidth, leftWidth,
+                                          h - topWidth - bottomWidth),
+                                          IntRect(0, topSlice, leftSlice, imageHeight - topSlice - bottomSlice),
+                                          Image::StretchTile, (Image::TileRule)vRule, op);
+        }
+    }
+
+    if (drawRight) {
+        // Paint the top and bottom right corners
+        // The top right corner rect is (tx + w - rightWidth, ty, rightWidth, topWidth)
+        // The rect to use from within the image is obtained from our slice, and is (imageWidth - rightSlice, 0, rightSlice, topSlice)
+        if (drawTop)
+        {
+          IntRect tileSize = IntRect(0, 0, imageWidth, imageHeight);
+          QImage imscaledLeft = img->scaled(tileSize.width(), tileSize.height(), Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+          QPixmap pixmap;
+          if (!pixmap.convertFromImage(imscaledLeft)) {
+            qWarning() << "error converting image to pixmap";
+            return false;
+          }
+          StillImage stillImage ( pixmap );
+          Image* image = &stillImage;
+          // Have to scale and tile into the border rect.
+          graphicsContext->drawImage(image, colorSpace, IntRect(tx + w - rightWidth, ty, rightWidth, topWidth),
+                                     IntRect(imageWidth - rightSlice, 0, rightSlice, topSlice), op);
+        }
+
+        // The bottom right corner rect is (tx + w - rightWidth, ty + h - bottomWidth, rightWidth, bottomWidth)
+        // The rect to use from within the image is (imageWidth - rightSlice, imageHeight - bottomSlice, rightSlice, bottomSlice)
+        if (drawBottom)
+        {
+          IntRect tileSize = IntRect(0, 0, imageWidth, imageHeight);
+          QImage imscaledLeft = img->scaled(tileSize.width(), tileSize.height(), Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+          QPixmap pixmap;
+          if (!pixmap.convertFromImage(imscaledLeft)) {
+            qWarning() << "error converting image to pixmap";
+            return false;
+          }
+          StillImage stillImage ( pixmap );
+          Image* image = &stillImage;
+          // Have to scale and tile into the border rect.
+          graphicsContext->drawImage(image, colorSpace, IntRect(tx + w - rightWidth, ty + h - bottomWidth, rightWidth, bottomWidth),
+                                     IntRect(imageWidth - rightSlice, imageHeight - bottomSlice, rightSlice, bottomSlice), op);
+        }
+        // Paint the right edge.
+        {
+          /*IntRect tileSize = IntRect(tx + w - rightWidth, ty + topWidth, rightWidth,
+                                          h - topWidth - bottomWidth);*/
+          IntRect tileSize = IntRect(0, 0, imageWidth, imageHeight);
+          QImage imscaledLeft = img->scaled(tileSize.width(), tileSize.height(), Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+          QPixmap pixmap;
+          if (!pixmap.convertFromImage(imscaledLeft)) {
+            qWarning() << "error converting image to pixmap";
+            return false;
+          }
+          StillImage stillImage ( pixmap );
+          Image* image = &stillImage;
+          // Have to scale and tile into the border rect.
+          graphicsContext->drawTiledImage(image, colorSpace, IntRect(tx + w - rightWidth, ty + topWidth, rightWidth,
+                                          h - topWidth - bottomWidth),
+                                          IntRect(imageWidth - rightSlice, topSlice, rightSlice, imageHeight - topSlice - bottomSlice),
+                                          Image::StretchTile, (Image::TileRule)vRule, op);
+        }
+    }
+
+    // Paint the top edge.
+    if (drawTop)
+    {
+      IntRect tileSize = IntRect(0, 0, imageWidth, imageHeight);
+      QImage imscaledLeft = img->scaled(tileSize.width(), tileSize.height(), Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+      QPixmap pixmap;
+      if (!pixmap.convertFromImage(imscaledLeft)) {
+        qWarning() << "error converting image to pixmap";
+        return false;
+      }
+      StillImage stillImage ( pixmap );
+      Image* image = &stillImage;
+      // Have to scale and tile into the border rect.
+      graphicsContext->drawTiledImage(image, colorSpace, IntRect(tx + leftWidth, ty, w - leftWidth - rightWidth, topWidth),
+                                      IntRect(leftSlice, 0, imageWidth - rightSlice - leftSlice, topSlice),
+                                      (Image::TileRule)hRule, Image::StretchTile, op);
+    }
+
+    // Paint the bottom edge.
+    if (drawBottom)
+    {
+      IntRect tileSize = IntRect(0, 0, imageWidth, imageHeight);
+      QImage imscaledLeft = img->scaled(tileSize.width(), tileSize.height(), Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+      QPixmap pixmap;
+      if (!pixmap.convertFromImage(imscaledLeft)) {
+        qWarning() << "error converting image to pixmap";
+        return false;
+      }
+      StillImage stillImage ( pixmap );
+      Image* image = &stillImage;
+      // Have to scale and tile into the border rect.
+      graphicsContext->drawTiledImage(image, colorSpace, IntRect(tx + leftWidth, ty + h - bottomWidth,
+                                      w - leftWidth - rightWidth, bottomWidth),
+                                      IntRect(leftSlice, imageHeight - bottomSlice, imageWidth - rightSlice - leftSlice, bottomSlice),
+                                      (Image::TileRule)hRule, Image::StretchTile, op);
+    }
+    // Paint the middle.
+    if (drawMiddle)
+    {
+      IntRect tileSize = IntRect(0, 0, imageWidth, imageHeight);
+      QImage imscaledLeft = img->scaled(tileSize.width(), tileSize.height(), Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+      QPixmap pixmap;
+      if (!pixmap.convertFromImage(imscaledLeft)) {
+        qWarning() << "error converting image to pixmap";
+        return false;
+      }
+      StillImage stillImage ( pixmap );
+      Image* image = &stillImage;
+      // Have to scale and tile into the border rect.
+      graphicsContext->drawTiledImage(image, colorSpace, IntRect(tx + leftWidth, ty + topWidth, w - leftWidth - rightWidth,
+                                      h - topWidth - bottomWidth),
+                                      IntRect(leftSlice, topSlice, imageWidth - rightSlice - leftSlice, imageHeight - topSlice - bottomSlice),
+                                      (Image::TileRule)hRule, (Image::TileRule)vRule, op);
+    }
+    return true;
+}
+
 static void paintBorder(
   ColorSpace colorSpace,
   const Color& topColor,  const Color& bottomColor,
@@ -1100,12 +1426,18 @@ static void paintBorder(
   bool hasBorderRadius,
   GraphicsContext* graphicsContext,
   int tx, int ty, int w, int h,
+  CompositeOperator op,
   bool begin = true, bool end = true)
 {
     // TODO
     // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/rendering/RenderBoxModelObject.cpp#L880
-    /*if (paintNinePieceImage(graphicsContext, tx, ty, w, h, style, borderImage()))
-        return;*/
+    if (paintNinePieceImage(graphicsContext, borders,
+      true,
+      tx, ty, w, h,
+      colorSpace, op)) {
+      //style, borderImage()))
+      return;
+    }
 
     if (graphicsContext->paintingDisabled())
         return;
@@ -1334,7 +1666,22 @@ void container_qt5::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders
       renderTop, renderLeft, renderRight, renderBottom,
       hasBorderRadius,
       graphicsContext,
-      draw_pos.x, draw_pos.y, draw_pos.width, draw_pos.height, true, true
+      draw_pos.x, draw_pos.y, draw_pos.width, draw_pos.height,
+        //CompositeClear,
+        //CompositeCopy,
+        CompositeSourceOver,
+        //CompositeSourceIn,
+        //CompositeSourceOut,
+        //CompositeSourceAtop,
+        //CompositeDestinationOver,
+        //CompositeDestinationIn,
+        //CompositeDestinationOut,
+        //CompositeDestinationAtop,
+        //CompositeXOR,
+        //CompositePlusDarker,
+        //CompositeHighlight,
+        //CompositePlusLighter,
+      true, true
     );
 
       // TODO: css gradient
@@ -2228,7 +2575,8 @@ void container_qt5::delete_font(litehtml::uint_ptr hFont)
     QFont *font = (QFont *) hFont;
 
     if (font) {
-      delete font;
+      // TODO: qt auto deletes fonts
+      //delete font;
     }
 }
 

@@ -110,7 +110,7 @@ ui(new Ui::MainWindow)
 
   <div id="root">
     <div class="first">
-      <div style="border-image: url(:/res/img/test.png) 30 round round; border-width: 3px;">border-image</div>
+      <div style="border-image: url(:/res/img/test2.png); border-width: 30px; ">border-image: url(:/res/img/test2.png); border-width: 30px; </div>
     </div>
     <div class="first">
       <div style="border-image: linear-gradient(to left, #61c69d 0%, #2d72bc 100%); border-image-slice: 1; border-width: 3px;">border-image: linear-gradient(to left, #61c69d 0%, #2d72bc 100%); border-image-slice: 1; border-width: 3px;</div>
@@ -174,14 +174,37 @@ ui(new Ui::MainWindow)
     </div>
   </div>
 
+<style>
+.container1 {
+  margin: 40px auto;
+  width: 80%;
+}
+
+.element1 {
+  border-width: 55px;
+  border-image: url(:/res/img/test3.png) 50 round round;
+  /* fill keyword makes sure the center part is preserved, so u can see how it is affected
+  by the different values of the border-image-repeat property */
+  border-image-repeat: round round;
+  border-image-width: 50px;
+}
+</style>
+
+<div class="container1">
+  <div class="element1">
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Veniam, optio, repellendus, quod, incidunt nulla iusto quam sunt sequi porro repudiandae consectetur veritatis consequuntur nam repellat quae temporibus laboriosam officia modi.</p>
+  </div>
+  <p><strong>You should read more about how the different border image properties work together in the <a href="http://tympanus.net/codrops/css_reference/border-image"><code>border-image</code></a> shorthand property entry</strong>.</p>
+</div>
+
   <img src=':/res/img/test.png' alt='' width="200" height="200" style="width:200px;height:200px">
   <img src=':/res/img/test2.png' alt='' width="200px" height="200px" style="width:200px;height:200px">
 
-  <div style="background-image: url(':/res/img/test.png');background-repeat: repeat-y;width:400px;height:400px;">
+  <div style="background-image: url(':/res/img/test2.png');background-repeat: repeat-y;width:400px;height:400px;">
     background-repeat: repeat-y;
   </div>
 
-  <div style="background-image: url(':/res/img/test.png');background-repeat: repeat;width:400px;height:400px;">
+  <div style="background-image: url(':/res/img/test2.png');background-repeat: repeat;width:400px;height:400px;">
     background-repeat: repeat;
   </div>
 
@@ -462,7 +485,7 @@ div.container {
 <p>The box-shadow property can be used to create paper-like cards:</p>
 
 <div class="polaroid">
-  <img src=':/res/img/test.png' alt="Norway" style="width:100%">
+  <img src=':/res/img/test2.png' alt="Norway" style="width:100%">
   <div class="container">
     <p>Hardanger, Norway</p>
   </div>
@@ -473,7 +496,7 @@ div.container {
   border: 10px solid transparent;
   padding: 15px;
  border: 5px solid grey;
- border-image: url(':/res/img/test.png');
+ border-image: url(':/res/img/test2.png');
 }
 </style>
 </head>
@@ -482,9 +505,9 @@ div.container {
 <h1>The border-image Property</h1>
 
 <p>Here, the middle sections of the image are repeated to create the border:</p>
-<p id="borderimg">border-image: url(border.png) 30 round;</p>
+<p id="borderimg">border-image;</p>
 
-<p>Here is the original image:</p><img src="border.png">
+<p>Here is the original image:</p><img src=':/res/img/test2.png'>
 <p><strong>Note:</strong> Internet Explorer 10, and earlier versions, do not support the border-image property.</p>
 
 

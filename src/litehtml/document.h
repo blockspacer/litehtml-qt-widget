@@ -4,6 +4,10 @@
 #include "style.h"
 #include "types.h"
 #include "context.h"
+#include "os_types.h"
+#include "web_color.h"
+#include "css_length.h"
+#include "element.h"
 #include "gumbo/gumbo.h"
 
 namespace litehtml

@@ -10,5 +10,6 @@
         <file>res/img/test.png</file>
         <file>res/css/reset.css</file>
         <file>res/css/bootstrap.css</file>
+        <file>res/img/test3.png</file>
     </qresource>
 </RCC>

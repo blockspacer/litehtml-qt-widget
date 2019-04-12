@@ -410,6 +410,56 @@ void litehtml::html_tag::parse_styles(bool is_reparse)
 	m_css_padding.top.fromString(		get_style_property(_t("padding-top"),		false,	_t("0")), _t(""));
 	m_css_padding.bottom.fromString(	get_style_property(_t("padding-bottom"),		false,	_t("0")), _t(""));
 
+  // parse border-image
+  // TODO: https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/css/CSSParser.cpp#L4460
+  // TODO: https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/css/CSSStyleSelector.cpp#L6149
+  m_css_borders.image.css_prop = get_style_property(_t("border-image"), false, _t("image-source"));
+
+  // get url from "border-image"
+  //css::parse_css_url(m_css_borders.image.css_prop, m_css_borders.image.image_path);
+
+  // get url from "border-image-source"
+  const litehtml::tchar_t* border_image_source = get_style_property(_t("border-image-source"), false, _t(""));
+  //printf("border_image_source %s\n", border_image_source);
+
+  // get url from "border-image"
+  css::parse_css_url(border_image_source, m_css_borders.image.image_path);
+
+
+  // load image by path
+  if(!m_css_borders.image.image_path.empty())
+  {
+    doc->container()->load_image(m_css_borders.image.image_path.c_str(), m_css_borders.image.baseurl.empty() ? 0 : m_css_borders.image.baseurl.c_str(), true);
+  }
+
+  // get image size by url
+  get_document()->container()->get_image_size(m_css_borders.image.image_path.c_str(), m_css_borders.image.baseurl.c_str(), m_css_borders.image.image_size);
+
+  // TODO: background_repeat -> border_repeat
+  // TODO: background_repeat_strings -> border_repeat_strings
+  // TODO: background_repeat_repeat -> border_repeat_repeat
+  m_css_borders.image.repeat = (background_repeat) value_index(
+    get_style_property(_t("border-image-repeat"), false, _t("stretch")),
+    background_repeat_strings,
+    background_repeat_repeat);
+
+  // TODO: border_width_strings -> border_image_width_strings
+  css_length		border_image_width;
+  border_image_width.fromString(	get_style_property(_t("border-image-width"),		false,	_t("1")), border_width_strings);
+  m_css_borders.image.width = border_image_width.val();//doc->cvt_units(border_image_width,	m_font_size);
+
+  // TODO: border_width_strings -> border_slice_strings
+  css_length		slice;
+  slice.fromString(	get_style_property(_t("border-image-slice"),		false,	_t("100%")), border_width_strings);
+  m_css_borders.image.slice = doc->cvt_units(slice,	m_font_size);
+
+  // TODO: border_width_strings -> border_outset_strings
+  css_length		border_image_outset;
+  border_image_outset.fromString(	get_style_property(_t("border-image-outset"),		false,	_t("0")), border_width_strings);
+  m_css_borders.image.outset = doc->cvt_units(border_image_outset,	m_font_size);
+
+  m_css_borders.image.baseurl = get_style_property(_t("border-image-baseurl"), false, _t(""));
+
 	m_css_borders.left.width.fromString(	get_style_property(_t("border-left-width"),		false,	_t("medium")), border_width_strings);
 	m_css_borders.right.width.fromString(	get_style_property(_t("border-right-width"),		false,	_t("medium")), border_width_strings);
 	m_css_borders.top.width.fromString(		get_style_property(_t("border-top-width"),		false,	_t("medium")), border_width_strings);
