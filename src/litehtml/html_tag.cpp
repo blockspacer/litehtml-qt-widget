@@ -1646,6 +1646,7 @@ void litehtml::html_tag::parse_background()
   // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/css/CSSStyleSelector.cpp#L4832
   // https://github.com/rkudiyarov/ClutterWebkit/blob/05d919e0598691bcd34f57d27f44872919e39e92/WebCore/css/CSSParser.cpp#L4207
   // https://github.com/Mage15/Leaf/blob/61237630a42e931739d4b7312bc73b75cd1224c9/LeafStyle/PropertyClasses/SpecificProperties/BoxShadowProperty.cs#L24
+  // https://github.com/sphair/ClanLib/blob/master/Sources/UI/Style/Properties/box_shadow.cpp
   // https://github.com/animehunter/clanlib-2.3/blob/7013c39f4cd1f25b0dad3bedfdb7a5cf593b1bb7/Sources/CSSLayout/BoxTree/PropertyParsers/css_parser_shadow.cpp#L40
   tstring box_shadow = get_style_property(_t("box-shadow"), false, _t(""));
   if(!box_shadow.empty())

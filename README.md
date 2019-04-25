@@ -2,9 +2,11 @@
 
 litehtml QT widget
 
-## TODO
+## TODO CSS Parser
 
-CSS Parser
+CLANLIB https://github.com/sphair/ClanLib/blob/master/Sources/UI/Style/Properties/box_shadow.cpp
+
+OR
 
 1 grammar
 https://github.com/derofim/webkitjs-bugtest/blob/87d552e1f8d78dcd20f888ebc5fda1ab43524442/src/WebCoreDerived/CSSPropertyNames.h
@@ -22,3 +24,15 @@ https://github.com/derofim/webkitjs-bugtest/blob/87d552e1f8d78dcd20f888ebc5fda1a
 
 parseDeclaration
 https://github.com/derofim/webkitjs-bugtest/blob/87d552e1f8d78dcd20f888ebc5fda1ab43524442/deps/WebKit/Source/WebCore/css/StyleProperties.cpp#L746
+
+## TODO Layout engine
+
+https://github.com/blockspacer/react-native-desktop/blob/master/docs/YogaLayoutEngine.md
+
+## TODO
+
+Test with http://www.mezzoblue.com/zengarden/alldesigns/
+
+## TODO renderer arch
+
+https://github.com/servo/webrender/wiki
